@@ -18,8 +18,19 @@ const styles = StyleSheet.create({
     padding: 26,
   },
   main: { width: "66%", padding: 32 },
-  name: { fontSize: 20, fontFamily: "Helvetica-Bold", color: "#fff" },
-  jobTitle: { fontSize: 11, color: "#d6e4f0", marginTop: 3, marginBottom: 20 },
+  name: {
+    fontSize: 20,
+    lineHeight: 1.2,
+    fontFamily: "Helvetica-Bold",
+    color: "#fff",
+  },
+  jobTitle: {
+    fontSize: 11,
+    lineHeight: 1.2,
+    color: "#d6e4f0",
+    marginTop: 8,
+    marginBottom: 20,
+  },
   sideTitle: {
     fontSize: 10,
     fontFamily: "Helvetica-Bold",
@@ -61,6 +72,8 @@ export default function ModernTemplate({ data }: { data: ResumeData }) {
     personal.website,
   ].filter(Boolean) as string[];
 
+  const cleanSkills = skills.map((s) => s.trim()).filter(Boolean);
+
   return (
     <Document title={`${personal.fullName} - Resume`}>
       <Page size="A4" style={styles.page}>
@@ -82,10 +95,10 @@ export default function ModernTemplate({ data }: { data: ResumeData }) {
             </View>
           )}
 
-          {skills.filter(Boolean).length > 0 && (
+          {cleanSkills.length > 0 && (
             <View>
               <Text style={styles.sideTitle}>Skills</Text>
-              {skills.filter(Boolean).map((s, i) => (
+              {cleanSkills.map((s, i) => (
                 <Text key={i} style={styles.sideText}>
                   {s}
                 </Text>
@@ -93,16 +106,20 @@ export default function ModernTemplate({ data }: { data: ResumeData }) {
             </View>
           )}
 
-          {customSections.map((sec) => (
-            <View key={sec.id}>
-              <Text style={styles.sideTitle}>{sec.title}</Text>
-              {sec.items.filter(Boolean).map((item, i) => (
-                <Text key={i} style={styles.sideText}>
-                  {item}
-                </Text>
-              ))}
-            </View>
-          ))}
+          {customSections.map((sec) => {
+            const items = sec.items.filter(Boolean);
+            if (items.length === 0) return null;
+            return (
+              <View key={sec.id}>
+                <Text style={styles.sideTitle}>{sec.title}</Text>
+                {items.map((item, i) => (
+                  <Text key={i} style={styles.sideText}>
+                    {item}
+                  </Text>
+                ))}
+              </View>
+            );
+          })}
         </View>
 
         {/* Main column */}

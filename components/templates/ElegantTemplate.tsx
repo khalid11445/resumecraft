@@ -18,18 +18,20 @@ const styles = StyleSheet.create({
     lineHeight: 1.5,
   },
   header: { marginBottom: 24 },
-  name: {
+    name: {
     fontFamily: "Times-Roman",
     fontSize: 30,
+    lineHeight: 1.2,
     color: NAVY,
     letterSpacing: 1,
   },
   jobTitle: {
     fontSize: 9.5,
+    lineHeight: 1.2,
     color: GOLD,
     textTransform: "uppercase",
     letterSpacing: 3,
-    marginTop: 6,
+    marginTop: 10,
   },
   rule: { height: 1, backgroundColor: LINE, marginTop: 14, marginBottom: 8 },
   contactRow: { flexDirection: "row", flexWrap: "wrap" },

@@ -14,9 +14,9 @@ const styles = StyleSheet.create({
     borderBottom: "1pt solid #222",
     paddingBottom: 12,
   },
-  name: { fontSize: 22, fontFamily: "Helvetica-Bold" },
-  jobTitle: { fontSize: 12, color: "#555", marginTop: 3 },
-  contact: { fontSize: 9, color: "#555", marginTop: 6 },
+    name: { fontSize: 22, lineHeight: 1.2, fontFamily: "Helvetica-Bold" },
+  jobTitle: { fontSize: 12, lineHeight: 1.2, color: "#555", marginTop: 8 },
+  contact: { fontSize: 9, color: "#555", marginTop: 10 },
   section: { marginBottom: 20 },
   sectionTitle: {
     fontSize: 11,

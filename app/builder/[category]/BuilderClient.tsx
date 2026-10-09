@@ -2,18 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import dynamic from "next/dynamic";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { resumeSchema, ResumeData } from "@/lib/resume-schema";
 import { getCategory } from "@/lib/categories";
 import BuilderForm from "@/components/builder/BuilderForm";
+import PdfPreview from "@/components/builder/PdfPreview";
 import { templates, getTemplate } from "@/lib/templates";
-
-const PDFViewer = dynamic(
-  () => import("@react-pdf/renderer").then((mod) => mod.PDFViewer),
-  { ssr: false, loading: () => <p className="p-8">Loading preview...</p> }
-);
 
 export default function BuilderPage() {
   const params = useParams<{ category: string }>();
@@ -40,36 +35,40 @@ export default function BuilderPage() {
   }, [JSON.stringify(liveData)]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function handleDownload() {
-  setError("");
+    setError("");
 
-  // Temporary: free download while payments are being set up
-  if (process.env.NEXT_PUBLIC_FREE_DOWNLOAD === "true") {
-    const { pdf } = await import("@react-pdf/renderer");
-    const blob = await pdf(<Template data={previewData} />).toBlob();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${previewData.personal.fullName || "resume"}.pdf`;
-    a.click();
-    URL.revokeObjectURL(url);
-    return;
-  }
+    // Temporary: free download while payments are being set up
+    if (process.env.NEXT_PUBLIC_FREE_DOWNLOAD === "true") {
+      const { pdf } = await import("@react-pdf/renderer");
+      const blob = await pdf(<Template data={previewData} />).toBlob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${previewData.personal.fullName || "resume"}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+      return;
+    }
 
-  setPaying(true);
-  try {
-    const res = await fetch("/api/checkout", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ resumeId, category: category.id, template: templateId }),
-    });
-    const data = await res.json();
-    if (!res.ok || !data.url) throw new Error(data.error || "Checkout failed");
-    window.location.href = data.url;
-  } catch (e) {
-    setError(e instanceof Error ? e.message : "Something went wrong");
-    setPaying(false);
+    setPaying(true);
+    try {
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          resumeId,
+          category: category.id,
+          template: templateId,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.url) throw new Error(data.error || "Checkout failed");
+      window.location.href = data.url;
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Something went wrong");
+      setPaying(false);
+    }
   }
-}
 
   return (
     <div className="flex h-[calc(100vh-3.5rem)] w-full">
@@ -111,9 +110,7 @@ export default function BuilderPage() {
         <BuilderForm form={form} />
       </div>
       <div className="w-1/2">
-        <PDFViewer key={templateId} width="100%" height="100%" showToolbar={false}>
-          <Template data={previewData} />
-        </PDFViewer>
+        <PdfPreview Template={Template} data={previewData} />
       </div>
     </div>
   );
