@@ -18,7 +18,7 @@ const PDFViewer = dynamic(
 export default function BuilderPage() {
   const params = useParams<{ category: string }>();
   const category = getCategory(String(params.category));
-  const [templateId, setTemplateId] = useState("classic");
+  const [templateId, setTemplateId] = useState("elegant");
   const Template = getTemplate(templateId).component;
 
   const [resumeId] = useState(() => crypto.randomUUID());

@@ -1,38 +1,96 @@
 import Link from "next/link";
 import { categories } from "@/lib/categories";
 
+const steps = [
+  {
+    n: "01",
+    title: "Choose your profession",
+    text: "Each field starts with the right sections and example content.",
+  },
+  {
+    n: "02",
+    title: "Edit with a live preview",
+    text: "Type on the left and watch your resume update on the right.",
+  },
+  {
+    n: "03",
+    title: "Download your PDF",
+    text: "Switch templates anytime without retyping a single word.",
+  },
+];
+
 export default function Home() {
   return (
-    <main className="mx-auto max-w-4xl px-6 py-16">
-      <section className="text-center">
-        <h1 className="text-4xl font-bold sm:text-5xl">
-          Resumes built for your profession
-        </h1>
-        <p className="mx-auto mt-4 max-w-xl text-gray-600">
-          Pick your field, edit with a live preview, and download a clean,
-          professional PDF in minutes.
-        </p>
-        <Link
-          href="/templates"
-          className="mt-8 inline-block rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-700"
-        >
-          Build my resume
-        </Link>
+    <main>
+      {/* Hero */}
+      <section className="bg-slate-900 text-white">
+        <div className="mx-auto max-w-4xl px-6 py-24 text-center sm:py-32">
+          <p className="text-xs uppercase tracking-[0.3em] text-amber-300/80">
+            Professional resume builder
+          </p>
+          <h1 className="mt-6 text-4xl font-semibold leading-tight sm:text-6xl">
+            Resumes that look as good as your experience
+          </h1>
+          <p className="mx-auto mt-6 max-w-xl text-base text-slate-300">
+            Choose your profession, edit with a live preview, and download a
+            clean, elegant PDF in minutes.
+          </p>
+          <div className="mt-10 flex flex-wrap justify-center gap-3">
+            <Link
+              href="/templates"
+              className="rounded-md bg-amber-300 px-7 py-3 text-sm font-semibold text-slate-900 hover:bg-amber-200"
+            >
+              Build my resume
+            </Link>
+            <Link
+              href="#professions"
+              className="rounded-md border border-slate-600 px-7 py-3 text-sm font-semibold text-white hover:bg-slate-800"
+            >
+              See professions
+            </Link>
+          </div>
+        </div>
       </section>
 
-      <section className="mt-16">
-        <h2 className="text-xl font-semibold">Choose your profession</h2>
-        <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {categories.map((c) => (
-            <Link
-              key={c.id}
-              href={`/builder/${c.id}`}
-              className="rounded-lg border border-gray-300 p-5 transition hover:border-blue-500 hover:shadow"
-            >
-              <h3 className="font-semibold">{c.name}</h3>
-              <p className="mt-1 text-sm text-gray-600">{c.description}</p>
-            </Link>
-          ))}
+      {/* Professions */}
+      <section id="professions" className="bg-white py-20">
+        <div className="mx-auto max-w-5xl px-6">
+          <h2 className="text-center text-2xl font-semibold text-slate-900">
+            Made for your profession
+          </h2>
+          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {categories.map((c) => (
+              <Link
+                key={c.id}
+                href={`/builder/${c.id}`}
+                className="rounded-lg border border-slate-200 p-6 transition hover:-translate-y-0.5 hover:border-slate-900 hover:shadow-md"
+              >
+                <h3 className="font-semibold text-slate-900">{c.name}</h3>
+                <p className="mt-2 text-sm text-slate-600">{c.description}</p>
+                <p className="mt-4 text-xs font-medium text-amber-700">
+                  Start building →
+                </p>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* How it works */}
+      <section className="bg-slate-50 py-20">
+        <div className="mx-auto max-w-5xl px-6">
+          <h2 className="text-center text-2xl font-semibold text-slate-900">
+            How it works
+          </h2>
+          <div className="mt-10 grid gap-8 sm:grid-cols-3">
+            {steps.map((s) => (
+              <div key={s.n}>
+                <p className="text-sm font-semibold text-amber-700">{s.n}</p>
+                <h3 className="mt-2 font-semibold text-slate-900">{s.title}</h3>
+                <p className="mt-2 text-sm text-slate-600">{s.text}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
     </main>

@@ -3,31 +3,35 @@ import { ResumeData } from "@/lib/resume-schema";
 
 const styles = StyleSheet.create({
   page: {
-    padding: 36,
+    padding: 40,
     fontSize: 10,
     fontFamily: "Helvetica",
     color: "#222",
-    lineHeight: 1.4,
+    lineHeight: 1.45,
   },
-  header: { marginBottom: 14, borderBottom: "1pt solid #222", paddingBottom: 8 },
+  header: {
+    marginBottom: 22,
+    borderBottom: "1pt solid #222",
+    paddingBottom: 12,
+  },
   name: { fontSize: 22, fontFamily: "Helvetica-Bold" },
-  jobTitle: { fontSize: 12, color: "#555", marginTop: 2 },
-  contact: { fontSize: 9, color: "#555", marginTop: 4 },
-  section: { marginBottom: 12 },
+  jobTitle: { fontSize: 12, color: "#555", marginTop: 3 },
+  contact: { fontSize: 9, color: "#555", marginTop: 6 },
+  section: { marginBottom: 20 },
   sectionTitle: {
     fontSize: 11,
     fontFamily: "Helvetica-Bold",
     textTransform: "uppercase",
     letterSpacing: 1,
-    marginBottom: 5,
+    marginBottom: 8,
   },
+  item: { marginBottom: 12 },
   row: { flexDirection: "row", justifyContent: "space-between" },
   bold: { fontFamily: "Helvetica-Bold" },
   muted: { color: "#666" },
-  bullet: { flexDirection: "row", marginTop: 2 },
+  bullet: { flexDirection: "row", marginTop: 3 },
   bulletDot: { width: 10 },
   bulletText: { flex: 1 },
-  item: { marginBottom: 7 },
 });
 
 export default function ClassicTemplate({ data }: { data: ResumeData }) {
@@ -42,6 +46,8 @@ export default function ClassicTemplate({ data }: { data: ResumeData }) {
   ]
     .filter(Boolean)
     .join("  |  ");
+
+  const cleanSkills = skills.map((s) => s.trim()).filter(Boolean);
 
   return (
     <Document title={`${personal.fullName} - Resume`}>
@@ -80,7 +86,7 @@ export default function ClassicTemplate({ data }: { data: ResumeData }) {
                 {job.location ? (
                   <Text style={styles.muted}>{job.location}</Text>
                 ) : null}
-                {job.bullets.map((b, i) => (
+                {job.bullets.filter(Boolean).map((b, i) => (
                   <View key={i} style={styles.bullet}>
                     <Text style={styles.bulletDot}>•</Text>
                     <Text style={styles.bulletText}>{b}</Text>
@@ -111,25 +117,29 @@ export default function ClassicTemplate({ data }: { data: ResumeData }) {
         )}
 
         {/* Skills */}
-        {skills.length > 0 && (
+        {cleanSkills.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Skills</Text>
-            <Text>{skills.join("  •  ")}</Text>
+            <Text>{cleanSkills.join("  •  ")}</Text>
           </View>
         )}
 
         {/* Custom sections (licenses, certifications, projects...) */}
-        {customSections.map((sec) => (
-          <View key={sec.id} style={styles.section}>
-            <Text style={styles.sectionTitle}>{sec.title}</Text>
-            {sec.items.map((item, i) => (
-              <View key={i} style={styles.bullet}>
-                <Text style={styles.bulletDot}>•</Text>
-                <Text style={styles.bulletText}>{item}</Text>
-              </View>
-            ))}
-          </View>
-        ))}
+        {customSections.map((sec) => {
+          const items = sec.items.filter(Boolean);
+          if (items.length === 0) return null;
+          return (
+            <View key={sec.id} style={styles.section}>
+              <Text style={styles.sectionTitle}>{sec.title}</Text>
+              {items.map((item, i) => (
+                <View key={i} style={styles.bullet}>
+                  <Text style={styles.bulletDot}>•</Text>
+                  <Text style={styles.bulletText}>{item}</Text>
+                </View>
+              ))}
+            </View>
+          );
+        })}
       </Page>
     </Document>
   );

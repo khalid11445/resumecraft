@@ -13,7 +13,7 @@ const styles = StyleSheet.create({
     color: "#1a1a1a",
     lineHeight: 1.35,
   },
-  header: { alignItems: "center", marginBottom: 10 },
+  header: { alignItems: "center", marginBottom: 14 },
   name: {
     fontSize: 20,
     fontFamily: "Helvetica-Bold",
@@ -23,7 +23,7 @@ const styles = StyleSheet.create({
   },
   jobTitle: { fontSize: 10.5, color: "#555", marginTop: 2 },
   contact: { fontSize: 8.5, color: "#555", marginTop: 4, textAlign: "center" },
-  section: { marginBottom: 9 },
+  section: { marginBottom: 13 },
   sectionTitle: {
     fontSize: 9.5,
     fontFamily: "Helvetica-Bold",
@@ -41,7 +41,7 @@ const styles = StyleSheet.create({
   bullet: { flexDirection: "row", marginTop: 1.5 },
   bulletDot: { width: 9 },
   bulletText: { flex: 1 },
-  item: { marginBottom: 5 },
+  item: { marginBottom: 8 },
 });
 
 export default function CompactTemplate({ data }: { data: ResumeData }) {
