@@ -103,6 +103,100 @@ const banking: ResumeData = {
     },
   ],
 };
+const tech: ResumeData = {
+  personal: {
+    fullName: "Omar Haddad",
+    jobTitle: "Frontend Developer",
+    email: "omar.haddad@email.com",
+    phone: "+212 600 000 000",
+    location: "Casablanca, Morocco",
+    website: "omarhaddad.dev",
+    linkedin: "linkedin.com/in/omarhaddad",
+  },
+  summary:
+    "Frontend developer with 3 years of experience building fast, accessible web apps with React and TypeScript.",
+  experience: [
+    {
+      id: "1",
+      role: "Frontend Developer",
+      company: "Atlas Digital",
+      location: "Casablanca, Morocco",
+      startDate: "2023",
+      endDate: "",
+      bullets: [
+        "Rebuilt the checkout flow in React, raising conversion by 15%",
+        "Cut page load time from 4s to 1.5s with code splitting and image optimization",
+      ],
+    },
+  ],
+  education: [
+    {
+      id: "1",
+      school: "ENSIAS",
+      degree: "Software Engineering Degree",
+      startDate: "2018",
+      endDate: "2023",
+      details: "",
+    },
+  ],
+  skills: ["React", "TypeScript", "Next.js", "Node.js", "Git"],
+  customSections: [
+    {
+      id: "1",
+      title: "Projects",
+      items: [
+        "Open-source UI library, 300+ GitHub stars",
+        "Personal finance tracker built with Next.js and Supabase",
+      ],
+    },
+  ],
+};
+
+const teacher: ResumeData = {
+  personal: {
+    fullName: "Laila Benali",
+    jobTitle: "Primary School Teacher",
+    email: "laila.benali@email.com",
+    phone: "+212 611 111 111",
+    location: "Rabat, Morocco",
+    website: "",
+    linkedin: "",
+  },
+  summary:
+    "Dedicated primary school teacher with 6 years of experience creating engaging, inclusive classrooms and improving student outcomes.",
+  experience: [
+    {
+      id: "1",
+      role: "Class Teacher, Grade 4",
+      company: "Al Amal School",
+      location: "Rabat, Morocco",
+      startDate: "2020",
+      endDate: "",
+      bullets: [
+        "Raised average reading scores by 18% in one school year",
+        "Designed project-based lessons used by 5 other teachers",
+      ],
+    },
+  ],
+  education: [
+    {
+      id: "1",
+      school: "Mohammed V University",
+      degree: "Bachelor's in Education",
+      startDate: "2015",
+      endDate: "2019",
+      details: "",
+    },
+  ],
+  skills: ["Classroom Management", "Lesson Planning", "Differentiated Instruction", "Parent Communication"],
+  customSections: [
+    {
+      id: "1",
+      title: "Certifications & Training",
+      items: ["Teaching Certificate", "First Aid Training", "Inclusive Education Workshop"],
+    },
+  ],
+};
 
 export const categories: Category[] = [
   {
@@ -126,7 +220,22 @@ export const categories: Category[] = [
     recommendedSections: ["Certifications", "Deals / Metrics"],
     starter: banking,
   },
+  {
+    id: "tech",
+    name: "Tech / Developer",
+    description: "Skills, projects, and links to your GitHub or portfolio.",
+    recommendedSections: ["Projects", "Open source", "Certifications"],
+    starter: tech,
+  },
+  {
+    id: "teacher",
+    name: "Teacher / Education",
+    description: "Classroom results, training, and certifications.",
+    recommendedSections: ["Certifications", "Training", "Extracurriculars"],
+    starter: teacher,
+  },
 ];
+
 
 export function getCategory(id: string): Category {
   return categories.find((c) => c.id === id) ?? categories[0];
