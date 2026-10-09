@@ -1,51 +1,57 @@
 import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
 import { ResumeData } from "@/lib/resume-schema";
 
-const ACCENT = "#2d3748";
+const makeStyles = (accent: string) =>
+  StyleSheet.create({
+    page: {
+      paddingTop: 30,
+      paddingBottom: 30,
+      paddingHorizontal: 36,
+      fontSize: 9.5,
+      fontFamily: "Helvetica",
+      color: "#1a1a1a",
+      lineHeight: 1.4,
+    },
+    header: { alignItems: "center", marginBottom: 14 },
+    name: {
+      fontSize: 20,
+      lineHeight: 1.2,
+      fontFamily: "Helvetica-Bold",
+      letterSpacing: 2,
+      textTransform: "uppercase",
+      color: accent,
+    },
+    jobTitle: { fontSize: 10.5, lineHeight: 1.2, color: "#555", marginTop: 6 },
+    contact: { fontSize: 8.5, color: "#555", marginTop: 8, textAlign: "center" },
+    section: { marginBottom: 13 },
+    sectionTitle: {
+      fontSize: 9.5,
+      fontFamily: "Helvetica-Bold",
+      textTransform: "uppercase",
+      letterSpacing: 1.5,
+      color: accent,
+      borderBottom: `0.75pt solid ${accent}`,
+      paddingBottom: 2,
+      marginBottom: 6,
+    },
+    row: { flexDirection: "row", justifyContent: "space-between" },
+    bold: { fontFamily: "Helvetica-Bold" },
+    italic: { fontFamily: "Helvetica-Oblique", color: "#555" },
+    muted: { color: "#666" },
+    bullet: { flexDirection: "row", marginTop: 2 },
+    bulletDot: { width: 9 },
+    bulletText: { flex: 1 },
+    item: { marginBottom: 8 },
+  });
 
-const styles = StyleSheet.create({
-  page: {
-    paddingTop: 30,
-    paddingBottom: 30,
-    paddingHorizontal: 36,
-    fontSize: 9.5,
-    fontFamily: "Helvetica",
-    color: "#1a1a1a",
-    lineHeight: 1.4,
-  },
-  header: { alignItems: "center", marginBottom: 14 },
-  name: {
-    fontSize: 20,
-    lineHeight: 1.2,
-    fontFamily: "Helvetica-Bold",
-    letterSpacing: 2,
-    textTransform: "uppercase",
-    color: ACCENT,
-  },
-  jobTitle: { fontSize: 10.5, lineHeight: 1.2, color: "#555", marginTop: 6 },
-  contact: { fontSize: 8.5, color: "#555", marginTop: 8, textAlign: "center" },
-  section: { marginBottom: 13 },
-  sectionTitle: {
-    fontSize: 9.5,
-    fontFamily: "Helvetica-Bold",
-    textTransform: "uppercase",
-    letterSpacing: 1.5,
-    color: ACCENT,
-    borderBottom: `0.75pt solid ${ACCENT}`,
-    paddingBottom: 2,
-    marginBottom: 6,
-  },
-  row: { flexDirection: "row", justifyContent: "space-between" },
-  bold: { fontFamily: "Helvetica-Bold" },
-  italic: { fontFamily: "Helvetica-Oblique", color: "#555" },
-  muted: { color: "#666" },
-  bullet: { flexDirection: "row", marginTop: 2 },
-  bulletDot: { width: 9 },
-  bulletText: { flex: 1 },
-  item: { marginBottom: 8 },
-});
-
-export default function CompactTemplate({ data }: { data: ResumeData }) {
+export default function CompactTemplate({
+  data,
+  accent = "#2d3748",
+}: {
+  data: ResumeData;
+  accent?: string;
+}) {
+  const styles = makeStyles(accent);
   const { personal, summary, experience, education, skills, customSections } = data;
 
   const contact = [
@@ -63,7 +69,6 @@ export default function CompactTemplate({ data }: { data: ResumeData }) {
   return (
     <Document title={`${personal.fullName} - Resume`}>
       <Page size="A4" style={styles.page}>
-        {/* Header */}
         <View style={styles.header}>
           <Text style={styles.name}>{personal.fullName}</Text>
           {personal.jobTitle ? (
@@ -72,7 +77,6 @@ export default function CompactTemplate({ data }: { data: ResumeData }) {
           {contact ? <Text style={styles.contact}>{contact}</Text> : null}
         </View>
 
-        {/* Summary */}
         {summary ? (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Summary</Text>
@@ -80,7 +84,6 @@ export default function CompactTemplate({ data }: { data: ResumeData }) {
           </View>
         ) : null}
 
-        {/* Experience */}
         {experience.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Experience</Text>
@@ -109,7 +112,6 @@ export default function CompactTemplate({ data }: { data: ResumeData }) {
           </View>
         )}
 
-        {/* Education */}
         {education.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Education</Text>
@@ -128,7 +130,6 @@ export default function CompactTemplate({ data }: { data: ResumeData }) {
           </View>
         )}
 
-        {/* Skills */}
         {cleanSkills.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Skills</Text>
@@ -136,7 +137,6 @@ export default function CompactTemplate({ data }: { data: ResumeData }) {
           </View>
         )}
 
-        {/* Custom sections */}
         {customSections.map((sec) => {
           const items = sec.items.filter(Boolean);
           if (items.length === 0) return null;

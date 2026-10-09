@@ -9,12 +9,16 @@ import { getCategory } from "@/lib/categories";
 import BuilderForm from "@/components/builder/BuilderForm";
 import PdfPreview from "@/components/builder/PdfPreview";
 import { templates, getTemplate } from "@/lib/templates";
+import { palettes, categoryAccent } from "@/lib/themes";
 
 export default function BuilderPage() {
   const params = useParams<{ category: string }>();
   const category = getCategory(String(params.category));
   const [templateId, setTemplateId] = useState("elegant");
   const Template = getTemplate(templateId).component;
+  const [accent, setAccent] = useState(
+    categoryAccent[category.id] ?? palettes[0].accent
+  );
 
   const [resumeId] = useState(() => crypto.randomUUID());
   const [paying, setPaying] = useState(false);
@@ -34,19 +38,27 @@ export default function BuilderPage() {
     return () => clearTimeout(t);
   }, [JSON.stringify(liveData)]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const freeMode = process.env.NEXT_PUBLIC_FREE_DOWNLOAD === "true";
+
+  function saveBlob(blob: Blob, filename: string) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   async function handleDownload() {
     setError("");
 
     // Temporary: free download while payments are being set up
-    if (process.env.NEXT_PUBLIC_FREE_DOWNLOAD === "true") {
+    if (freeMode) {
       const { pdf } = await import("@react-pdf/renderer");
-      const blob = await pdf(<Template data={previewData} />).toBlob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${previewData.personal.fullName || "resume"}.pdf`;
-      a.click();
-      URL.revokeObjectURL(url);
+      const blob = await pdf(
+        <Template data={previewData} accent={accent} />
+      ).toBlob();
+      saveBlob(blob, `${previewData.personal.fullName || "resume"}.pdf`);
       return;
     }
 
@@ -70,6 +82,41 @@ export default function BuilderPage() {
     }
   }
 
+  // Exports the first page of the resume as a PNG image
+  async function handleImage() {
+    setError("");
+    try {
+      const { pdf } = await import("@react-pdf/renderer");
+      const pdfBlob = await pdf(
+        <Template data={previewData} accent={accent} />
+      ).toBlob();
+      const buffer = await pdfBlob.arrayBuffer();
+
+      const pdfjs = await import("pdfjs-dist");
+      pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
+      const doc = await pdfjs.getDocument({ data: buffer }).promise;
+      const page = await doc.getPage(1);
+      const viewport = page.getViewport({ scale: 2.5 });
+
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.floor(viewport.width);
+      canvas.height = Math.floor(viewport.height);
+      const ctx = canvas.getContext("2d");
+      if (!ctx) throw new Error("Canvas not supported");
+
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      await page.render({ canvasContext: ctx, viewport }).promise;
+
+      canvas.toBlob((blob) => {
+        if (blob) saveBlob(blob, `${previewData.personal.fullName || "resume"}.png`);
+      }, "image/png");
+      doc.destroy();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not create the image");
+    }
+  }
+
   return (
     <div className="flex h-[calc(100vh-3.5rem)] w-full">
       <div className="w-1/2 overflow-y-auto border-r border-gray-300 bg-white">
@@ -80,6 +127,7 @@ export default function BuilderPage() {
             Suggested sections: {category.recommendedSections.join(", ")}
           </p>
 
+          {/* Templates */}
           <div className="mt-3 flex flex-wrap items-center gap-2">
             {templates.map((t) => (
               <button
@@ -95,22 +143,55 @@ export default function BuilderPage() {
                 {t.name}
               </button>
             ))}
+          </div>
 
+          {/* Colors */}
+          <div className="mt-3 flex items-center gap-2">
+            <span className="text-xs text-gray-500">Color</span>
+            {palettes.map((p) => (
+              <button
+                key={p.id}
+                type="button"
+                title={p.name}
+                aria-label={p.name}
+                onClick={() => setAccent(p.accent)}
+                className={`h-6 w-6 rounded-full border-2 ${
+                  accent === p.accent
+                    ? "border-black"
+                    : "border-white ring-1 ring-gray-300"
+                }`}
+                style={{ backgroundColor: p.accent }}
+              />
+            ))}
+          </div>
+
+          {/* Downloads */}
+          <div className="mt-3 flex flex-wrap items-center gap-2">
             <button
               type="button"
               onClick={handleDownload}
               disabled={paying}
-              className="ml-auto rounded bg-green-600 px-4 py-1.5 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-50"
+              className="rounded bg-green-600 px-4 py-1.5 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-50"
             >
               {paying ? "Opening checkout..." : "Download PDF"}
             </button>
+            {freeMode && (
+              <button
+                type="button"
+                onClick={handleImage}
+                className="rounded border border-gray-300 bg-white px-4 py-1.5 text-sm font-semibold text-black hover:bg-gray-50"
+              >
+                Download image
+              </button>
+            )}
           </div>
           {error ? <p className="mt-2 text-xs text-red-600">{error}</p> : null}
         </div>
         <BuilderForm form={form} />
       </div>
+
       <div className="w-1/2">
-        <PdfPreview Template={Template} data={previewData} />
+        <PdfPreview Template={Template} data={previewData} accent={accent} />
       </div>
     </div>
   );

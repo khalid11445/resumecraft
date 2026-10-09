@@ -5,22 +5,22 @@ import { pdf } from "@react-pdf/renderer";
 import { ResumeData } from "@/lib/resume-schema";
 
 type Props = {
-  Template: ComponentType<{ data: ResumeData }>;
+  Template: ComponentType<{ data: ResumeData; accent?: string }>;
   data: ResumeData;
+  accent?: string;
 };
 
-export default function PdfPreview({ Template, data }: Props) {
+export default function PdfPreview({ Template, data, accent }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const runRef = useRef(0);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    // Each change starts a new "run"; older runs stop when a newer one begins
     const run = ++runRef.current;
 
     (async () => {
       try {
-        const blob = await pdf(<Template data={data} />).toBlob();
+        const blob = await pdf(<Template data={data} accent={accent} />).toBlob();
         if (run !== runRef.current) return;
 
         const buffer = await blob.arrayBuffer();
@@ -37,7 +37,6 @@ export default function PdfPreview({ Template, data }: Props) {
         const dpr = window.devicePixelRatio || 1;
         const canvases: HTMLCanvasElement[] = [];
 
-        // Draw every page off-screen first
         for (let n = 1; n <= doc.numPages; n++) {
           const page = await doc.getPage(n);
           const base = page.getViewport({ scale: 1 });
@@ -59,7 +58,6 @@ export default function PdfPreview({ Template, data }: Props) {
           canvases.push(canvas);
         }
 
-        // Swap everything at once: no flash, scroll position is kept
         container.replaceChildren(...canvases);
         setReady(true);
         doc.destroy();
@@ -67,7 +65,7 @@ export default function PdfPreview({ Template, data }: Props) {
         console.error("Preview error:", err);
       }
     })();
-  }, [Template, data]);
+  }, [Template, data, accent]);
 
   return (
     <div className="relative h-full w-full bg-gray-100">

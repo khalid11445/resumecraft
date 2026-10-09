@@ -1,67 +1,73 @@
 import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
 import { ResumeData } from "@/lib/resume-schema";
 
-const ACCENT = "#1f4e79";
+const makeStyles = (accent: string) =>
+  StyleSheet.create({
+    page: {
+      flexDirection: "row",
+      fontSize: 10,
+      fontFamily: "Helvetica",
+      color: "#222",
+      lineHeight: 1.45,
+    },
+    sidebar: {
+      width: "34%",
+      backgroundColor: accent,
+      color: "#fff",
+      padding: 26,
+    },
+    main: { width: "66%", padding: 32 },
+    name: {
+      fontSize: 20,
+      lineHeight: 1.2,
+      fontFamily: "Helvetica-Bold",
+      color: "#fff",
+    },
+    jobTitle: {
+      fontSize: 11,
+      lineHeight: 1.2,
+      color: "#e5e7eb",
+      marginTop: 8,
+      marginBottom: 20,
+    },
+    sideTitle: {
+      fontSize: 10,
+      fontFamily: "Helvetica-Bold",
+      textTransform: "uppercase",
+      letterSpacing: 1,
+      marginTop: 22,
+      marginBottom: 8,
+      color: "#fff",
+    },
+    sideText: { fontSize: 9, color: "#f3f4f6", marginBottom: 4 },
+    mainTitle: {
+      fontSize: 12,
+      fontFamily: "Helvetica-Bold",
+      textTransform: "uppercase",
+      letterSpacing: 1,
+      color: accent,
+      borderBottom: `1pt solid ${accent}`,
+      paddingBottom: 3,
+      marginBottom: 10,
+    },
+    section: { marginBottom: 22 },
+    row: { flexDirection: "row", justifyContent: "space-between" },
+    bold: { fontFamily: "Helvetica-Bold" },
+    muted: { color: "#666" },
+    bullet: { flexDirection: "row", marginTop: 3 },
+    bulletDot: { width: 10 },
+    bulletText: { flex: 1 },
+    item: { marginBottom: 12 },
+  });
 
-const styles = StyleSheet.create({
-  page: {
-    flexDirection: "row",
-    fontSize: 10,
-    fontFamily: "Helvetica",
-    color: "#222",
-    lineHeight: 1.45,
-  },
-  sidebar: {
-    width: "34%",
-    backgroundColor: ACCENT,
-    color: "#fff",
-    padding: 26,
-  },
-  main: { width: "66%", padding: 32 },
-  name: {
-    fontSize: 20,
-    lineHeight: 1.2,
-    fontFamily: "Helvetica-Bold",
-    color: "#fff",
-  },
-  jobTitle: {
-    fontSize: 11,
-    lineHeight: 1.2,
-    color: "#d6e4f0",
-    marginTop: 8,
-    marginBottom: 20,
-  },
-  sideTitle: {
-    fontSize: 10,
-    fontFamily: "Helvetica-Bold",
-    textTransform: "uppercase",
-    letterSpacing: 1,
-    marginTop: 22,
-    marginBottom: 8,
-    color: "#fff",
-  },
-  sideText: { fontSize: 9, color: "#e8f0f7", marginBottom: 4 },
-  mainTitle: {
-    fontSize: 12,
-    fontFamily: "Helvetica-Bold",
-    textTransform: "uppercase",
-    letterSpacing: 1,
-    color: ACCENT,
-    borderBottom: `1pt solid ${ACCENT}`,
-    paddingBottom: 3,
-    marginBottom: 10,
-  },
-  section: { marginBottom: 22 },
-  row: { flexDirection: "row", justifyContent: "space-between" },
-  bold: { fontFamily: "Helvetica-Bold" },
-  muted: { color: "#666" },
-  bullet: { flexDirection: "row", marginTop: 3 },
-  bulletDot: { width: 10 },
-  bulletText: { flex: 1 },
-  item: { marginBottom: 12 },
-});
-
-export default function ModernTemplate({ data }: { data: ResumeData }) {
+export default function ModernTemplate({
+  data,
+  accent = "#1f4e79",
+}: {
+  data: ResumeData;
+  accent?: string;
+}) {
+  const styles = makeStyles(accent);
   const { personal, summary, experience, education, skills, customSections } = data;
 
   const contacts = [
@@ -77,7 +83,6 @@ export default function ModernTemplate({ data }: { data: ResumeData }) {
   return (
     <Document title={`${personal.fullName} - Resume`}>
       <Page size="A4" style={styles.page}>
-        {/* Sidebar */}
         <View style={styles.sidebar}>
           <Text style={styles.name}>{personal.fullName}</Text>
           {personal.jobTitle ? (
@@ -122,7 +127,6 @@ export default function ModernTemplate({ data }: { data: ResumeData }) {
           })}
         </View>
 
-        {/* Main column */}
         <View style={styles.main}>
           {summary ? (
             <View style={styles.section}>

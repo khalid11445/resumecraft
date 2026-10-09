@@ -1,40 +1,54 @@
 import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
 import { ResumeData } from "@/lib/resume-schema";
 
-const styles = StyleSheet.create({
-  page: {
-    padding: 40,
-    fontSize: 10,
-    fontFamily: "Helvetica",
-    color: "#222",
-    lineHeight: 1.45,
-  },
-  header: {
-    marginBottom: 22,
-    borderBottom: "1pt solid #222",
-    paddingBottom: 12,
-  },
-    name: { fontSize: 22, lineHeight: 1.2, fontFamily: "Helvetica-Bold" },
-  jobTitle: { fontSize: 12, lineHeight: 1.2, color: "#555", marginTop: 8 },
-  contact: { fontSize: 9, color: "#555", marginTop: 10 },
-  section: { marginBottom: 20 },
-  sectionTitle: {
-    fontSize: 11,
-    fontFamily: "Helvetica-Bold",
-    textTransform: "uppercase",
-    letterSpacing: 1,
-    marginBottom: 8,
-  },
-  item: { marginBottom: 12 },
-  row: { flexDirection: "row", justifyContent: "space-between" },
-  bold: { fontFamily: "Helvetica-Bold" },
-  muted: { color: "#666" },
-  bullet: { flexDirection: "row", marginTop: 3 },
-  bulletDot: { width: 10 },
-  bulletText: { flex: 1 },
-});
+const makeStyles = (accent: string) =>
+  StyleSheet.create({
+    page: {
+      padding: 40,
+      fontSize: 10,
+      fontFamily: "Helvetica",
+      color: "#222",
+      lineHeight: 1.45,
+    },
+    header: {
+      marginBottom: 22,
+      borderBottom: `1.5pt solid ${accent}`,
+      paddingBottom: 12,
+    },
+    name: {
+      fontSize: 22,
+      lineHeight: 1.2,
+      fontFamily: "Helvetica-Bold",
+      color: accent,
+    },
+    jobTitle: { fontSize: 12, lineHeight: 1.2, color: "#555", marginTop: 8 },
+    contact: { fontSize: 9, color: "#555", marginTop: 10 },
+    section: { marginBottom: 20 },
+    sectionTitle: {
+      fontSize: 11,
+      fontFamily: "Helvetica-Bold",
+      textTransform: "uppercase",
+      letterSpacing: 1,
+      color: accent,
+      marginBottom: 8,
+    },
+    item: { marginBottom: 12 },
+    row: { flexDirection: "row", justifyContent: "space-between" },
+    bold: { fontFamily: "Helvetica-Bold" },
+    muted: { color: "#666" },
+    bullet: { flexDirection: "row", marginTop: 3 },
+    bulletDot: { width: 10 },
+    bulletText: { flex: 1 },
+  });
 
-export default function ClassicTemplate({ data }: { data: ResumeData }) {
+export default function ClassicTemplate({
+  data,
+  accent = "#222222",
+}: {
+  data: ResumeData;
+  accent?: string;
+}) {
+  const styles = makeStyles(accent);
   const { personal, summary, experience, education, skills, customSections } = data;
 
   const contact = [
@@ -52,7 +66,6 @@ export default function ClassicTemplate({ data }: { data: ResumeData }) {
   return (
     <Document title={`${personal.fullName} - Resume`}>
       <Page size="A4" style={styles.page}>
-        {/* Header */}
         <View style={styles.header}>
           <Text style={styles.name}>{personal.fullName}</Text>
           {personal.jobTitle ? (
@@ -61,7 +74,6 @@ export default function ClassicTemplate({ data }: { data: ResumeData }) {
           <Text style={styles.contact}>{contact}</Text>
         </View>
 
-        {/* Summary */}
         {summary ? (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Summary</Text>
@@ -69,7 +81,6 @@ export default function ClassicTemplate({ data }: { data: ResumeData }) {
           </View>
         ) : null}
 
-        {/* Experience */}
         {experience.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Experience</Text>
@@ -97,7 +108,6 @@ export default function ClassicTemplate({ data }: { data: ResumeData }) {
           </View>
         )}
 
-        {/* Education */}
         {education.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Education</Text>
@@ -116,7 +126,6 @@ export default function ClassicTemplate({ data }: { data: ResumeData }) {
           </View>
         )}
 
-        {/* Skills */}
         {cleanSkills.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Skills</Text>
@@ -124,7 +133,6 @@ export default function ClassicTemplate({ data }: { data: ResumeData }) {
           </View>
         )}
 
-        {/* Custom sections (licenses, certifications, projects...) */}
         {customSections.map((sec) => {
           const items = sec.items.filter(Boolean);
           if (items.length === 0) return null;
