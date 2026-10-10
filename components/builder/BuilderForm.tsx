@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { DragEvent, HTMLAttributes, useRef, useState } from "react";
 import { UseFormReturn, useFieldArray } from "react-hook-form";
 import { ResumeData } from "@/lib/resume-schema";
 import { getSuggestions, bulletsFor } from "@/lib/suggestions";
@@ -21,8 +21,233 @@ const ideaBtn =
   "rounded border border-dashed border-gray-300 bg-white px-2 py-1 text-left text-xs text-gray-700 hover:border-blue-500 hover:bg-blue-50";
 const errText = "mt-1 text-xs text-red-600";
 const checkRow = "mt-1 flex items-center gap-2 text-xs text-gray-600";
+const grip =
+  "cursor-grab select-none px-1 text-base leading-none text-gray-400 hover:text-gray-700 active:cursor-grabbing";
+const moveBtn =
+  "rounded px-1 text-xs text-gray-400 hover:text-gray-700 disabled:opacity-30";
 
 const isPresent = (s?: string) => !s || !s.trim() || /^present$/i.test(s.trim());
+
+function moveItem<T>(list: T[], from: number, to: number): T[] {
+  const next = [...list];
+  const [item] = next.splice(from, 1);
+  next.splice(to, 0, item);
+  return next;
+}
+
+// Native drag and drop for a list: a handle to grab and a row to drop on
+function useReorder(onMove: (from: number, to: number) => void) {
+  const dragFrom = useRef<number | null>(null);
+  const [overIndex, setOverIndex] = useState<number | null>(null);
+
+  const handle = (i: number): HTMLAttributes<HTMLSpanElement> => ({
+    draggable: true,
+    onDragStart: (e: DragEvent<HTMLSpanElement>) => {
+      dragFrom.current = i;
+      e.dataTransfer.effectAllowed = "move";
+      e.dataTransfer.setData("text/plain", String(i));
+      const row = e.currentTarget.closest("[data-reorder-item]");
+      if (row) e.dataTransfer.setDragImage(row, 16, 16);
+    },
+    onDragEnd: () => {
+      dragFrom.current = null;
+      setOverIndex(null);
+    },
+  });
+
+  const item = (i: number) => ({
+    "data-reorder-item": "",
+    onDragOver: (e: DragEvent<HTMLElement>) => {
+      if (dragFrom.current === null) return;
+      e.preventDefault();
+      setOverIndex(i);
+    },
+    onDrop: (e: DragEvent<HTMLElement>) => {
+      e.preventDefault();
+      const from = dragFrom.current;
+      dragFrom.current = null;
+      setOverIndex(null);
+      if (from !== null && from !== i) onMove(from, i);
+    },
+  });
+
+  const ring = (i: number) => (overIndex === i ? "ring-2 ring-blue-400" : "");
+
+  return { handle, item, ring };
+}
+
+// Grip + up/down buttons (the buttons also work on touch screens)
+function ReorderBar({
+  title,
+  index,
+  count,
+  handleProps,
+  onMove,
+}: {
+  title: string;
+  index: number;
+  count: number;
+  handleProps: HTMLAttributes<HTMLSpanElement>;
+  onMove: (from: number, to: number) => void;
+}) {
+  return (
+    <div className="mb-2 flex items-center justify-between">
+      <div className="flex items-center gap-1">
+        <span
+          {...handleProps}
+          className={grip}
+          title="Drag to reorder"
+          aria-label="Drag to reorder"
+        >
+          ⋮⋮
+        </span>
+        <span className="text-xs font-semibold text-gray-500">{title}</span>
+      </div>
+      <div className="flex items-center">
+        <button
+          type="button"
+          className={moveBtn}
+          disabled={index === 0}
+          onClick={() => onMove(index, index - 1)}
+          aria-label="Move up"
+        >
+          ▲
+        </button>
+        <button
+          type="button"
+          className={moveBtn}
+          disabled={index === count - 1}
+          onClick={() => onMove(index, index + 1)}
+          aria-label="Move down"
+        >
+          ▼
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// One editable line per item, each draggable
+function LineList({
+  values,
+  onChange,
+  addLabel,
+}: {
+  values: string[];
+  onChange: (next: string[]) => void;
+  addLabel: string;
+}) {
+  const r = useReorder((from, to) => onChange(moveItem(values, from, to)));
+
+  return (
+    <div>
+      {values.map((value, i) => (
+        <div
+          key={i}
+          {...r.item(i)}
+          className={`mb-1 flex items-center gap-1 rounded ${r.ring(i)}`}
+        >
+          <span
+            {...r.handle(i)}
+            className={grip}
+            title="Drag to reorder"
+            aria-label="Drag to reorder"
+          >
+            ⋮⋮
+          </span>
+          <input
+            className={input}
+            value={value}
+            onChange={(e) => {
+              const next = [...values];
+              next[i] = e.target.value;
+              onChange(next);
+            }}
+          />
+          <button
+            type="button"
+            className={moveBtn}
+            disabled={i === 0}
+            onClick={() => onChange(moveItem(values, i, i - 1))}
+            aria-label="Move line up"
+          >
+            ▲
+          </button>
+          <button
+            type="button"
+            className={moveBtn}
+            disabled={i === values.length - 1}
+            onClick={() => onChange(moveItem(values, i, i + 1))}
+            aria-label="Move line down"
+          >
+            ▼
+          </button>
+          <button
+            type="button"
+            className={removeBtn}
+            onClick={() => onChange(values.filter((_, j) => j !== i))}
+            aria-label="Remove line"
+          >
+            ✕
+          </button>
+        </div>
+      ))}
+      <button
+        type="button"
+        className="mt-1 text-xs font-medium text-blue-600 hover:text-blue-800"
+        onClick={() => onChange([...values, ""])}
+      >
+        + {addLabel}
+      </button>
+    </div>
+  );
+}
+
+// Skills as chips you can drag to change the order
+function SkillChips({
+  skills,
+  onChange,
+}: {
+  skills: string[];
+  onChange: (next: string[]) => void;
+}) {
+  const clean = skills.filter((s) => s.trim());
+  const r = useReorder((from, to) => onChange(moveItem(clean, from, to)));
+  if (clean.length < 2) return null;
+
+  return (
+    <>
+      <p className="mt-3 text-xs text-gray-500">Drag a skill to change the order</p>
+      <div className="mt-1 flex flex-wrap gap-2">
+        {clean.map((s, i) => (
+          <span
+            key={`${s}-${i}`}
+            {...r.item(i)}
+            className={`inline-flex items-center gap-1 rounded-full border border-gray-300 bg-white py-1 pl-1 pr-2 text-xs text-gray-700 ${r.ring(i)}`}
+          >
+            <span
+              {...r.handle(i)}
+              className={grip}
+              title="Drag to reorder"
+              aria-label="Drag to reorder"
+            >
+              ⋮⋮
+            </span>
+            {s}
+            <button
+              type="button"
+              className="text-gray-400 hover:text-red-600"
+              onClick={() => onChange(clean.filter((_, j) => j !== i))}
+              aria-label={`Remove ${s}`}
+            >
+              ✕
+            </button>
+          </span>
+        ))}
+      </div>
+    </>
+  );
+}
 
 // Crops the picture to a centered square and shrinks it (keeps the data small)
 function resizeToSquare(file: File, size: number): Promise<string> {
@@ -72,6 +297,10 @@ export default function BuilderForm({
   const experience = useFieldArray({ control, name: "experience" });
   const education = useFieldArray({ control, name: "education" });
   const sections = useFieldArray({ control, name: "customSections" });
+
+  const expDrag = useReorder((from, to) => experience.move(from, to));
+  const eduDrag = useReorder((from, to) => education.move(from, to));
+  const secDrag = useReorder((from, to) => sections.move(from, to));
 
   const newId = () => Math.random().toString(36).slice(2, 9);
 
@@ -229,7 +458,18 @@ export default function BuilderForm({
           .slice(0, 5);
 
         return (
-          <div key={field.id} className={card}>
+          <div
+            key={field.id}
+            {...expDrag.item(i)}
+            className={`${card} ${expDrag.ring(i)}`}
+          >
+            <ReorderBar
+              title={`Job ${i + 1}`}
+              index={i}
+              count={experience.fields.length}
+              handleProps={expDrag.handle(i)}
+              onMove={experience.move}
+            />
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className={label}>Role</label>
@@ -272,15 +512,12 @@ export default function BuilderForm({
                 <input className={input} {...register(`experience.${i}.location`)} />
               </div>
               <div className="col-span-2">
-                <label className={label}>Bullet points (one per line)</label>
-                <textarea
-                  rows={3}
-                  className={input}
-                  value={bullets.join("\n")}
-                  onChange={(e) =>
-                    setValue(`experience.${i}.bullets`, e.target.value.split("\n"), {
-                      shouldDirty: true,
-                    })
+                <label className={label}>Bullet points (drag ⋮⋮ to reorder)</label>
+                <LineList
+                  values={bullets}
+                  addLabel="Add bullet point"
+                  onChange={(next) =>
+                    setValue(`experience.${i}.bullets`, next, { shouldDirty: true })
                   }
                 />
               </div>
@@ -314,7 +551,7 @@ export default function BuilderForm({
             </div>
             <button
               type="button"
-              className={removeBtn}
+              className={`${removeBtn} mt-3`}
               onClick={() => experience.remove(i)}
             >
               Remove job
@@ -348,7 +585,18 @@ export default function BuilderForm({
           currentEdu[field.id] ?? /^present$/i.test(endValue.trim());
 
         return (
-          <div key={field.id} className={card}>
+          <div
+            key={field.id}
+            {...eduDrag.item(i)}
+            className={`${card} ${eduDrag.ring(i)}`}
+          >
+            <ReorderBar
+              title={`Education ${i + 1}`}
+              index={i}
+              count={education.fields.length}
+              handleProps={eduDrag.handle(i)}
+              onMove={education.move}
+            />
             <div className="grid grid-cols-2 gap-3">
               <div className="col-span-2">
                 <label className={label}>School</label>
@@ -389,7 +637,7 @@ export default function BuilderForm({
             </div>
             <button
               type="button"
-              className={removeBtn}
+              className={`${removeBtn} mt-3`}
               onClick={() => education.remove(i)}
             >
               Remove
@@ -428,6 +676,10 @@ export default function BuilderForm({
           )
         }
       />
+      <SkillChips
+        skills={skills}
+        onChange={(next) => setValue("skills", next, { shouldDirty: true })}
+      />
       {missingSkills.length > 0 && (
         <>
           <p className="mt-3 text-xs text-gray-500">
@@ -457,26 +709,34 @@ export default function BuilderForm({
       {sections.fields.map((field, i) => {
         const items = watch(`customSections.${i}.items`) ?? [];
         return (
-          <div key={field.id} className={card}>
+          <div
+            key={field.id}
+            {...secDrag.item(i)}
+            className={`${card} ${secDrag.ring(i)}`}
+          >
+            <ReorderBar
+              title={`Section ${i + 1}`}
+              index={i}
+              count={sections.fields.length}
+              handleProps={secDrag.handle(i)}
+              onMove={sections.move}
+            />
             <label className={label}>Section title</label>
             <input
               className={`${input} mb-3`}
               {...register(`customSections.${i}.title`)}
             />
-            <label className={label}>Items (one per line)</label>
-            <textarea
-              rows={3}
-              className={input}
-              value={items.join("\n")}
-              onChange={(e) =>
-                setValue(`customSections.${i}.items`, e.target.value.split("\n"), {
-                  shouldDirty: true,
-                })
+            <label className={label}>Items (drag ⋮⋮ to reorder)</label>
+            <LineList
+              values={items}
+              addLabel="Add item"
+              onChange={(next) =>
+                setValue(`customSections.${i}.items`, next, { shouldDirty: true })
               }
             />
             <button
               type="button"
-              className={removeBtn}
+              className={`${removeBtn} mt-3`}
               onClick={() => sections.remove(i)}
             >
               Remove section

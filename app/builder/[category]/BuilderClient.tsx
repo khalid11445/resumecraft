@@ -11,7 +11,7 @@ import AiWriter from "@/components/builder/AiWriter";
 import PdfPreview from "@/components/builder/PdfPreview";
 import { templates, getTemplate } from "@/lib/templates";
 import { palettes, categoryAccent } from "@/lib/themes";
-
+import LiveResume, { isLiveTemplate } from "@/components/builder/LiveResume";
 export default function BuilderPage() {
   const params = useParams<{ category: string }>();
   const category = getCategory(String(params.category));
@@ -213,12 +213,21 @@ export default function BuilderPage() {
         <BuilderForm form={form} categoryId={category.id} />
       </div>
 
-      <div className="w-1/2">
-        <PdfPreview
-          Template={Template}
-          data={previewData}
-          accent={accent}
-        />
+            <div className="w-1/2">
+                       {isLiveTemplate(templateId) ? (
+          <LiveResume
+            form={form}
+            data={liveData}
+            accent={accent}
+            templateId={templateId}
+          />
+        ) : (
+          <PdfPreview
+            Template={Template}
+            data={previewData}
+            accent={accent}
+          />
+        )}
       </div>
     </div>
   );
