@@ -12,6 +12,7 @@ import PdfPreview from "@/components/builder/PdfPreview";
 import { templates, getTemplate } from "@/lib/templates";
 import { palettes, categoryAccent } from "@/lib/themes";
 import LiveResume, { isLiveTemplate } from "@/components/builder/LiveResume";
+
 export default function BuilderPage() {
   const params = useParams<{ category: string }>();
   const category = getCategory(String(params.category));
@@ -33,6 +34,18 @@ export default function BuilderPage() {
   const [resumeId] = useState(() => crypto.randomUUID());
   const [paying, setPaying] = useState(false);
   const [error, setError] = useState("");
+
+  // Phone layout: one panel at a time, switched with tabs
+  const [tab, setTab] = useState<"edit" | "preview">("edit");
+  const [isDesktop, setIsDesktop] = useState(true);
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 768px)");
+    const update = () => setIsDesktop(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+  const showPreview = isDesktop || tab === "preview";
 
   const form = useForm<ResumeData>({
     resolver: zodResolver(resumeSchema),
@@ -130,9 +143,47 @@ export default function BuilderPage() {
     }
   }
 
+  const tabClass = (active: boolean) =>
+    `flex-1 border-b-2 py-2.5 text-sm font-semibold ${
+      active
+        ? "border-blue-600 text-blue-600"
+        : "border-transparent text-gray-500"
+    }`;
+
   return (
-    <div className="flex h-[calc(100vh-3.5rem)] w-full">
-      <div className="w-1/2 overflow-y-auto border-r border-gray-300 bg-white">
+    <div className="flex h-[calc(100dvh-3.5rem)] w-full flex-col md:flex-row">
+      {/* Tabs (phones only) */}
+      <div className="flex shrink-0 items-center border-b border-gray-200 bg-white md:hidden">
+        <button
+          type="button"
+          onClick={() => setTab("edit")}
+          className={tabClass(tab === "edit")}
+        >
+          Edit
+        </button>
+        <button
+          type="button"
+          onClick={() => setTab("preview")}
+          className={tabClass(tab === "preview")}
+        >
+          Preview
+        </button>
+        <button
+          type="button"
+          onClick={handleDownload}
+          disabled={paying}
+          className="mx-2 shrink-0 rounded bg-green-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-green-700 disabled:opacity-50"
+        >
+          {paying ? "Opening..." : "Download PDF"}
+        </button>
+      </div>
+
+      {/* Form panel */}
+      <div
+        className={`${
+          tab === "edit" ? "block" : "hidden"
+        } min-h-0 w-full flex-1 overflow-y-auto border-gray-300 bg-white md:block md:w-1/2 md:flex-none md:border-r`}
+      >
         <div className="border-b border-gray-200 p-4">
           <p className="text-xs text-gray-500">Category</p>
           <p className="font-semibold text-black">{category.name}</p>
@@ -159,7 +210,7 @@ export default function BuilderPage() {
           </div>
 
           {/* Colors */}
-          <div className="mt-3 flex items-center gap-2">
+          <div className="mt-3 flex flex-wrap items-center gap-2">
             <span className="text-xs text-gray-500">Color</span>
             {palettes.map((p) => (
               <button
@@ -213,22 +264,29 @@ export default function BuilderPage() {
         <BuilderForm form={form} categoryId={category.id} />
       </div>
 
-            <div className="w-1/2">
-                       {isLiveTemplate(templateId) ? (
-          <LiveResume
-            form={form}
-            data={liveData}
-            accent={accent}
-            templateId={templateId}
-          />
-        ) : (
-          <PdfPreview
-            Template={Template}
-            data={previewData}
-            accent={accent}
-          />
-        )}
-      </div>
+      {/* Preview panel (mounted only when visible, so it measures the right width) */}
+      {showPreview && (
+        <div
+          className={`${
+            tab === "preview" ? "block" : "hidden"
+          } min-h-0 w-full flex-1 md:block md:w-1/2 md:flex-none`}
+        >
+          {isLiveTemplate(templateId) ? (
+            <LiveResume
+              form={form}
+              data={liveData}
+              accent={accent}
+              templateId={templateId}
+            />
+          ) : (
+            <PdfPreview
+              Template={Template}
+              data={previewData}
+              accent={accent}
+            />
+          )}
+        </div>
+      )}
     </div>
   );
 }
