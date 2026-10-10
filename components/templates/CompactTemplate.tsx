@@ -1,4 +1,11 @@
-import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
+import {
+  Document,
+  Page,
+  Text,
+  View,
+  Image,
+  StyleSheet,
+} from "@react-pdf/renderer";
 import { ResumeData } from "@/lib/resume-schema";
 
 const makeStyles = (accent: string) =>
@@ -7,41 +14,48 @@ const makeStyles = (accent: string) =>
       paddingTop: 30,
       paddingBottom: 30,
       paddingHorizontal: 36,
-      fontSize: 9.5,
+      fontSize: 9,
       fontFamily: "Helvetica",
       color: "#1a1a1a",
       lineHeight: 1.4,
     },
-    header: { alignItems: "center", marginBottom: 14 },
+    header: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginBottom: 14,
+      paddingBottom: 10,
+      borderBottom: `1.5pt solid ${accent}`,
+    },
+    photo: { width: 54, height: 54, borderRadius: 27, marginRight: 12 },
+    headerText: { flex: 1 },
     name: {
-      fontSize: 20,
+      fontSize: 19,
       lineHeight: 1.2,
       fontFamily: "Helvetica-Bold",
-      letterSpacing: 2,
-      textTransform: "uppercase",
       color: accent,
     },
-    jobTitle: { fontSize: 10.5, lineHeight: 1.2, color: "#555", marginTop: 6 },
-    contact: { fontSize: 8.5, color: "#555", marginTop: 8, textAlign: "center" },
-    section: { marginBottom: 13 },
+    jobTitle: { fontSize: 10, lineHeight: 1.2, color: "#555", marginTop: 4 },
+    contactCol: { alignItems: "flex-end" },
+    contactLine: { fontSize: 8.5, color: "#555", lineHeight: 1.5 },
+    section: { marginBottom: 12 },
     sectionTitle: {
-      fontSize: 9.5,
+      fontSize: 9,
       fontFamily: "Helvetica-Bold",
       textTransform: "uppercase",
-      letterSpacing: 1.5,
+      letterSpacing: 1.2,
       color: accent,
-      borderBottom: `0.75pt solid ${accent}`,
-      paddingBottom: 2,
+      backgroundColor: "#f1f5f9",
+      paddingVertical: 3,
+      paddingHorizontal: 6,
       marginBottom: 6,
     },
     row: { flexDirection: "row", justifyContent: "space-between" },
     bold: { fontFamily: "Helvetica-Bold" },
-    italic: { fontFamily: "Helvetica-Oblique", color: "#555" },
     muted: { color: "#666" },
     bullet: { flexDirection: "row", marginTop: 2 },
     bulletDot: { width: 9 },
     bulletText: { flex: 1 },
-    item: { marginBottom: 8 },
+    item: { marginBottom: 7 },
   });
 
 export default function CompactTemplate({
@@ -54,15 +68,13 @@ export default function CompactTemplate({
   const styles = makeStyles(accent);
   const { personal, summary, experience, education, skills, customSections } = data;
 
-  const contact = [
+  const contacts = [
     personal.email,
     personal.phone,
     personal.location,
     personal.linkedin,
     personal.website,
-  ]
-    .filter(Boolean)
-    .join("  •  ");
+  ].filter(Boolean) as string[];
 
   const cleanSkills = skills.map((s) => s.trim()).filter(Boolean);
 
@@ -70,11 +82,22 @@ export default function CompactTemplate({
     <Document title={`${personal.fullName} - Resume`}>
       <Page size="A4" style={styles.page}>
         <View style={styles.header}>
-          <Text style={styles.name}>{personal.fullName}</Text>
-          {personal.jobTitle ? (
-            <Text style={styles.jobTitle}>{personal.jobTitle}</Text>
+          {personal.photo ? (
+            <Image src={personal.photo} style={styles.photo} />
           ) : null}
-          {contact ? <Text style={styles.contact}>{contact}</Text> : null}
+          <View style={styles.headerText}>
+            <Text style={styles.name}>{personal.fullName}</Text>
+            {personal.jobTitle ? (
+              <Text style={styles.jobTitle}>{personal.jobTitle}</Text>
+            ) : null}
+          </View>
+          <View style={styles.contactCol}>
+            {contacts.map((c, i) => (
+              <Text key={i} style={styles.contactLine}>
+                {c}
+              </Text>
+            ))}
+          </View>
         </View>
 
         {summary ? (
@@ -90,17 +113,17 @@ export default function CompactTemplate({
             {experience.map((job) => (
               <View key={job.id} style={styles.item} wrap={false}>
                 <View style={styles.row}>
-                  <Text style={styles.bold}>{job.company}</Text>
+                  <Text>
+                    <Text style={styles.bold}>{job.role}</Text>
+                    {job.company ? `  —  ${job.company}` : ""}
+                  </Text>
                   <Text style={styles.muted}>
                     {job.startDate} - {job.endDate || "Present"}
                   </Text>
                 </View>
-                <View style={styles.row}>
-                  <Text style={styles.italic}>{job.role}</Text>
-                  {job.location ? (
-                    <Text style={styles.muted}>{job.location}</Text>
-                  ) : null}
-                </View>
+                {job.location ? (
+                  <Text style={styles.muted}>{job.location}</Text>
+                ) : null}
                 {job.bullets.filter(Boolean).map((b, i) => (
                   <View key={i} style={styles.bullet}>
                     <Text style={styles.bulletDot}>•</Text>
@@ -118,12 +141,14 @@ export default function CompactTemplate({
             {education.map((ed) => (
               <View key={ed.id} style={styles.item} wrap={false}>
                 <View style={styles.row}>
-                  <Text style={styles.bold}>{ed.school}</Text>
+                  <Text>
+                    <Text style={styles.bold}>{ed.school}</Text>
+                    {ed.degree ? `  —  ${ed.degree}` : ""}
+                  </Text>
                   <Text style={styles.muted}>
                     {[ed.startDate, ed.endDate].filter(Boolean).join(" - ")}
                   </Text>
                 </View>
-                {ed.degree ? <Text style={styles.italic}>{ed.degree}</Text> : null}
                 {ed.details ? <Text style={styles.muted}>{ed.details}</Text> : null}
               </View>
             ))}

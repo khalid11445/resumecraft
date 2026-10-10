@@ -1,9 +1,11 @@
 import { ComponentType } from "react";
 import { ResumeData } from "./resume-schema";
+import ElegantTemplate from "@/components/templates/ElegantTemplate";
 import ClassicTemplate from "@/components/templates/ClassicTemplate";
 import ModernTemplate from "@/components/templates/ModernTemplate";
 import CompactTemplate from "@/components/templates/CompactTemplate";
-import ElegantTemplate from "@/components/templates/ElegantTemplate";
+import BoldTemplate from "@/components/templates/BoldTemplate";
+import TimelineTemplate from "@/components/templates/TimelineTemplate";
 
 export type TemplateProps = { data: ResumeData; accent?: string };
 
@@ -15,8 +17,10 @@ export type TemplateInfo = {
 
 export const templates: TemplateInfo[] = [
   { id: "elegant", name: "Elegant", component: ElegantTemplate },
-  { id: "classic", name: "Classic", component: ClassicTemplate },
+  { id: "bold", name: "Bold", component: BoldTemplate },
+  { id: "timeline", name: "Timeline", component: TimelineTemplate },
   { id: "modern", name: "Modern", component: ModernTemplate },
+  { id: "classic", name: "Classic", component: ClassicTemplate },
   { id: "compact", name: "Compact", component: CompactTemplate },
 ];
 

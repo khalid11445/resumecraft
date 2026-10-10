@@ -1,5 +1,7 @@
 import Link from "next/link";
+import Image from "next/image";
 import { categories } from "@/lib/categories";
+import PricingSection from "@/components/site/PricingSection";
 
 const steps = [
   {
@@ -17,6 +19,12 @@ const steps = [
     title: "Download your PDF",
     text: "Switch templates anytime without retyping a single word.",
   },
+];
+
+const homeExamples = [
+  "nurse-modern.png",
+  "tech-modern.png",
+  "banking-compact.png",
 ];
 
 export default function Home() {
@@ -93,6 +101,42 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Examples */}
+      <section className="bg-white py-20">
+        <div className="mx-auto max-w-5xl px-6">
+          <h2 className="text-center text-2xl font-semibold text-slate-900">
+            Resumes made with our templates
+          </h2>
+          <div className="mt-10 grid gap-6 sm:grid-cols-3">
+            {homeExamples.map((file) => (
+              <div
+                key={file}
+                className="relative aspect-[210/297] overflow-hidden rounded-md border border-slate-200"
+              >
+                <Image
+                  src={`/examples/${file}`}
+                  alt="Example resume"
+                  fill
+                  sizes="(min-width: 640px) 33vw, 100vw"
+                  className="object-contain"
+                />
+              </div>
+            ))}
+          </div>
+          <div className="mt-8 text-center">
+            <Link
+              href="/examples"
+              className="text-sm font-semibold text-amber-700 hover:underline"
+            >
+              See all examples
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing */}
+      <PricingSection />
     </main>
   );
 }

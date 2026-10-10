@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { resumeSchema, ResumeData } from "@/lib/resume-schema";
 import { getCategory } from "@/lib/categories";
 import BuilderForm from "@/components/builder/BuilderForm";
+import AiWriter from "@/components/builder/AiWriter";
 import PdfPreview from "@/components/builder/PdfPreview";
 import { templates, getTemplate } from "@/lib/templates";
 import { palettes, categoryAccent } from "@/lib/themes";
@@ -14,10 +15,19 @@ import { palettes, categoryAccent } from "@/lib/themes";
 export default function BuilderPage() {
   const params = useParams<{ category: string }>();
   const category = getCategory(String(params.category));
-  const [templateId, setTemplateId] = useState("elegant");
+
+  const search = useSearchParams();
+  const qTemplate = search.get("template");
+  const qColor = search.get("color");
+
+  const [templateId, setTemplateId] = useState(
+    templates.some((t) => t.id === qTemplate) ? (qTemplate as string) : "elegant"
+  );
   const Template = getTemplate(templateId).component;
   const [accent, setAccent] = useState(
-    categoryAccent[category.id] ?? palettes[0].accent
+    qColor && /^[0-9a-fA-F]{6}$/.test(qColor)
+      ? `#${qColor}`
+      : categoryAccent[category.id] ?? palettes[0].accent
   );
 
   const [resumeId] = useState(() => crypto.randomUUID());
@@ -39,6 +49,9 @@ export default function BuilderPage() {
   }, [JSON.stringify(liveData)]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const freeMode = process.env.NEXT_PUBLIC_FREE_DOWNLOAD === "true";
+
+  // True while any suggested line still contains [brackets]
+  const hasPlaceholders = /\[[^\]]*\]/.test(JSON.stringify(liveData));
 
   function saveBlob(blob: Blob, filename: string) {
     const url = URL.createObjectURL(blob);
@@ -185,13 +198,27 @@ export default function BuilderPage() {
               </button>
             )}
           </div>
+
           {error ? <p className="mt-2 text-xs text-red-600">{error}</p> : null}
+
+          {hasPlaceholders ? (
+            <p className="mt-2 text-xs text-amber-700">
+              Some suggested lines still contain [brackets]. Replace them with
+              your real details before downloading.
+            </p>
+          ) : null}
         </div>
-        <BuilderForm form={form} />
+
+        <AiWriter form={form} categoryName={category.name} />
+        <BuilderForm form={form} categoryId={category.id} />
       </div>
 
       <div className="w-1/2">
-        <PdfPreview Template={Template} data={previewData} accent={accent} />
+        <PdfPreview
+          Template={Template}
+          data={previewData}
+          accent={accent}
+        />
       </div>
     </div>
   );

@@ -11,6 +11,12 @@ export default function Navbar() {
           <Link href="/templates" className="text-gray-700 hover:text-black">
             Templates
           </Link>
+          <Link href="/examples" className="text-gray-700 hover:text-black">
+            Examples
+          </Link>
+          <Link href="/pricing" className="text-gray-700 hover:text-black">
+            Pricing
+          </Link>
           <Link
             href="/templates"
             className="rounded bg-blue-600 px-4 py-1.5 font-semibold text-white hover:bg-blue-700"

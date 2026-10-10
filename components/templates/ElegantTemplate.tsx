@@ -1,5 +1,12 @@
 import { ReactNode } from "react";
-import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
+import {
+  Document,
+  Page,
+  Text,
+  View,
+  Image,
+  StyleSheet,
+} from "@react-pdf/renderer";
 import { ResumeData } from "@/lib/resume-schema";
 
 const GOLD = "#b08d57";
@@ -18,6 +25,13 @@ const makeStyles = (accent: string) =>
       lineHeight: 1.5,
     },
     header: { marginBottom: 24 },
+    headerTop: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+    },
+    headerText: { flex: 1 },
+    photo: { width: 72, height: 72, borderRadius: 36, marginLeft: 16 },
     name: {
       fontFamily: "Times-Roman",
       fontSize: 30,
@@ -122,10 +136,17 @@ export default function ElegantTemplate({
     <Document title={`${personal.fullName} - Resume`}>
       <Page size="A4" style={styles.page}>
         <View style={styles.header}>
-          <Text style={styles.name}>{personal.fullName}</Text>
-          {personal.jobTitle ? (
-            <Text style={styles.jobTitle}>{personal.jobTitle}</Text>
-          ) : null}
+          <View style={styles.headerTop}>
+            <View style={styles.headerText}>
+              <Text style={styles.name}>{personal.fullName}</Text>
+              {personal.jobTitle ? (
+                <Text style={styles.jobTitle}>{personal.jobTitle}</Text>
+              ) : null}
+            </View>
+            {personal.photo ? (
+              <Image src={personal.photo} style={styles.photo} />
+            ) : null}
+          </View>
           <View style={styles.rule} />
           <View style={styles.contactRow}>
             {contacts.map((c, i) => (

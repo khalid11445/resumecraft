@@ -1,4 +1,11 @@
-import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
+import {
+  Document,
+  Page,
+  Text,
+  View,
+  Image,
+  StyleSheet,
+} from "@react-pdf/renderer";
 import { ResumeData } from "@/lib/resume-schema";
 
 const makeStyles = (accent: string) =>
@@ -17,6 +24,16 @@ const makeStyles = (accent: string) =>
       padding: 26,
     },
     main: { width: "66%", padding: 32 },
+    photo: {
+      width: 92,
+      height: 92,
+      borderRadius: 46,
+      alignSelf: "center",
+      marginBottom: 16,
+      borderWidth: 2,
+      borderColor: "#fff",
+      borderStyle: "solid",
+    },
     name: {
       fontSize: 20,
       lineHeight: 1.2,
@@ -84,6 +101,9 @@ export default function ModernTemplate({
     <Document title={`${personal.fullName} - Resume`}>
       <Page size="A4" style={styles.page}>
         <View style={styles.sidebar}>
+          {personal.photo ? (
+            <Image src={personal.photo} style={styles.photo} />
+          ) : null}
           <Text style={styles.name}>{personal.fullName}</Text>
           {personal.jobTitle ? (
             <Text style={styles.jobTitle}>{personal.jobTitle}</Text>

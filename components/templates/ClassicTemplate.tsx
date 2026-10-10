@@ -1,42 +1,62 @@
-import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
+import {
+  Document,
+  Page,
+  Text,
+  View,
+  Image,
+  StyleSheet,
+} from "@react-pdf/renderer";
 import { ResumeData } from "@/lib/resume-schema";
 
 const makeStyles = (accent: string) =>
   StyleSheet.create({
     page: {
-      padding: 40,
-      fontSize: 10,
-      fontFamily: "Helvetica",
-      color: "#222",
-      lineHeight: 1.45,
+      padding: 44,
+      fontSize: 10.5,
+      fontFamily: "Times-Roman",
+      color: "#1f1f1f",
+      lineHeight: 1.4,
     },
     header: {
-      marginBottom: 22,
-      borderBottom: `1.5pt solid ${accent}`,
+      alignItems: "center",
+      marginBottom: 18,
       paddingBottom: 12,
+      borderBottom: `1.5pt solid ${accent}`,
     },
+    photo: { width: 70, height: 70, borderRadius: 35, marginBottom: 8 },
     name: {
-      fontSize: 22,
+      fontFamily: "Times-Bold",
+      fontSize: 24,
       lineHeight: 1.2,
-      fontFamily: "Helvetica-Bold",
+      letterSpacing: 2,
+      textTransform: "uppercase",
       color: accent,
     },
-    jobTitle: { fontSize: 12, lineHeight: 1.2, color: "#555", marginTop: 8 },
-    contact: { fontSize: 9, color: "#555", marginTop: 10 },
-    section: { marginBottom: 20 },
+    jobTitle: {
+      fontFamily: "Times-Italic",
+      fontSize: 12.5,
+      lineHeight: 1.2,
+      color: "#444",
+      marginTop: 6,
+    },
+    contact: { fontSize: 9.5, color: "#444", marginTop: 8, textAlign: "center" },
+    section: { marginBottom: 16 },
     sectionTitle: {
+      fontFamily: "Times-Bold",
       fontSize: 11,
-      fontFamily: "Helvetica-Bold",
+      letterSpacing: 1.5,
       textTransform: "uppercase",
-      letterSpacing: 1,
       color: accent,
+      borderBottom: "0.5pt solid #999",
+      paddingBottom: 3,
       marginBottom: 8,
     },
-    item: { marginBottom: 12 },
+    item: { marginBottom: 10 },
     row: { flexDirection: "row", justifyContent: "space-between" },
-    bold: { fontFamily: "Helvetica-Bold" },
-    muted: { color: "#666" },
-    bullet: { flexDirection: "row", marginTop: 3 },
+    bold: { fontFamily: "Times-Bold" },
+    italic: { fontFamily: "Times-Italic", color: "#444" },
+    muted: { color: "#555" },
+    bullet: { flexDirection: "row", marginTop: 2 },
     bulletDot: { width: 10 },
     bulletText: { flex: 1 },
   });
@@ -67,36 +87,40 @@ export default function ClassicTemplate({
     <Document title={`${personal.fullName} - Resume`}>
       <Page size="A4" style={styles.page}>
         <View style={styles.header}>
+          {personal.photo ? (
+            <Image src={personal.photo} style={styles.photo} />
+          ) : null}
           <Text style={styles.name}>{personal.fullName}</Text>
           {personal.jobTitle ? (
             <Text style={styles.jobTitle}>{personal.jobTitle}</Text>
           ) : null}
-          <Text style={styles.contact}>{contact}</Text>
+          {contact ? <Text style={styles.contact}>{contact}</Text> : null}
         </View>
 
         {summary ? (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Summary</Text>
+            <Text style={styles.sectionTitle}>Professional Summary</Text>
             <Text>{summary}</Text>
           </View>
         ) : null}
 
         {experience.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Experience</Text>
+            <Text style={styles.sectionTitle}>Professional Experience</Text>
             {experience.map((job) => (
               <View key={job.id} style={styles.item} wrap={false}>
                 <View style={styles.row}>
-                  <Text style={styles.bold}>
-                    {job.role}, {job.company}
-                  </Text>
+                  <Text style={styles.bold}>{job.company}</Text>
                   <Text style={styles.muted}>
                     {job.startDate} - {job.endDate || "Present"}
                   </Text>
                 </View>
-                {job.location ? (
-                  <Text style={styles.muted}>{job.location}</Text>
-                ) : null}
+                <View style={styles.row}>
+                  <Text style={styles.italic}>{job.role}</Text>
+                  {job.location ? (
+                    <Text style={styles.muted}>{job.location}</Text>
+                  ) : null}
+                </View>
                 {job.bullets.filter(Boolean).map((b, i) => (
                   <View key={i} style={styles.bullet}>
                     <Text style={styles.bulletDot}>•</Text>
@@ -119,7 +143,7 @@ export default function ClassicTemplate({
                     {[ed.startDate, ed.endDate].filter(Boolean).join(" - ")}
                   </Text>
                 </View>
-                {ed.degree ? <Text>{ed.degree}</Text> : null}
+                {ed.degree ? <Text style={styles.italic}>{ed.degree}</Text> : null}
                 {ed.details ? <Text style={styles.muted}>{ed.details}</Text> : null}
               </View>
             ))}
@@ -129,7 +153,7 @@ export default function ClassicTemplate({
         {cleanSkills.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Skills</Text>
-            <Text>{cleanSkills.join("  •  ")}</Text>
+            <Text>{cleanSkills.join("  ·  ")}</Text>
           </View>
         )}
 

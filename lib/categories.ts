@@ -3,6 +3,7 @@ import { sampleResume } from "./sample-data";
 
 export type Category = {
   id: string;
+  color: string;
   name: string;
   description: string;
   recommendedSections: string[];
@@ -103,6 +104,7 @@ const banking: ResumeData = {
     },
   ],
 };
+
 const tech: ResumeData = {
   personal: {
     fullName: "Omar Haddad",
@@ -188,12 +190,21 @@ const teacher: ResumeData = {
       details: "",
     },
   ],
-  skills: ["Classroom Management", "Lesson Planning", "Differentiated Instruction", "Parent Communication"],
+  skills: [
+    "Classroom Management",
+    "Lesson Planning",
+    "Differentiated Instruction",
+    "Parent Communication",
+  ],
   customSections: [
     {
       id: "1",
       title: "Certifications & Training",
-      items: ["Teaching Certificate", "First Aid Training", "Inclusive Education Workshop"],
+      items: [
+        "Teaching Certificate",
+        "First Aid Training",
+        "Inclusive Education Workshop",
+      ],
     },
   ],
 };
@@ -201,6 +212,7 @@ const teacher: ResumeData = {
 export const categories: Category[] = [
   {
     id: "nurse",
+    color: "#0f766e",
     name: "Nurse / Healthcare",
     description: "Highlight licenses, certifications, and clinical experience.",
     recommendedSections: ["Licenses", "Certifications", "Clinical rotations"],
@@ -208,6 +220,7 @@ export const categories: Category[] = [
   },
   {
     id: "student",
+    color: "#c2410c",
     name: "Student / First job",
     description: "Education first, plus projects and volunteering.",
     recommendedSections: ["Projects", "Volunteering", "Activities"],
@@ -215,6 +228,7 @@ export const categories: Category[] = [
   },
   {
     id: "banking",
+    color: "#1e3a8a",
     name: "Banking / Finance",
     description: "Results-focused, one-page layout with certifications.",
     recommendedSections: ["Certifications", "Deals / Metrics"],
@@ -222,6 +236,7 @@ export const categories: Category[] = [
   },
   {
     id: "tech",
+    color: "#4f46e5",
     name: "Tech / Developer",
     description: "Skills, projects, and links to your GitHub or portfolio.",
     recommendedSections: ["Projects", "Open source", "Certifications"],
@@ -229,13 +244,13 @@ export const categories: Category[] = [
   },
   {
     id: "teacher",
+    color: "#15803d",
     name: "Teacher / Education",
     description: "Classroom results, training, and certifications.",
     recommendedSections: ["Certifications", "Training", "Extracurriculars"],
     starter: teacher,
   },
 ];
-
 
 export function getCategory(id: string): Category {
   return categories.find((c) => c.id === id) ?? categories[0];
