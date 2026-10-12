@@ -8,6 +8,7 @@ import {
   StyleSheet,
 } from "@react-pdf/renderer";
 import { ResumeData } from "@/lib/resume-schema";
+import { Lang, getLabels, jobRange, eduRange } from "@/lib/labels";
 
 const makeStyles = (accent: string) =>
   StyleSheet.create({
@@ -112,11 +113,14 @@ function Entry({
 export default function TimelineTemplate({
   data,
   accent = "#4338ca",
+  lang = "en",
 }: {
   data: ResumeData;
   accent?: string;
+  lang?: Lang;
 }) {
   const styles = makeStyles(accent);
+  const L = getLabels(lang);
   const { personal, summary, experience, education, skills, customSections } = data;
 
   const contacts = [
@@ -130,7 +134,7 @@ export default function TimelineTemplate({
   const cleanSkills = skills.map((s) => s.trim()).filter(Boolean);
 
   return (
-    <Document title={`${personal.fullName} - Resume`}>
+    <Document title={`${personal.fullName} - CV`}>
       <Page size="A4" style={styles.page}>
         <View style={styles.header}>
           <View style={styles.headerTop}>
@@ -155,18 +159,18 @@ export default function TimelineTemplate({
 
         {summary ? (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Profile</Text>
+            <Text style={styles.sectionTitle}>{L.summary}</Text>
             <Text>{summary}</Text>
           </View>
         ) : null}
 
         {experience.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Experience</Text>
+            <Text style={styles.sectionTitle}>{L.experience}</Text>
             {experience.map((job) => (
               <Entry key={job.id} styles={styles}>
                 <Text style={styles.dates}>
-                  {job.startDate} - {job.endDate || "Present"}
+                  {jobRange(job.startDate, job.endDate, lang)}
                 </Text>
                 <Text style={styles.role}>{job.role}</Text>
                 <Text style={styles.company}>
@@ -185,11 +189,11 @@ export default function TimelineTemplate({
 
         {education.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Education</Text>
+            <Text style={styles.sectionTitle}>{L.education}</Text>
             {education.map((ed) => (
               <Entry key={ed.id} styles={styles}>
                 <Text style={styles.dates}>
-                  {[ed.startDate, ed.endDate].filter(Boolean).join(" - ")}
+                  {eduRange(ed.startDate, ed.endDate, lang)}
                 </Text>
                 <Text style={styles.role}>{ed.school}</Text>
                 {ed.degree ? <Text style={styles.company}>{ed.degree}</Text> : null}
@@ -201,7 +205,7 @@ export default function TimelineTemplate({
 
         {cleanSkills.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Skills</Text>
+            <Text style={styles.sectionTitle}>{L.skills}</Text>
             <Text>{cleanSkills.join("   /   ")}</Text>
           </View>
         )}

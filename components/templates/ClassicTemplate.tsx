@@ -7,6 +7,7 @@ import {
   StyleSheet,
 } from "@react-pdf/renderer";
 import { ResumeData } from "@/lib/resume-schema";
+import { Lang, getLabels, jobRange, eduRange } from "@/lib/labels";
 
 const makeStyles = (accent: string) =>
   StyleSheet.create({
@@ -64,11 +65,14 @@ const makeStyles = (accent: string) =>
 export default function ClassicTemplate({
   data,
   accent = "#222222",
+  lang = "en",
 }: {
   data: ResumeData;
   accent?: string;
+  lang?: Lang;
 }) {
   const styles = makeStyles(accent);
+  const L = getLabels(lang);
   const { personal, summary, experience, education, skills, customSections } = data;
 
   const contact = [
@@ -84,7 +88,7 @@ export default function ClassicTemplate({
   const cleanSkills = skills.map((s) => s.trim()).filter(Boolean);
 
   return (
-    <Document title={`${personal.fullName} - Resume`}>
+    <Document title={`${personal.fullName} - CV`}>
       <Page size="A4" style={styles.page}>
         <View style={styles.header}>
           {personal.photo ? (
@@ -99,20 +103,20 @@ export default function ClassicTemplate({
 
         {summary ? (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Professional Summary</Text>
+            <Text style={styles.sectionTitle}>{L.summary}</Text>
             <Text>{summary}</Text>
           </View>
         ) : null}
 
         {experience.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Professional Experience</Text>
+            <Text style={styles.sectionTitle}>{L.experience}</Text>
             {experience.map((job) => (
               <View key={job.id} style={styles.item} wrap={false}>
                 <View style={styles.row}>
                   <Text style={styles.bold}>{job.company}</Text>
                   <Text style={styles.muted}>
-                    {job.startDate} - {job.endDate || "Present"}
+                    {jobRange(job.startDate, job.endDate, lang)}
                   </Text>
                 </View>
                 <View style={styles.row}>
@@ -134,13 +138,13 @@ export default function ClassicTemplate({
 
         {education.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Education</Text>
+            <Text style={styles.sectionTitle}>{L.education}</Text>
             {education.map((ed) => (
               <View key={ed.id} style={styles.item} wrap={false}>
                 <View style={styles.row}>
                   <Text style={styles.bold}>{ed.school}</Text>
                   <Text style={styles.muted}>
-                    {[ed.startDate, ed.endDate].filter(Boolean).join(" - ")}
+                    {eduRange(ed.startDate, ed.endDate, lang)}
                   </Text>
                 </View>
                 {ed.degree ? <Text style={styles.italic}>{ed.degree}</Text> : null}
@@ -152,7 +156,7 @@ export default function ClassicTemplate({
 
         {cleanSkills.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Skills</Text>
+            <Text style={styles.sectionTitle}>{L.skills}</Text>
             <Text>{cleanSkills.join("  ·  ")}</Text>
           </View>
         )}

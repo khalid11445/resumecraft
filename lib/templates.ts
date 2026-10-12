@@ -1,5 +1,6 @@
 import { ComponentType } from "react";
 import { ResumeData } from "./resume-schema";
+import { Lang } from "./labels";
 import ElegantTemplate from "@/components/templates/ElegantTemplate";
 import ClassicTemplate from "@/components/templates/ClassicTemplate";
 import ModernTemplate from "@/components/templates/ModernTemplate";
@@ -7,7 +8,7 @@ import CompactTemplate from "@/components/templates/CompactTemplate";
 import BoldTemplate from "@/components/templates/BoldTemplate";
 import TimelineTemplate from "@/components/templates/TimelineTemplate";
 
-export type TemplateProps = { data: ResumeData; accent?: string };
+export type TemplateProps = { data: ResumeData; accent?: string; lang?: Lang };
 
 export type TemplateInfo = {
   id: string;

@@ -15,4 +15,5 @@ export const categoryAccent: Record<string, string> = {
   banking: "#1b2a41",
   tech: "#4338ca",
   teacher: "#166534",
+  stage: "#0e7490",
 };

@@ -7,6 +7,7 @@ import {
   StyleSheet,
 } from "@react-pdf/renderer";
 import { ResumeData } from "@/lib/resume-schema";
+import { Lang, getLabels, jobRange, eduRange } from "@/lib/labels";
 
 const makeStyles = (accent: string) =>
   StyleSheet.create({
@@ -80,11 +81,14 @@ const makeStyles = (accent: string) =>
 export default function ModernTemplate({
   data,
   accent = "#1f4e79",
+  lang = "en",
 }: {
   data: ResumeData;
   accent?: string;
+  lang?: Lang;
 }) {
   const styles = makeStyles(accent);
+  const L = getLabels(lang);
   const { personal, summary, experience, education, skills, customSections } = data;
 
   const contacts = [
@@ -98,7 +102,7 @@ export default function ModernTemplate({
   const cleanSkills = skills.map((s) => s.trim()).filter(Boolean);
 
   return (
-    <Document title={`${personal.fullName} - Resume`}>
+    <Document title={`${personal.fullName} - CV`}>
       <Page size="A4" style={styles.page}>
         <View style={styles.sidebar}>
           {personal.photo ? (
@@ -111,7 +115,7 @@ export default function ModernTemplate({
 
           {contacts.length > 0 && (
             <View>
-              <Text style={styles.sideTitle}>Contact</Text>
+              <Text style={styles.sideTitle}>{L.contact}</Text>
               {contacts.map((c, i) => (
                 <Text key={i} style={styles.sideText}>
                   {c}
@@ -122,7 +126,7 @@ export default function ModernTemplate({
 
           {cleanSkills.length > 0 && (
             <View>
-              <Text style={styles.sideTitle}>Skills</Text>
+              <Text style={styles.sideTitle}>{L.skills}</Text>
               {cleanSkills.map((s, i) => (
                 <Text key={i} style={styles.sideText}>
                   {s}
@@ -150,20 +154,20 @@ export default function ModernTemplate({
         <View style={styles.main}>
           {summary ? (
             <View style={styles.section}>
-              <Text style={styles.mainTitle}>Profile</Text>
+              <Text style={styles.mainTitle}>{L.summary}</Text>
               <Text>{summary}</Text>
             </View>
           ) : null}
 
           {experience.length > 0 && (
             <View style={styles.section}>
-              <Text style={styles.mainTitle}>Experience</Text>
+              <Text style={styles.mainTitle}>{L.experience}</Text>
               {experience.map((job) => (
                 <View key={job.id} style={styles.item} wrap={false}>
                   <View style={styles.row}>
                     <Text style={styles.bold}>{job.role}</Text>
                     <Text style={styles.muted}>
-                      {job.startDate} - {job.endDate || "Present"}
+                      {jobRange(job.startDate, job.endDate, lang)}
                     </Text>
                   </View>
                   <Text style={styles.muted}>
@@ -182,13 +186,13 @@ export default function ModernTemplate({
 
           {education.length > 0 && (
             <View style={styles.section}>
-              <Text style={styles.mainTitle}>Education</Text>
+              <Text style={styles.mainTitle}>{L.education}</Text>
               {education.map((ed) => (
                 <View key={ed.id} style={styles.item} wrap={false}>
                   <View style={styles.row}>
                     <Text style={styles.bold}>{ed.school}</Text>
                     <Text style={styles.muted}>
-                      {[ed.startDate, ed.endDate].filter(Boolean).join(" - ")}
+                      {eduRange(ed.startDate, ed.endDate, lang)}
                     </Text>
                   </View>
                   {ed.degree ? <Text>{ed.degree}</Text> : null}

@@ -1,59 +1,35 @@
 import Link from "next/link";
 
-// Edit this array to change plans, prices and currency.
-// Prices are placeholders: payments come later.
-const CURRENCY = "$";
+// Change the price here: it is the only place you need to edit.
+// It must match the amount you set in your checkout (app/api/checkout).
+const PRICE = "$4.99";
 
-type Plan = {
-  name: string;
-  price: number;
-  period: string;
-  description: string;
-  features: string[];
-  cta: string;
-  href: string;
-  highlighted?: boolean;
-};
-
-const plans: Plan[] = [
+const plans = [
   {
-    name: "Free",
-    price: 0,
-    period: "forever",
-    description: "Create your first resume and try it out.",
+    name: "Build",
+    price: "Free",
+    note: "No account needed",
+    description: "Create and perfect your resume before you pay anything.",
     features: [
-      "2 resume templates",
-      "Change the color for your profession",
-      "Export as a PNG image",
+      "Choose your profession and template",
+      "Edit directly on the resume",
+      "Drag lines to reorder them",
+      "Change the color",
     ],
-    cta: "Start for free",
-    href: "/templates",
+    cta: "Start building",
+    highlighted: false,
   },
   {
-    name: "Single template",
-    price: 4,
-    period: "per template",
-    description: "Found a template you love? Buy it on its own.",
+    name: "Download",
+    price: PRICE,
+    note: "One-time payment per resume",
+    description: "Happy with your resume? Pay once and download it.",
     features: [
-      "1 premium template of your choice",
-      "PDF without watermark",
-      "High-quality PNG export",
+      "Everything in Build",
+      "Download your resume as a PDF",
+      "Pay only when you are ready",
     ],
-    cta: "Pick a template",
-    href: "/templates",
-  },
-  {
-    name: "All templates",
-    price: 9,
-    period: "per month",
-    description: "Every template, for applying to several jobs.",
-    features: [
-      "All premium templates",
-      "A4 and US Letter formats",
-      "New templates included",
-    ],
-    cta: "Get all templates",
-    href: "/templates",
+    cta: "Build my resume",
     highlighted: true,
   },
 ];
@@ -61,16 +37,16 @@ const plans: Plan[] = [
 export default function PricingSection() {
   return (
     <section id="pricing" className="bg-slate-50 py-20">
-      <div className="mx-auto max-w-5xl px-6">
+      <div className="mx-auto max-w-4xl px-6">
         <h2 className="text-center text-2xl font-semibold text-slate-900">
-          Simple pricing for every resume template
+          Simple pricing
         </h2>
         <p className="mx-auto mt-3 max-w-xl text-center text-sm text-slate-600">
-          Start for free. Pay only if you want a premium template or access to
-          all of them.
+          Build and edit your resume for free. You only pay when you download
+          it.
         </p>
 
-        <div className="mt-10 grid gap-5 md:grid-cols-3">
+        <div className="mx-auto mt-10 grid max-w-3xl gap-5 md:grid-cols-2">
           {plans.map((plan) => (
             <div
               key={plan.name}
@@ -99,20 +75,17 @@ export default function PricingSection() {
                 {plan.description}
               </p>
 
-              <p className="mt-6 flex items-baseline gap-2">
-                <span className="text-4xl font-semibold tabular-nums">
-                  {CURRENCY}
-                  {plan.price}
-                </span>
-                <span
-                  className={
-                    plan.highlighted
-                      ? "text-sm text-slate-300"
-                      : "text-sm text-slate-600"
-                  }
-                >
-                  {plan.period}
-                </span>
+              <p className="mt-6 text-4xl font-semibold tabular-nums">
+                {plan.price}
+              </p>
+              <p
+                className={
+                  plan.highlighted
+                    ? "mt-1 text-xs text-slate-300"
+                    : "mt-1 text-xs text-slate-500"
+                }
+              >
+                {plan.note}
               </p>
 
               <ul className="mt-6 flex-1 space-y-2 text-sm">
@@ -138,7 +111,7 @@ export default function PricingSection() {
               </ul>
 
               <Link
-                href={plan.href}
+                href="/templates"
                 className={
                   plan.highlighted
                     ? "mt-8 rounded-md bg-amber-300 px-5 py-2.5 text-center text-sm font-semibold text-slate-900 hover:bg-amber-200"

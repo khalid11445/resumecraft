@@ -1,11 +1,5 @@
-import PricingSection from "@/components/site/PricingSection";
+import PricingView from "@/components/site/PricingView";
 
-export const metadata = { title: "Prix" };
-
-export default function PricingPage() {
-  return (
-    <main>
-      <PricingSection />
-    </main>
-  );
+export default function Page() {
+  return <PricingView lang="en" />;
 }

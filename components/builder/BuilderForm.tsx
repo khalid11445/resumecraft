@@ -1,10 +1,11 @@
 "use client";
 
-import { DragEvent, HTMLAttributes, useRef, useState } from "react";
+import { useState } from "react";
 import { UseFormReturn, useFieldArray } from "react-hook-form";
 import { ResumeData } from "@/lib/resume-schema";
-import { getSuggestions, bulletsFor } from "@/lib/suggestions";
-import { summariesFor } from "@/lib/summaries";
+import { getIdeas, bulletIdeas, summaryIdeas } from "@/lib/catalog";
+import { Lang } from "@/lib/labels";
+import { Ui } from "@/lib/i18n";
 
 const input =
   "w-full rounded border border-gray-300 px-3 py-2 text-sm text-black bg-white";
@@ -21,233 +22,9 @@ const ideaBtn =
   "rounded border border-dashed border-gray-300 bg-white px-2 py-1 text-left text-xs text-gray-700 hover:border-blue-500 hover:bg-blue-50";
 const errText = "mt-1 text-xs text-red-600";
 const checkRow = "mt-1 flex items-center gap-2 text-xs text-gray-600";
-const grip =
-  "cursor-grab select-none px-1 text-base leading-none text-gray-400 hover:text-gray-700 active:cursor-grabbing";
-const moveBtn =
-  "rounded px-1 text-xs text-gray-400 hover:text-gray-700 disabled:opacity-30";
 
-const isPresent = (s?: string) => !s || !s.trim() || /^present$/i.test(s.trim());
-
-function moveItem<T>(list: T[], from: number, to: number): T[] {
-  const next = [...list];
-  const [item] = next.splice(from, 1);
-  next.splice(to, 0, item);
-  return next;
-}
-
-// Native drag and drop for a list: a handle to grab and a row to drop on
-function useReorder(onMove: (from: number, to: number) => void) {
-  const dragFrom = useRef<number | null>(null);
-  const [overIndex, setOverIndex] = useState<number | null>(null);
-
-  const handle = (i: number): HTMLAttributes<HTMLSpanElement> => ({
-    draggable: true,
-    onDragStart: (e: DragEvent<HTMLSpanElement>) => {
-      dragFrom.current = i;
-      e.dataTransfer.effectAllowed = "move";
-      e.dataTransfer.setData("text/plain", String(i));
-      const row = e.currentTarget.closest("[data-reorder-item]");
-      if (row) e.dataTransfer.setDragImage(row, 16, 16);
-    },
-    onDragEnd: () => {
-      dragFrom.current = null;
-      setOverIndex(null);
-    },
-  });
-
-  const item = (i: number) => ({
-    "data-reorder-item": "",
-    onDragOver: (e: DragEvent<HTMLElement>) => {
-      if (dragFrom.current === null) return;
-      e.preventDefault();
-      setOverIndex(i);
-    },
-    onDrop: (e: DragEvent<HTMLElement>) => {
-      e.preventDefault();
-      const from = dragFrom.current;
-      dragFrom.current = null;
-      setOverIndex(null);
-      if (from !== null && from !== i) onMove(from, i);
-    },
-  });
-
-  const ring = (i: number) => (overIndex === i ? "ring-2 ring-blue-400" : "");
-
-  return { handle, item, ring };
-}
-
-// Grip + up/down buttons (the buttons also work on touch screens)
-function ReorderBar({
-  title,
-  index,
-  count,
-  handleProps,
-  onMove,
-}: {
-  title: string;
-  index: number;
-  count: number;
-  handleProps: HTMLAttributes<HTMLSpanElement>;
-  onMove: (from: number, to: number) => void;
-}) {
-  return (
-    <div className="mb-2 flex items-center justify-between">
-      <div className="flex items-center gap-1">
-        <span
-          {...handleProps}
-          className={grip}
-          title="Drag to reorder"
-          aria-label="Drag to reorder"
-        >
-          ⋮⋮
-        </span>
-        <span className="text-xs font-semibold text-gray-500">{title}</span>
-      </div>
-      <div className="flex items-center">
-        <button
-          type="button"
-          className={moveBtn}
-          disabled={index === 0}
-          onClick={() => onMove(index, index - 1)}
-          aria-label="Move up"
-        >
-          ▲
-        </button>
-        <button
-          type="button"
-          className={moveBtn}
-          disabled={index === count - 1}
-          onClick={() => onMove(index, index + 1)}
-          aria-label="Move down"
-        >
-          ▼
-        </button>
-      </div>
-    </div>
-  );
-}
-
-// One editable line per item, each draggable
-function LineList({
-  values,
-  onChange,
-  addLabel,
-}: {
-  values: string[];
-  onChange: (next: string[]) => void;
-  addLabel: string;
-}) {
-  const r = useReorder((from, to) => onChange(moveItem(values, from, to)));
-
-  return (
-    <div>
-      {values.map((value, i) => (
-        <div
-          key={i}
-          {...r.item(i)}
-          className={`mb-1 flex items-center gap-1 rounded ${r.ring(i)}`}
-        >
-          <span
-            {...r.handle(i)}
-            className={grip}
-            title="Drag to reorder"
-            aria-label="Drag to reorder"
-          >
-            ⋮⋮
-          </span>
-          <input
-            className={input}
-            value={value}
-            onChange={(e) => {
-              const next = [...values];
-              next[i] = e.target.value;
-              onChange(next);
-            }}
-          />
-          <button
-            type="button"
-            className={moveBtn}
-            disabled={i === 0}
-            onClick={() => onChange(moveItem(values, i, i - 1))}
-            aria-label="Move line up"
-          >
-            ▲
-          </button>
-          <button
-            type="button"
-            className={moveBtn}
-            disabled={i === values.length - 1}
-            onClick={() => onChange(moveItem(values, i, i + 1))}
-            aria-label="Move line down"
-          >
-            ▼
-          </button>
-          <button
-            type="button"
-            className={removeBtn}
-            onClick={() => onChange(values.filter((_, j) => j !== i))}
-            aria-label="Remove line"
-          >
-            ✕
-          </button>
-        </div>
-      ))}
-      <button
-        type="button"
-        className="mt-1 text-xs font-medium text-blue-600 hover:text-blue-800"
-        onClick={() => onChange([...values, ""])}
-      >
-        + {addLabel}
-      </button>
-    </div>
-  );
-}
-
-// Skills as chips you can drag to change the order
-function SkillChips({
-  skills,
-  onChange,
-}: {
-  skills: string[];
-  onChange: (next: string[]) => void;
-}) {
-  const clean = skills.filter((s) => s.trim());
-  const r = useReorder((from, to) => onChange(moveItem(clean, from, to)));
-  if (clean.length < 2) return null;
-
-  return (
-    <>
-      <p className="mt-3 text-xs text-gray-500">Drag a skill to change the order</p>
-      <div className="mt-1 flex flex-wrap gap-2">
-        {clean.map((s, i) => (
-          <span
-            key={`${s}-${i}`}
-            {...r.item(i)}
-            className={`inline-flex items-center gap-1 rounded-full border border-gray-300 bg-white py-1 pl-1 pr-2 text-xs text-gray-700 ${r.ring(i)}`}
-          >
-            <span
-              {...r.handle(i)}
-              className={grip}
-              title="Drag to reorder"
-              aria-label="Drag to reorder"
-            >
-              ⋮⋮
-            </span>
-            {s}
-            <button
-              type="button"
-              className="text-gray-400 hover:text-red-600"
-              onClick={() => onChange(clean.filter((_, j) => j !== i))}
-              aria-label={`Remove ${s}`}
-            >
-              ✕
-            </button>
-          </span>
-        ))}
-      </div>
-    </>
-  );
-}
+const isPresent = (s?: string) =>
+  !s || !s.trim() || /^(present|présent)$/i.test(s.trim());
 
 // Crops the picture to a centered square and shrinks it (keeps the data small)
 function resizeToSquare(file: File, size: number): Promise<string> {
@@ -282,9 +59,13 @@ function resizeToSquare(file: File, size: number): Promise<string> {
 export default function BuilderForm({
   form,
   categoryId,
+  t,
+  contentLang,
 }: {
   form: UseFormReturn<ResumeData>;
   categoryId: string;
+  t: Ui;
+  contentLang: Lang;
 }) {
   const {
     register,
@@ -298,17 +79,13 @@ export default function BuilderForm({
   const education = useFieldArray({ control, name: "education" });
   const sections = useFieldArray({ control, name: "customSections" });
 
-  const expDrag = useReorder((from, to) => experience.move(from, to));
-  const eduDrag = useReorder((from, to) => education.move(from, to));
-  const secDrag = useReorder((from, to) => sections.move(from, to));
-
   const newId = () => Math.random().toString(36).slice(2, 9);
 
-  const sug = getSuggestions(categoryId);
+  const sug = getIdeas(categoryId, contentLang);
   const jobTitle = watch("personal.jobTitle") ?? "";
   const photo = watch("personal.photo");
   const skills = watch("skills") ?? [];
-  const summaryIdeas = summariesFor(categoryId, jobTitle);
+  const summaryOptions = summaryIdeas(categoryId, jobTitle, contentLang);
 
   const [wantPhoto, setWantPhoto] = useState(Boolean(photo));
   const [photoError, setPhotoError] = useState("");
@@ -321,40 +98,40 @@ export default function BuilderForm({
   return (
     <div className="p-4">
       {/* Personal */}
-      <h2 className={h2}>Personal info</h2>
+      <h2 className={h2}>{t.personalInfo}</h2>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className={label}>Full name</label>
+          <label className={label}>{t.fullName}</label>
           <input className={input} {...register("personal.fullName")} />
-          {errors.personal?.fullName?.message ? (
-            <p className={errText}>{errors.personal.fullName.message}</p>
+          {errors.personal?.fullName ? (
+            <p className={errText}>{t.nameRequired}</p>
           ) : null}
         </div>
         <div>
-          <label className={label}>Job title</label>
+          <label className={label}>{t.jobTitle}</label>
           <input className={input} {...register("personal.jobTitle")} />
         </div>
         <div>
-          <label className={label}>Email</label>
+          <label className={label}>{t.email}</label>
           <input className={input} {...register("personal.email")} />
-          {errors.personal?.email?.message ? (
-            <p className={errText}>{errors.personal.email.message}</p>
+          {errors.personal?.email ? (
+            <p className={errText}>{t.emailInvalid}</p>
           ) : null}
         </div>
         <div>
-          <label className={label}>Phone</label>
+          <label className={label}>{t.phone}</label>
           <input className={input} {...register("personal.phone")} />
         </div>
         <div>
-          <label className={label}>Location</label>
+          <label className={label}>{t.location}</label>
           <input className={input} {...register("personal.location")} />
         </div>
         <div>
-          <label className={label}>LinkedIn</label>
+          <label className={label}>{t.linkedin}</label>
           <input className={input} {...register("personal.linkedin")} />
         </div>
         <div className="col-span-2">
-          <label className={label}>Website</label>
+          <label className={label}>{t.website}</label>
           <input className={input} {...register("personal.website")} />
         </div>
       </div>
@@ -373,19 +150,16 @@ export default function BuilderForm({
               }
             }}
           />
-          Add a photo
+          {t.addPhoto}
         </label>
-        <p className="mt-1 text-xs text-gray-500">
-          Common in many countries, but usually not recommended on resumes for
-          the US, Canada, and the UK. Your photo stays in your browser.
-        </p>
+        <p className="mt-1 text-xs text-gray-500">{t.photoHelp}</p>
         {wantPhoto && (
           <div className="mt-3 flex items-center gap-3">
             {photo ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={photo}
-                alt="Your photo"
+                alt={t.yourPhoto}
                 className="h-14 w-14 rounded-full object-cover"
               />
             ) : null}
@@ -400,10 +174,8 @@ export default function BuilderForm({
                   const url = await resizeToSquare(file, 320);
                   setValue("personal.photo", url, { shouldDirty: true });
                   setPhotoError("");
-                } catch (err) {
-                  setPhotoError(
-                    err instanceof Error ? err.message : "Could not load the photo"
-                  );
+                } catch {
+                  setPhotoError(t.photoError);
                 }
                 e.target.value = "";
               }}
@@ -413,28 +185,28 @@ export default function BuilderForm({
         {photoError ? <p className={errText}>{photoError}</p> : null}
       </div>
 
-      <p className="mt-4 text-xs text-gray-500">Suggested titles (click to use)</p>
+      <p className="mt-4 text-xs text-gray-500">{t.suggestedTitles}</p>
       <div className="mt-1 flex flex-wrap gap-2">
-        {sug.titles.map((t) => (
+        {sug.titles.map((title) => (
           <button
-            key={t}
+            key={title}
             type="button"
             className={chip}
-            onClick={() => setValue("personal.jobTitle", t, { shouldDirty: true })}
+            onClick={() =>
+              setValue("personal.jobTitle", title, { shouldDirty: true })
+            }
           >
-            {t}
+            {title}
           </button>
         ))}
       </div>
 
       {/* Summary */}
-      <h2 className={h2}>Summary</h2>
+      <h2 className={h2}>{t.summary}</h2>
       <textarea rows={4} className={input} {...register("summary")} />
-      <p className="mt-3 text-xs text-gray-500">
-        Suggested summaries: click to use, then replace the [brackets]
-      </p>
+      <p className="mt-3 text-xs text-gray-500">{t.suggestedSummaries}</p>
       <div className="mt-1 flex flex-col gap-1">
-        {summaryIdeas.map((s) => (
+        {summaryOptions.map((s) => (
           <button
             key={s}
             type="button"
@@ -447,48 +219,37 @@ export default function BuilderForm({
       </div>
 
       {/* Experience */}
-      <h2 className={h2}>Experience</h2>
+      <h2 className={h2}>{t.experience}</h2>
       {experience.fields.map((field, i) => {
         const bullets = watch(`experience.${i}.bullets`) ?? [];
         const role = watch(`experience.${i}.role`) ?? "";
         const endValue = watch(`experience.${i}.endDate`) ?? "";
         const isCurrent = currentJobs[field.id] ?? isPresent(endValue);
-        const ideas = bulletsFor(categoryId, role || jobTitle)
+        const ideas = bulletIdeas(categoryId, role || jobTitle, contentLang)
           .filter((b) => !bullets.includes(b))
           .slice(0, 5);
 
         return (
-          <div
-            key={field.id}
-            {...expDrag.item(i)}
-            className={`${card} ${expDrag.ring(i)}`}
-          >
-            <ReorderBar
-              title={`Job ${i + 1}`}
-              index={i}
-              count={experience.fields.length}
-              handleProps={expDrag.handle(i)}
-              onMove={experience.move}
-            />
+          <div key={field.id} className={card}>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className={label}>Role</label>
+                <label className={label}>{t.role}</label>
                 <input className={input} {...register(`experience.${i}.role`)} />
               </div>
               <div>
-                <label className={label}>Company</label>
+                <label className={label}>{t.company}</label>
                 <input className={input} {...register(`experience.${i}.company`)} />
               </div>
               <div>
-                <label className={label}>Start</label>
+                <label className={label}>{t.start}</label>
                 <input className={input} {...register(`experience.${i}.startDate`)} />
               </div>
               <div>
-                <label className={label}>End</label>
+                <label className={label}>{t.end}</label>
                 <input
                   className={isCurrent ? inputLocked : input}
                   readOnly={isCurrent}
-                  placeholder="Present"
+                  placeholder={t.present}
                   {...register(`experience.${i}.endDate`)}
                 />
                 <label className={checkRow}>
@@ -504,30 +265,30 @@ export default function BuilderForm({
                       );
                     }}
                   />
-                  I currently work here
+                  {t.currentJob}
                 </label>
               </div>
               <div className="col-span-2">
-                <label className={label}>Location</label>
+                <label className={label}>{t.location}</label>
                 <input className={input} {...register(`experience.${i}.location`)} />
               </div>
               <div className="col-span-2">
-                <label className={label}>Bullet points (drag ⋮⋮ to reorder)</label>
-                <LineList
-                  values={bullets}
-                  addLabel="Add bullet point"
-                  onChange={(next) =>
-                    setValue(`experience.${i}.bullets`, next, { shouldDirty: true })
+                <label className={label}>{t.bullets}</label>
+                <textarea
+                  rows={3}
+                  className={input}
+                  value={bullets.join("\n")}
+                  onChange={(e) =>
+                    setValue(`experience.${i}.bullets`, e.target.value.split("\n"), {
+                      shouldDirty: true,
+                    })
                   }
                 />
               </div>
 
               {ideas.length > 0 && (
                 <div className="col-span-2">
-                  <p className="text-xs text-gray-500">
-                    Suggested bullet points: click to add, then replace the
-                    [brackets] with your real details
-                  </p>
+                  <p className="text-xs text-gray-500">{t.suggestedBullets}</p>
                   <div className="mt-1 flex flex-col gap-1">
                     {ideas.map((b) => (
                       <button
@@ -551,10 +312,10 @@ export default function BuilderForm({
             </div>
             <button
               type="button"
-              className={`${removeBtn} mt-3`}
+              className={removeBtn}
               onClick={() => experience.remove(i)}
             >
-              Remove job
+              {t.removeJob}
             </button>
           </div>
         );
@@ -574,48 +335,37 @@ export default function BuilderForm({
           })
         }
       >
-        + Add job
+        {t.addJob}
       </button>
 
       {/* Education */}
-      <h2 className={h2}>Education</h2>
+      <h2 className={h2}>{t.education}</h2>
       {education.fields.map((field, i) => {
         const endValue = watch(`education.${i}.endDate`) ?? "";
         const isStudying =
-          currentEdu[field.id] ?? /^present$/i.test(endValue.trim());
+          currentEdu[field.id] ?? /^(present|présent)$/i.test(endValue.trim());
 
         return (
-          <div
-            key={field.id}
-            {...eduDrag.item(i)}
-            className={`${card} ${eduDrag.ring(i)}`}
-          >
-            <ReorderBar
-              title={`Education ${i + 1}`}
-              index={i}
-              count={education.fields.length}
-              handleProps={eduDrag.handle(i)}
-              onMove={education.move}
-            />
+          <div key={field.id} className={card}>
             <div className="grid grid-cols-2 gap-3">
               <div className="col-span-2">
-                <label className={label}>School</label>
+                <label className={label}>{t.school}</label>
                 <input className={input} {...register(`education.${i}.school`)} />
               </div>
               <div className="col-span-2">
-                <label className={label}>Degree</label>
+                <label className={label}>{t.degree}</label>
                 <input className={input} {...register(`education.${i}.degree`)} />
               </div>
               <div>
-                <label className={label}>Start</label>
+                <label className={label}>{t.start}</label>
                 <input className={input} {...register(`education.${i}.startDate`)} />
               </div>
               <div>
-                <label className={label}>End</label>
+                <label className={label}>{t.end}</label>
                 <input
                   className={isStudying ? inputLocked : input}
                   readOnly={isStudying}
-                  placeholder="Present"
+                  placeholder={t.present}
                   {...register(`education.${i}.endDate`)}
                 />
                 <label className={checkRow}>
@@ -631,16 +381,16 @@ export default function BuilderForm({
                       );
                     }}
                   />
-                  I&apos;m still studying here
+                  {t.stillStudying}
                 </label>
               </div>
             </div>
             <button
               type="button"
-              className={`${removeBtn} mt-3`}
+              className={removeBtn}
               onClick={() => education.remove(i)}
             >
-              Remove
+              {t.remove}
             </button>
           </div>
         );
@@ -659,12 +409,12 @@ export default function BuilderForm({
           })
         }
       >
-        + Add education
+        {t.addEducation}
       </button>
 
       {/* Skills */}
-      <h2 className={h2}>Skills</h2>
-      <label className={label}>Separate with commas</label>
+      <h2 className={h2}>{t.skills}</h2>
+      <label className={label}>{t.skillsHint}</label>
       <input
         className={input}
         value={skills.join(", ")}
@@ -676,15 +426,9 @@ export default function BuilderForm({
           )
         }
       />
-      <SkillChips
-        skills={skills}
-        onChange={(next) => setValue("skills", next, { shouldDirty: true })}
-      />
       {missingSkills.length > 0 && (
         <>
-          <p className="mt-3 text-xs text-gray-500">
-            Suggested skills (click to add)
-          </p>
+          <p className="mt-3 text-xs text-gray-500">{t.suggestedSkills}</p>
           <div className="mt-1 flex flex-wrap gap-2">
             {missingSkills.map((s) => (
               <button
@@ -705,41 +449,33 @@ export default function BuilderForm({
       )}
 
       {/* Custom sections */}
-      <h2 className={h2}>Extra sections</h2>
+      <h2 className={h2}>{t.extraSections}</h2>
       {sections.fields.map((field, i) => {
         const items = watch(`customSections.${i}.items`) ?? [];
         return (
-          <div
-            key={field.id}
-            {...secDrag.item(i)}
-            className={`${card} ${secDrag.ring(i)}`}
-          >
-            <ReorderBar
-              title={`Section ${i + 1}`}
-              index={i}
-              count={sections.fields.length}
-              handleProps={secDrag.handle(i)}
-              onMove={sections.move}
-            />
-            <label className={label}>Section title</label>
+          <div key={field.id} className={card}>
+            <label className={label}>{t.sectionTitle}</label>
             <input
               className={`${input} mb-3`}
               {...register(`customSections.${i}.title`)}
             />
-            <label className={label}>Items (drag ⋮⋮ to reorder)</label>
-            <LineList
-              values={items}
-              addLabel="Add item"
-              onChange={(next) =>
-                setValue(`customSections.${i}.items`, next, { shouldDirty: true })
+            <label className={label}>{t.itemsPerLine}</label>
+            <textarea
+              rows={3}
+              className={input}
+              value={items.join("\n")}
+              onChange={(e) =>
+                setValue(`customSections.${i}.items`, e.target.value.split("\n"), {
+                  shouldDirty: true,
+                })
               }
             />
             <button
               type="button"
-              className={`${removeBtn} mt-3`}
+              className={removeBtn}
               onClick={() => sections.remove(i)}
             >
-              Remove section
+              {t.removeSection}
             </button>
           </div>
         );
@@ -748,10 +484,10 @@ export default function BuilderForm({
         type="button"
         className={addBtn}
         onClick={() =>
-          sections.append({ id: newId(), title: "Certifications", items: [] })
+          sections.append({ id: newId(), title: t.newSectionTitle, items: [] })
         }
       >
-        + Add section
+        {t.addSection}
       </button>
     </div>
   );

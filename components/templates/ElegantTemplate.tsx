@@ -8,6 +8,7 @@ import {
   StyleSheet,
 } from "@react-pdf/renderer";
 import { ResumeData } from "@/lib/resume-schema";
+import { Lang, getLabels, jobRange, eduRange } from "@/lib/labels";
 
 const GOLD = "#b08d57";
 const GRAY = "#5f6b7a";
@@ -115,11 +116,14 @@ function Section({
 export default function ElegantTemplate({
   data,
   accent = "#1b2a41",
+  lang = "en",
 }: {
   data: ResumeData;
   accent?: string;
+  lang?: Lang;
 }) {
   const styles = makeStyles(accent);
+  const L = getLabels(lang);
   const { personal, summary, experience, education, skills, customSections } = data;
 
   const contacts = [
@@ -133,7 +137,7 @@ export default function ElegantTemplate({
   const cleanSkills = skills.map((s) => s.trim()).filter(Boolean);
 
   return (
-    <Document title={`${personal.fullName} - Resume`}>
+    <Document title={`${personal.fullName} - CV`}>
       <Page size="A4" style={styles.page}>
         <View style={styles.header}>
           <View style={styles.headerTop}>
@@ -158,19 +162,19 @@ export default function ElegantTemplate({
         </View>
 
         {summary ? (
-          <Section title="Profile" styles={styles}>
+          <Section title={L.summary} styles={styles}>
             <Text>{summary}</Text>
           </Section>
         ) : null}
 
         {experience.length > 0 && (
-          <Section title="Experience" styles={styles}>
+          <Section title={L.experience} styles={styles}>
             {experience.map((job) => (
               <View key={job.id} style={styles.item} wrap={false}>
                 <View style={styles.row}>
                   <Text style={styles.role}>{job.role}</Text>
                   <Text style={styles.date}>
-                    {job.startDate} - {job.endDate || "Present"}
+                    {jobRange(job.startDate, job.endDate, lang)}
                   </Text>
                 </View>
                 <Text style={styles.company}>
@@ -188,13 +192,13 @@ export default function ElegantTemplate({
         )}
 
         {education.length > 0 && (
-          <Section title="Education" styles={styles}>
+          <Section title={L.education} styles={styles}>
             {education.map((ed) => (
               <View key={ed.id} style={styles.item} wrap={false}>
                 <View style={styles.row}>
                   <Text style={styles.role}>{ed.school}</Text>
                   <Text style={styles.date}>
-                    {[ed.startDate, ed.endDate].filter(Boolean).join(" - ")}
+                    {eduRange(ed.startDate, ed.endDate, lang)}
                   </Text>
                 </View>
                 {ed.degree ? <Text style={styles.company}>{ed.degree}</Text> : null}
@@ -205,7 +209,7 @@ export default function ElegantTemplate({
         )}
 
         {cleanSkills.length > 0 && (
-          <Section title="Skills" styles={styles}>
+          <Section title={L.skills} styles={styles}>
             <View style={styles.chips}>
               {cleanSkills.map((s, i) => (
                 <View key={i} style={styles.chip}>

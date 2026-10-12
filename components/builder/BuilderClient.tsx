@@ -5,24 +5,32 @@ import { useParams, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { resumeSchema, ResumeData } from "@/lib/resume-schema";
-import { getCategory } from "@/lib/categories";
+import { getCategory } from "@/lib/catalog";
 import BuilderForm from "@/components/builder/BuilderForm";
 import AiWriter from "@/components/builder/AiWriter";
+import QuickEdit from "@/components/builder/QuickEdit";
 import PdfPreview from "@/components/builder/PdfPreview";
+import { findEditFields, EditField } from "@/lib/quickedit";
 import { templates, getTemplate } from "@/lib/templates";
 import { palettes, categoryAccent } from "@/lib/themes";
-import LiveResume, { isLiveTemplate } from "@/components/builder/LiveResume";
+import { Lang } from "@/lib/labels";
+import { getUi } from "@/lib/i18n";
 
-export default function BuilderPage() {
+export default function BuilderClient({ uiLang = "en" }: { uiLang?: Lang }) {
+  const t = getUi(uiLang);
   const params = useParams<{ category: string }>();
-  const category = getCategory(String(params.category));
+  const categoryId = String(params.category);
+  const category = getCategory(categoryId, uiLang);
 
   const search = useSearchParams();
   const qTemplate = search.get("template");
   const qColor = search.get("color");
+  const qLang = search.get("lang");
+  const initialLang: Lang = qLang === "fr" || qLang === "en" ? qLang : uiLang;
 
+  const [lang, setLang] = useState<Lang>(initialLang);
   const [templateId, setTemplateId] = useState(
-    templates.some((t) => t.id === qTemplate) ? (qTemplate as string) : "elegant"
+    templates.some((x) => x.id === qTemplate) ? (qTemplate as string) : "elegant"
   );
   const Template = getTemplate(templateId).component;
   const [accent, setAccent] = useState(
@@ -31,40 +39,40 @@ export default function BuilderPage() {
       : categoryAccent[category.id] ?? palettes[0].accent
   );
 
+  const starter = getCategory(categoryId, initialLang).starter;
+
   const [resumeId] = useState(() => crypto.randomUUID());
   const [paying, setPaying] = useState(false);
   const [error, setError] = useState("");
-
-  // Phone layout: one panel at a time, switched with tabs
-  const [tab, setTab] = useState<"edit" | "preview">("edit");
-  const [isDesktop, setIsDesktop] = useState(true);
-  useEffect(() => {
-    const mq = window.matchMedia("(min-width: 768px)");
-    const update = () => setIsDesktop(mq.matches);
-    update();
-    mq.addEventListener("change", update);
-    return () => mq.removeEventListener("change", update);
-  }, []);
-  const showPreview = isDesktop || tab === "preview";
+  const [quick, setQuick] = useState<{
+    fields: EditField[];
+    x: number;
+    y: number;
+  } | null>(null);
 
   const form = useForm<ResumeData>({
     resolver: zodResolver(resumeSchema),
-    defaultValues: category.starter,
+    defaultValues: starter,
     mode: "onChange",
   });
 
   const liveData = form.watch() as ResumeData;
 
-  const [previewData, setPreviewData] = useState<ResumeData>(category.starter);
+  const [previewData, setPreviewData] = useState<ResumeData>(starter);
   useEffect(() => {
-    const t = setTimeout(() => setPreviewData(structuredClone(liveData)), 500);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setPreviewData(structuredClone(liveData)), 500);
+    return () => clearTimeout(timer);
   }, [JSON.stringify(liveData)]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const freeMode = process.env.NEXT_PUBLIC_FREE_DOWNLOAD === "true";
 
   // True while any suggested line still contains [brackets]
   const hasPlaceholders = /\[[^\]]*\]/.test(JSON.stringify(liveData));
+
+  function handlePick(text: string, x: number, y: number) {
+    const fields = findEditFields(form, text);
+    setQuick(fields.length ? { fields, x, y } : null);
+  }
 
   function saveBlob(blob: Blob, filename: string) {
     const url = URL.createObjectURL(blob);
@@ -82,9 +90,9 @@ export default function BuilderPage() {
     if (freeMode) {
       const { pdf } = await import("@react-pdf/renderer");
       const blob = await pdf(
-        <Template data={previewData} accent={accent} />
+        <Template data={previewData} accent={accent} lang={lang} />
       ).toBlob();
-      saveBlob(blob, `${previewData.personal.fullName || "resume"}.pdf`);
+      saveBlob(blob, `${previewData.personal.fullName || "cv"}.pdf`);
       return;
     }
 
@@ -103,7 +111,7 @@ export default function BuilderPage() {
       if (!res.ok || !data.url) throw new Error(data.error || "Checkout failed");
       window.location.href = data.url;
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Something went wrong");
+      setError(e instanceof Error ? e.message : t.somethingWrong);
       setPaying(false);
     }
   }
@@ -114,7 +122,7 @@ export default function BuilderPage() {
     try {
       const { pdf } = await import("@react-pdf/renderer");
       const pdfBlob = await pdf(
-        <Template data={previewData} accent={accent} />
+        <Template data={previewData} accent={accent} lang={lang} />
       ).toBlob();
       const buffer = await pdfBlob.arrayBuffer();
 
@@ -135,83 +143,64 @@ export default function BuilderPage() {
       await page.render({ canvasContext: ctx, viewport }).promise;
 
       canvas.toBlob((blob) => {
-        if (blob) saveBlob(blob, `${previewData.personal.fullName || "resume"}.png`);
+        if (blob) saveBlob(blob, `${previewData.personal.fullName || "cv"}.png`);
       }, "image/png");
       doc.destroy();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Could not create the image");
+      setError(e instanceof Error ? e.message : t.imageError);
     }
   }
 
-  const tabClass = (active: boolean) =>
-    `flex-1 border-b-2 py-2.5 text-sm font-semibold ${
-      active
-        ? "border-blue-600 text-blue-600"
-        : "border-transparent text-gray-500"
-    }`;
-
   return (
-    <div className="flex h-[calc(100dvh-3.5rem)] w-full flex-col md:flex-row">
-      {/* Tabs (phones only) */}
-      <div className="flex shrink-0 items-center border-b border-gray-200 bg-white md:hidden">
-        <button
-          type="button"
-          onClick={() => setTab("edit")}
-          className={tabClass(tab === "edit")}
-        >
-          Edit
-        </button>
-        <button
-          type="button"
-          onClick={() => setTab("preview")}
-          className={tabClass(tab === "preview")}
-        >
-          Preview
-        </button>
-        <button
-          type="button"
-          onClick={handleDownload}
-          disabled={paying}
-          className="mx-2 shrink-0 rounded bg-green-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-green-700 disabled:opacity-50"
-        >
-          {paying ? "Opening..." : "Download PDF"}
-        </button>
-      </div>
-
-      {/* Form panel */}
-      <div
-        className={`${
-          tab === "edit" ? "block" : "hidden"
-        } min-h-0 w-full flex-1 overflow-y-auto border-gray-300 bg-white md:block md:w-1/2 md:flex-none md:border-r`}
-      >
+    <div className="flex h-[calc(100vh-3.5rem)] w-full">
+      <div className="w-1/2 overflow-y-auto border-r border-gray-300 bg-white">
         <div className="border-b border-gray-200 p-4">
-          <p className="text-xs text-gray-500">Category</p>
+          <p className="text-xs text-gray-500">{t.category}</p>
           <p className="font-semibold text-black">{category.name}</p>
           <p className="mt-1 text-xs text-gray-500">
-            Suggested sections: {category.recommendedSections.join(", ")}
+            {t.suggestedSections}: {category.recommendedSections.join(", ")}
           </p>
 
-          {/* Templates */}
-          <div className="mt-3 flex flex-wrap items-center gap-2">
-            {templates.map((t) => (
+          {/* Resume language */}
+          <div className="mt-3 flex items-center gap-2">
+            <span className="text-xs text-gray-500">{t.resumeLanguage}</span>
+            {(["en", "fr"] as Lang[]).map((l) => (
               <button
-                key={t.id}
+                key={l}
                 type="button"
-                onClick={() => setTemplateId(t.id)}
+                onClick={() => setLang(l)}
                 className={`rounded border px-3 py-1 text-sm ${
-                  templateId === t.id
+                  lang === l
                     ? "border-blue-600 bg-blue-600 text-white"
                     : "border-gray-300 bg-white text-black"
                 }`}
               >
-                {t.name}
+                {l === "en" ? "English" : "Français"}
+              </button>
+            ))}
+          </div>
+
+          {/* Templates */}
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            {templates.map((tpl) => (
+              <button
+                key={tpl.id}
+                type="button"
+                onClick={() => setTemplateId(tpl.id)}
+                className={`rounded border px-3 py-1 text-sm ${
+                  templateId === tpl.id
+                    ? "border-blue-600 bg-blue-600 text-white"
+                    : "border-gray-300 bg-white text-black"
+                }`}
+              >
+                {tpl.name}
               </button>
             ))}
           </div>
 
           {/* Colors */}
-          <div className="mt-3 flex flex-wrap items-center gap-2">
-            <span className="text-xs text-gray-500">Color</span>
+          <div className="mt-3 flex items-center gap-2">
+            <span className="text-xs text-gray-500">{t.color}</span>
             {palettes.map((p) => (
               <button
                 key={p.id}
@@ -237,7 +226,7 @@ export default function BuilderPage() {
               disabled={paying}
               className="rounded bg-green-600 px-4 py-1.5 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-50"
             >
-              {paying ? "Opening checkout..." : "Download PDF"}
+              {paying ? t.openingCheckout : t.downloadPdf}
             </button>
             {freeMode && (
               <button
@@ -245,48 +234,53 @@ export default function BuilderPage() {
                 onClick={handleImage}
                 className="rounded border border-gray-300 bg-white px-4 py-1.5 text-sm font-semibold text-black hover:bg-gray-50"
               >
-                Download image
+                {t.downloadImage}
               </button>
             )}
           </div>
 
           {error ? <p className="mt-2 text-xs text-red-600">{error}</p> : null}
-
           {hasPlaceholders ? (
-            <p className="mt-2 text-xs text-amber-700">
-              Some suggested lines still contain [brackets]. Replace them with
-              your real details before downloading.
-            </p>
+            <p className="mt-2 text-xs text-amber-700">{t.placeholderWarning}</p>
           ) : null}
         </div>
 
-        <AiWriter form={form} categoryName={category.name} />
-        <BuilderForm form={form} categoryId={category.id} />
+        <AiWriter
+          form={form}
+          categoryName={category.name}
+          resumeLanguage={lang === "fr" ? "French" : "English"}
+          t={t}
+        />
+        <BuilderForm
+          form={form}
+          categoryId={category.id}
+          t={t}
+          contentLang={lang}
+        />
       </div>
 
-      {/* Preview panel (mounted only when visible, so it measures the right width) */}
-      {showPreview && (
-        <div
-          className={`${
-            tab === "preview" ? "block" : "hidden"
-          } min-h-0 w-full flex-1 md:block md:w-1/2 md:flex-none`}
-        >
-          {isLiveTemplate(templateId) ? (
-            <LiveResume
-              form={form}
-              data={liveData}
-              accent={accent}
-              templateId={templateId}
-            />
-          ) : (
-            <PdfPreview
-              Template={Template}
-              data={previewData}
-              accent={accent}
-            />
-          )}
-        </div>
-      )}
+      <div className="w-1/2">
+        <PdfPreview
+          Template={Template}
+          data={previewData}
+          accent={accent}
+          lang={lang}
+          hint={t.previewHint}
+          loadingText={t.loadingPreview}
+          onPickText={handlePick}
+        />
+      </div>
+
+      {quick ? (
+        <QuickEdit
+          key={`${quick.fields.map((f) => f.id).join("|")}-${quick.x}-${quick.y}`}
+          fields={quick.fields}
+          x={quick.x}
+          y={quick.y}
+          t={t}
+          onClose={() => setQuick(null)}
+        />
+      ) : null}
     </div>
   );
 }

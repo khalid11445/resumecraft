@@ -7,6 +7,7 @@ import {
   StyleSheet,
 } from "@react-pdf/renderer";
 import { ResumeData } from "@/lib/resume-schema";
+import { Lang, getLabels, jobRange, eduRange } from "@/lib/labels";
 
 const makeStyles = (accent: string) =>
   StyleSheet.create({
@@ -113,11 +114,14 @@ function Title({ text, styles }: { text: string; styles: Styles }) {
 export default function BoldTemplate({
   data,
   accent = "#1b2a41",
+  lang = "en",
 }: {
   data: ResumeData;
   accent?: string;
+  lang?: Lang;
 }) {
   const styles = makeStyles(accent);
+  const L = getLabels(lang);
   const { personal, summary, experience, education, skills, customSections } = data;
 
   const contacts = [
@@ -131,7 +135,7 @@ export default function BoldTemplate({
   const cleanSkills = skills.map((s) => s.trim()).filter(Boolean);
 
   return (
-    <Document title={`${personal.fullName} - Resume`}>
+    <Document title={`${personal.fullName} - CV`}>
       <Page size="A4" style={styles.page}>
         <View style={styles.band}>
           <View style={styles.bandText}>
@@ -155,20 +159,20 @@ export default function BoldTemplate({
 
         {summary ? (
           <View style={styles.section}>
-            <Title text="About me" styles={styles} />
+            <Title text={L.summary} styles={styles} />
             <Text>{summary}</Text>
           </View>
         ) : null}
 
         {experience.length > 0 && (
           <View style={styles.section}>
-            <Title text="Experience" styles={styles} />
+            <Title text={L.experience} styles={styles} />
             {experience.map((job) => (
               <View key={job.id} style={styles.item} wrap={false}>
                 <View style={styles.row}>
                   <Text style={styles.role}>{job.role}</Text>
                   <Text style={styles.date}>
-                    {job.startDate} - {job.endDate || "Present"}
+                    {jobRange(job.startDate, job.endDate, lang)}
                   </Text>
                 </View>
                 <Text style={styles.company}>
@@ -187,13 +191,13 @@ export default function BoldTemplate({
 
         {education.length > 0 && (
           <View style={styles.section}>
-            <Title text="Education" styles={styles} />
+            <Title text={L.education} styles={styles} />
             {education.map((ed) => (
               <View key={ed.id} style={styles.item} wrap={false}>
                 <View style={styles.row}>
                   <Text style={styles.role}>{ed.school}</Text>
                   <Text style={styles.date}>
-                    {[ed.startDate, ed.endDate].filter(Boolean).join(" - ")}
+                    {eduRange(ed.startDate, ed.endDate, lang)}
                   </Text>
                 </View>
                 {ed.degree ? <Text style={styles.company}>{ed.degree}</Text> : null}
@@ -205,7 +209,7 @@ export default function BoldTemplate({
 
         {cleanSkills.length > 0 && (
           <View style={styles.section}>
-            <Title text="Skills" styles={styles} />
+            <Title text={L.skills} styles={styles} />
             <View style={styles.chips}>
               {cleanSkills.map((s, i) => (
                 <View key={i} style={styles.chip}>

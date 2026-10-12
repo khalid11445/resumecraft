@@ -7,6 +7,7 @@ import {
   StyleSheet,
 } from "@react-pdf/renderer";
 import { ResumeData } from "@/lib/resume-schema";
+import { Lang, getLabels, jobRange, eduRange } from "@/lib/labels";
 
 const makeStyles = (accent: string) =>
   StyleSheet.create({
@@ -61,11 +62,14 @@ const makeStyles = (accent: string) =>
 export default function CompactTemplate({
   data,
   accent = "#2d3748",
+  lang = "en",
 }: {
   data: ResumeData;
   accent?: string;
+  lang?: Lang;
 }) {
   const styles = makeStyles(accent);
+  const L = getLabels(lang);
   const { personal, summary, experience, education, skills, customSections } = data;
 
   const contacts = [
@@ -79,7 +83,7 @@ export default function CompactTemplate({
   const cleanSkills = skills.map((s) => s.trim()).filter(Boolean);
 
   return (
-    <Document title={`${personal.fullName} - Resume`}>
+    <Document title={`${personal.fullName} - CV`}>
       <Page size="A4" style={styles.page}>
         <View style={styles.header}>
           {personal.photo ? (
@@ -102,14 +106,14 @@ export default function CompactTemplate({
 
         {summary ? (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Summary</Text>
+            <Text style={styles.sectionTitle}>{L.summary}</Text>
             <Text>{summary}</Text>
           </View>
         ) : null}
 
         {experience.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Experience</Text>
+            <Text style={styles.sectionTitle}>{L.experience}</Text>
             {experience.map((job) => (
               <View key={job.id} style={styles.item} wrap={false}>
                 <View style={styles.row}>
@@ -118,7 +122,7 @@ export default function CompactTemplate({
                     {job.company ? `  —  ${job.company}` : ""}
                   </Text>
                   <Text style={styles.muted}>
-                    {job.startDate} - {job.endDate || "Present"}
+                    {jobRange(job.startDate, job.endDate, lang)}
                   </Text>
                 </View>
                 {job.location ? (
@@ -137,7 +141,7 @@ export default function CompactTemplate({
 
         {education.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Education</Text>
+            <Text style={styles.sectionTitle}>{L.education}</Text>
             {education.map((ed) => (
               <View key={ed.id} style={styles.item} wrap={false}>
                 <View style={styles.row}>
@@ -146,7 +150,7 @@ export default function CompactTemplate({
                     {ed.degree ? `  —  ${ed.degree}` : ""}
                   </Text>
                   <Text style={styles.muted}>
-                    {[ed.startDate, ed.endDate].filter(Boolean).join(" - ")}
+                    {eduRange(ed.startDate, ed.endDate, lang)}
                   </Text>
                 </View>
                 {ed.details ? <Text style={styles.muted}>{ed.details}</Text> : null}
@@ -157,7 +161,7 @@ export default function CompactTemplate({
 
         {cleanSkills.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Skills</Text>
+            <Text style={styles.sectionTitle}>{L.skills}</Text>
             <Text>{cleanSkills.join("  |  ")}</Text>
           </View>
         )}
