@@ -32,14 +32,21 @@ export default function QuickEdit({
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
+  // On a phone the editor slides up from the bottom instead of floating
+  const isMobile = window.innerWidth < 640;
+
   const width = 320;
   const left = Math.max(8, Math.min(x - width / 2, window.innerWidth - width - 8));
   const top = Math.max(8, Math.min(y + 14, window.innerHeight - 300));
 
   return (
     <div
-      className="fixed z-50 rounded-lg border border-gray-300 bg-white p-3 shadow-xl"
-      style={{ left, top, width }}
+      className={
+        isMobile
+          ? "fixed inset-x-0 bottom-0 z-50 max-h-[70dvh] overflow-y-auto rounded-t-2xl border-t border-gray-300 bg-white p-4 shadow-2xl"
+          : "fixed z-50 rounded-lg border border-gray-300 bg-white p-3 shadow-xl"
+      }
+      style={isMobile ? undefined : { left, top, width }}
     >
       <div className="mb-2 flex items-center justify-between">
         <p className="text-xs font-semibold text-gray-600">{t.editOnResume}</p>

@@ -16,8 +16,20 @@ import { palettes, categoryAccent } from "@/lib/themes";
 import { Lang } from "@/lib/labels";
 import { getUi } from "@/lib/i18n";
 
+type Tab = "edit" | "preview";
+
+const tabClass = (active: boolean) =>
+  `flex-1 py-2.5 text-sm font-semibold ${
+    active ? "border-b-2 border-blue-600 text-blue-600" : "text-gray-500"
+  }`;
+
 export default function BuilderClient({ uiLang = "en" }: { uiLang?: Lang }) {
   const t = getUi(uiLang);
+  const tabLabels =
+    uiLang === "fr"
+      ? { edit: "Modifier", preview: "Aperçu" }
+      : { edit: "Edit", preview: "Preview" };
+
   const params = useParams<{ category: string }>();
   const categoryId = String(params.category);
   const category = getCategory(categoryId, uiLang);
@@ -28,6 +40,7 @@ export default function BuilderClient({ uiLang = "en" }: { uiLang?: Lang }) {
   const qLang = search.get("lang");
   const initialLang: Lang = qLang === "fr" || qLang === "en" ? qLang : uiLang;
 
+  const [tab, setTab] = useState<Tab>("edit");
   const [lang, setLang] = useState<Lang>(initialLang);
   const [templateId, setTemplateId] = useState(
     templates.some((x) => x.id === qTemplate) ? (qTemplate as string) : "elegant"
@@ -151,9 +164,84 @@ export default function BuilderClient({ uiLang = "en" }: { uiLang?: Lang }) {
     }
   }
 
+  // Pieces used in two places: the edit panel and the mobile preview bar
+  const templateButtons = templates.map((tpl) => (
+    <button
+      key={tpl.id}
+      type="button"
+      onClick={() => setTemplateId(tpl.id)}
+      className={`shrink-0 whitespace-nowrap rounded border px-3 py-1 text-sm ${
+        templateId === tpl.id
+          ? "border-blue-600 bg-blue-600 text-white"
+          : "border-gray-300 bg-white text-black"
+      }`}
+    >
+      {tpl.name}
+    </button>
+  ));
+
+  const colorDots = palettes.map((p) => (
+    <button
+      key={p.id}
+      type="button"
+      title={p.name}
+      aria-label={p.name}
+      onClick={() => setAccent(p.accent)}
+      className={`h-6 w-6 shrink-0 rounded-full border-2 ${
+        accent === p.accent ? "border-black" : "border-white ring-1 ring-gray-300"
+      }`}
+      style={{ backgroundColor: p.accent }}
+    />
+  ));
+
+  const downloadButtons = (
+    <>
+      <button
+        type="button"
+        onClick={handleDownload}
+        disabled={paying}
+        className="rounded bg-green-600 px-4 py-1.5 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-50"
+      >
+        {paying ? t.openingCheckout : t.downloadPdf}
+      </button>
+      {freeMode && (
+        <button
+          type="button"
+          onClick={handleImage}
+          className="rounded border border-gray-300 bg-white px-4 py-1.5 text-sm font-semibold text-black hover:bg-gray-50"
+        >
+          {t.downloadImage}
+        </button>
+      )}
+    </>
+  );
+
   return (
-    <div className="flex h-[calc(100vh-3.5rem)] w-full">
-      <div className="w-1/2 overflow-y-auto border-r border-gray-300 bg-white">
+    <div className="flex h-[calc(100dvh-3.5rem)] w-full flex-col lg:flex-row">
+      {/* Tabs, phones and tablets only */}
+      <div className="flex shrink-0 border-b border-gray-200 bg-white lg:hidden">
+        <button
+          type="button"
+          onClick={() => setTab("edit")}
+          className={tabClass(tab === "edit")}
+        >
+          {tabLabels.edit}
+        </button>
+        <button
+          type="button"
+          onClick={() => setTab("preview")}
+          className={tabClass(tab === "preview")}
+        >
+          {tabLabels.preview}
+        </button>
+      </div>
+
+      {/* Edit panel */}
+      <div
+        className={`${
+          tab === "edit" ? "block" : "hidden"
+        } min-h-0 w-full flex-1 overflow-y-auto border-gray-300 bg-white lg:block lg:w-1/2 lg:flex-none lg:border-r`}
+      >
         <div className="border-b border-gray-200 p-4">
           <p className="text-xs text-gray-500">{t.category}</p>
           <p className="font-semibold text-black">{category.name}</p>
@@ -180,63 +268,17 @@ export default function BuilderClient({ uiLang = "en" }: { uiLang?: Lang }) {
             ))}
           </div>
 
-          {/* Templates */}
           <div className="mt-3 flex flex-wrap items-center gap-2">
-            {templates.map((tpl) => (
-              <button
-                key={tpl.id}
-                type="button"
-                onClick={() => setTemplateId(tpl.id)}
-                className={`rounded border px-3 py-1 text-sm ${
-                  templateId === tpl.id
-                    ? "border-blue-600 bg-blue-600 text-white"
-                    : "border-gray-300 bg-white text-black"
-                }`}
-              >
-                {tpl.name}
-              </button>
-            ))}
+            {templateButtons}
           </div>
 
-          {/* Colors */}
-          <div className="mt-3 flex items-center gap-2">
+          <div className="mt-3 flex flex-wrap items-center gap-2">
             <span className="text-xs text-gray-500">{t.color}</span>
-            {palettes.map((p) => (
-              <button
-                key={p.id}
-                type="button"
-                title={p.name}
-                aria-label={p.name}
-                onClick={() => setAccent(p.accent)}
-                className={`h-6 w-6 rounded-full border-2 ${
-                  accent === p.accent
-                    ? "border-black"
-                    : "border-white ring-1 ring-gray-300"
-                }`}
-                style={{ backgroundColor: p.accent }}
-              />
-            ))}
+            {colorDots}
           </div>
 
-          {/* Downloads */}
           <div className="mt-3 flex flex-wrap items-center gap-2">
-            <button
-              type="button"
-              onClick={handleDownload}
-              disabled={paying}
-              className="rounded bg-green-600 px-4 py-1.5 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-50"
-            >
-              {paying ? t.openingCheckout : t.downloadPdf}
-            </button>
-            {freeMode && (
-              <button
-                type="button"
-                onClick={handleImage}
-                className="rounded border border-gray-300 bg-white px-4 py-1.5 text-sm font-semibold text-black hover:bg-gray-50"
-              >
-                {t.downloadImage}
-              </button>
-            )}
+            {downloadButtons}
           </div>
 
           {error ? <p className="mt-2 text-xs text-red-600">{error}</p> : null}
@@ -259,16 +301,40 @@ export default function BuilderClient({ uiLang = "en" }: { uiLang?: Lang }) {
         />
       </div>
 
-      <div className="w-1/2">
-        <PdfPreview
-          Template={Template}
-          data={previewData}
-          accent={accent}
-          lang={lang}
-          hint={t.previewHint}
-          loadingText={t.loadingPreview}
-          onPickText={handlePick}
-        />
+      {/* Preview panel */}
+      <div
+        className={`${
+          tab === "preview" ? "flex" : "hidden"
+        } min-h-0 w-full flex-1 flex-col lg:flex lg:w-1/2 lg:flex-none`}
+      >
+        {/* Compact controls, phones and tablets only */}
+        <div className="shrink-0 space-y-2 border-b border-gray-200 bg-white p-2 lg:hidden">
+          <div className="flex gap-2 overflow-x-auto pb-1">{templateButtons}</div>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center gap-1.5 overflow-x-auto">
+              {colorDots}
+            </div>
+            <div className="flex items-center gap-2">{downloadButtons}</div>
+          </div>
+          {error ? <p className="text-xs text-red-600">{error}</p> : null}
+          {hasPlaceholders ? (
+            <p className="text-xs text-amber-700">{t.placeholderWarning}</p>
+          ) : null}
+        </div>
+
+        <div className="relative min-h-0 flex-1">
+          <div className="absolute inset-0">
+            <PdfPreview
+              Template={Template}
+              data={previewData}
+              accent={accent}
+              lang={lang}
+              hint={t.previewHint}
+              loadingText={t.loadingPreview}
+              onPickText={handlePick}
+            />
+          </div>
+        </div>
       </div>
 
       {quick ? (

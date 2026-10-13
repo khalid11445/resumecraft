@@ -33,9 +33,29 @@ export default function PdfPreview({
 
   const [ready, setReady] = useState(false);
   const [zoomIndex, setZoomIndex] = useState(1);
+  const [boxWidth, setBoxWidth] = useState(0);
   const zoom = ZOOMS[zoomIndex];
 
+  // Tracks the visible width. It is 0 while the preview is hidden
+  // (for example on the other mobile tab). Small changes, such as a
+  // scrollbar appearing, are ignored to avoid redraw loops.
   useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const update = () => {
+      const w = Math.round(el.clientWidth);
+      setBoxWidth((prev) =>
+        prev === 0 || w === 0 || Math.abs(prev - w) > 24 ? w : prev
+      );
+    };
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (boxWidth < 120) return; // hidden: nothing to draw yet
     const run = ++runRef.current;
 
     (async () => {
@@ -55,7 +75,7 @@ export default function PdfPreview({
         const container = containerRef.current;
         if (!container) return;
 
-        const width = Math.max((container.clientWidth - 32) * zoom, 200);
+        const width = Math.max((boxWidth - 32) * zoom, 200);
         const renderScale = Math.max(window.devicePixelRatio || 1, 2);
         const pages: HTMLDivElement[] = [];
 
@@ -115,13 +135,15 @@ export default function PdfPreview({
         console.error("Preview error:", err);
       }
     })();
-  }, [Template, data, accent, lang, zoom]);
+  }, [Template, data, accent, lang, zoom, boxWidth]);
 
   return (
     <div className="flex h-full w-full flex-col bg-gray-100">
       <div className="flex h-10 shrink-0 items-center justify-between border-b border-gray-200 bg-white px-3 text-xs text-gray-600">
-        <span>{hint ?? "Click any text on the resume to edit it"}</span>
-        <div className="flex items-center gap-2">
+        <span className="truncate pr-2">
+          {hint ?? "Click any text on the resume to edit it"}
+        </span>
+        <div className="flex shrink-0 items-center gap-2">
           <button
             type="button"
             disabled={zoomIndex === 0}
@@ -145,7 +167,7 @@ export default function PdfPreview({
       <div className="relative min-h-0 flex-1">
         {!ready && (
           <p className="absolute inset-0 flex items-center justify-center text-sm text-gray-500">
-           {loadingText ?? "Loading preview..."}
+            {loadingText ?? "Loading preview..."}
           </p>
         )}
         <div ref={containerRef} className="h-full w-full overflow-auto p-4" />

@@ -8,6 +8,7 @@ const T = {
     intro:
       "A one-page resume, the right title, and a clear idea of when to apply. Start from a resume made for internship applications, with academic projects, languages and student activities.",
     cta: "Build my internship resume",
+    letterCta: "Write my request letter",
     calendarTitle: "When to apply",
     typeHeader: "Type of internship",
     whenHeader: "When to apply",
@@ -35,6 +36,7 @@ const T = {
     ],
     note: "This information is indicative. It comes from recruitment guides such as Jobsquare, not from an official source. Your school may set its own calendar and rules, so always check with your internship office.",
     builderHref: "/builder/stage",
+    letterHref: "/letter",
   },
   fr: {
     badge: "Saison des stages",
@@ -42,6 +44,7 @@ const T = {
     intro:
       "Un CV d'une page, le bon intitulé et une idée claire du moment où postuler. Partez d'un CV pensé pour les candidatures de stage, avec projets académiques, langues et vie associative.",
     cta: "Créer mon CV de stage",
+    letterCta: "Rédiger ma demande de stage",
     calendarTitle: "Quand postuler",
     typeHeader: "Type de stage",
     whenHeader: "Quand postuler",
@@ -69,6 +72,7 @@ const T = {
     ],
     note: "Ces informations sont indicatives. Elles proviennent de guides de recrutement comme Jobsquare, et non d'une source officielle. Votre école peut avoir son propre calendrier et ses propres règles : vérifiez toujours auprès de votre service des stages.",
     builderHref: "/fr/builder/stage",
+    letterHref: "/fr/letter",
   },
 };
 
@@ -84,12 +88,21 @@ export default function StageView({ lang }: { lang: Lang }) {
         {t.title}
       </h1>
       <p className="mt-3 text-slate-600">{t.intro}</p>
-      <Link
-        href={t.builderHref}
-        className="mt-6 inline-block rounded-lg bg-slate-900 px-6 py-3 text-sm font-semibold text-white hover:bg-slate-800"
-      >
-        {t.cta}
-      </Link>
+
+      <div className="mt-6 flex flex-wrap gap-3">
+        <Link
+          href={t.builderHref}
+          className="inline-block rounded-lg bg-slate-900 px-6 py-3 text-sm font-semibold text-white hover:bg-slate-800"
+        >
+          {t.cta}
+        </Link>
+        <Link
+          href={t.letterHref}
+          className="inline-block rounded-lg border border-slate-300 px-6 py-3 text-sm font-semibold text-slate-900 hover:bg-slate-50"
+        >
+          {t.letterCta}
+        </Link>
+      </div>
 
       <h2 className="mt-14 text-xl font-semibold text-slate-900">
         {t.calendarTitle}
