@@ -10,11 +10,16 @@ import BuilderForm from "@/components/builder/BuilderForm";
 import AiWriter from "@/components/builder/AiWriter";
 import QuickEdit from "@/components/builder/QuickEdit";
 import PdfPreview from "@/components/builder/PdfPreview";
+import ReadabilityPanel from "@/components/builder/ReadabilityPanel";
+import JobMatchPanel from "@/components/builder/JobMatchPanel";
 import { findEditFields, EditField } from "@/lib/quickedit";
+import { analyzeResume, ReadabilityResult } from "@/lib/readability";
+import { countPlaceholders } from "@/lib/placeholders";
 import { templates, getTemplate } from "@/lib/templates";
 import { palettes, categoryAccent } from "@/lib/themes";
 import { Lang } from "@/lib/labels";
 import { getUi } from "@/lib/i18n";
+import { useDownloadGate } from "@/lib/useDownloadGate";
 
 type Tab = "edit" | "preview";
 
@@ -29,6 +34,18 @@ export default function BuilderClient({ uiLang = "en" }: { uiLang?: Lang }) {
     uiLang === "fr"
       ? { edit: "Modifier", preview: "Aperçu" }
       : { edit: "Edit", preview: "Preview" };
+  const checkLabels =
+    uiLang === "fr"
+      ? {
+          check: "Vérifier la lisibilité",
+          checking: "Analyse...",
+          match: "Comparer à une offre",
+        }
+      : {
+          check: "Check readability",
+          checking: "Checking...",
+          match: "Match a job posting",
+        };
 
   const params = useParams<{ category: string }>();
   const categoryId = String(params.category);
@@ -39,6 +56,8 @@ export default function BuilderClient({ uiLang = "en" }: { uiLang?: Lang }) {
   const qColor = search.get("color");
   const qLang = search.get("lang");
   const initialLang: Lang = qLang === "fr" || qLang === "en" ? qLang : uiLang;
+
+  const gate = useDownloadGate(uiLang);
 
   const [tab, setTab] = useState<Tab>("edit");
   const [lang, setLang] = useState<Lang>(initialLang);
@@ -54,8 +73,9 @@ export default function BuilderClient({ uiLang = "en" }: { uiLang?: Lang }) {
 
   const starter = getCategory(categoryId, initialLang).starter;
 
-  const [resumeId] = useState(() => crypto.randomUUID());
-  const [paying, setPaying] = useState(false);
+  const [checking, setChecking] = useState(false);
+  const [report, setReport] = useState<ReadabilityResult | null>(null);
+  const [matchOpen, setMatchOpen] = useState(false);
   const [error, setError] = useState("");
   const [quick, setQuick] = useState<{
     fields: EditField[];
@@ -77,14 +97,19 @@ export default function BuilderClient({ uiLang = "en" }: { uiLang?: Lang }) {
     return () => clearTimeout(timer);
   }, [JSON.stringify(liveData)]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const freeMode = process.env.NEXT_PUBLIC_FREE_DOWNLOAD === "true";
-
-  // True while any suggested line still contains [brackets]
-  const hasPlaceholders = /\[[^\]]*\]/.test(JSON.stringify(liveData));
+  // True while any suggested line still contains a [bracket] placeholder
+  const hasPlaceholders = countPlaceholders(liveData) > 0;
 
   function handlePick(text: string, x: number, y: number) {
     const fields = findEditFields(form, text);
     setQuick(fields.length ? { fields, x, y } : null);
+  }
+
+  // Adds a term to the skills list (used by the job-posting match)
+  function addSkill(term: string) {
+    const current = (form.getValues("skills") ?? []).filter((s) => s.trim());
+    if (current.some((s) => s.trim().toLowerCase() === term.toLowerCase())) return;
+    form.setValue("skills", [...current, term], { shouldDirty: true });
   }
 
   function saveBlob(blob: Blob, filename: string) {
@@ -96,41 +121,22 @@ export default function BuilderClient({ uiLang = "en" }: { uiLang?: Lang }) {
     URL.revokeObjectURL(url);
   }
 
-  async function handleDownload() {
+  // The two download actions. They are wrapped by gate.run() on the buttons
+  async function doDownload() {
     setError("");
-
-    // Temporary: free download while payments are being set up
-    if (freeMode) {
+    try {
       const { pdf } = await import("@react-pdf/renderer");
       const blob = await pdf(
         <Template data={previewData} accent={accent} lang={lang} />
       ).toBlob();
       saveBlob(blob, `${previewData.personal.fullName || "cv"}.pdf`);
-      return;
-    }
-
-    setPaying(true);
-    try {
-      const res = await fetch("/api/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          resumeId,
-          category: category.id,
-          template: templateId,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok || !data.url) throw new Error(data.error || "Checkout failed");
-      window.location.href = data.url;
     } catch (e) {
       setError(e instanceof Error ? e.message : t.somethingWrong);
-      setPaying(false);
     }
   }
 
   // Exports the first page of the resume as a PNG image
-  async function handleImage() {
+  async function doImage() {
     setError("");
     try {
       const { pdf } = await import("@react-pdf/renderer");
@@ -163,6 +169,42 @@ export default function BuilderClient({ uiLang = "en" }: { uiLang?: Lang }) {
       setError(e instanceof Error ? e.message : t.imageError);
     }
   }
+
+  // Builds the PDF and reads it back like a simple text reader
+  async function handleCheck() {
+    setError("");
+    setChecking(true);
+    try {
+      const { pdf } = await import("@react-pdf/renderer");
+      const blob = await pdf(
+        <Template data={previewData} accent={accent} lang={lang} />
+      ).toBlob();
+      setReport(
+        await analyzeResume(
+          blob,
+          previewData,
+          getTemplate(templateId).columns,
+          lang,
+          uiLang
+        )
+      );
+    } catch (e) {
+      setError(e instanceof Error ? e.message : t.somethingWrong);
+    } finally {
+      setChecking(false);
+    }
+  }
+
+  // Small line shown once a valid code is saved in this browser
+  const passText = gate.pass.active
+    ? `${uiLang === "fr" ? "Accès au téléchargement actif" : "Download pass active"}${
+        gate.pass.expiresAt
+          ? ` ${uiLang === "fr" ? "jusqu'au" : "until"} ${new Date(
+              gate.pass.expiresAt
+            ).toLocaleDateString(uiLang === "fr" ? "fr-FR" : "en-US")}`
+          : ""
+      }`
+    : "";
 
   // Pieces used in two places: the edit panel and the mobile preview bar
   const templateButtons = templates.map((tpl) => (
@@ -198,21 +240,33 @@ export default function BuilderClient({ uiLang = "en" }: { uiLang?: Lang }) {
     <>
       <button
         type="button"
-        onClick={handleDownload}
-        disabled={paying}
-        className="rounded bg-green-600 px-4 py-1.5 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-50"
+        onClick={() => gate.run(doDownload)}
+        className="rounded bg-green-600 px-4 py-1.5 text-sm font-semibold text-white hover:bg-green-700"
       >
-        {paying ? t.openingCheckout : t.downloadPdf}
+        {t.downloadPdf}
       </button>
-      {freeMode && (
-        <button
-          type="button"
-          onClick={handleImage}
-          className="rounded border border-gray-300 bg-white px-4 py-1.5 text-sm font-semibold text-black hover:bg-gray-50"
-        >
-          {t.downloadImage}
-        </button>
-      )}
+      <button
+        type="button"
+        onClick={() => gate.run(doImage)}
+        className="rounded border border-gray-300 bg-white px-4 py-1.5 text-sm font-semibold text-black hover:bg-gray-50"
+      >
+        {t.downloadImage}
+      </button>
+      <button
+        type="button"
+        onClick={handleCheck}
+        disabled={checking}
+        className="rounded border border-gray-300 bg-white px-4 py-1.5 text-sm font-semibold text-black hover:bg-gray-50 disabled:opacity-50"
+      >
+        {checking ? checkLabels.checking : checkLabels.check}
+      </button>
+      <button
+        type="button"
+        onClick={() => setMatchOpen(true)}
+        className="rounded border border-gray-300 bg-white px-4 py-1.5 text-sm font-semibold text-black hover:bg-gray-50"
+      >
+        {checkLabels.match}
+      </button>
     </>
   );
 
@@ -281,6 +335,9 @@ export default function BuilderClient({ uiLang = "en" }: { uiLang?: Lang }) {
             {downloadButtons}
           </div>
 
+          {passText ? (
+            <p className="mt-2 text-xs text-green-700">✓ {passText}</p>
+          ) : null}
           {error ? <p className="mt-2 text-xs text-red-600">{error}</p> : null}
           {hasPlaceholders ? (
             <p className="mt-2 text-xs text-amber-700">{t.placeholderWarning}</p>
@@ -314,8 +371,11 @@ export default function BuilderClient({ uiLang = "en" }: { uiLang?: Lang }) {
             <div className="flex items-center gap-1.5 overflow-x-auto">
               {colorDots}
             </div>
-            <div className="flex items-center gap-2">{downloadButtons}</div>
+            <div className="flex flex-wrap items-center gap-2">
+              {downloadButtons}
+            </div>
           </div>
+          {passText ? <p className="text-xs text-green-700">✓ {passText}</p> : null}
           {error ? <p className="text-xs text-red-600">{error}</p> : null}
           {hasPlaceholders ? (
             <p className="text-xs text-amber-700">{t.placeholderWarning}</p>
@@ -347,6 +407,25 @@ export default function BuilderClient({ uiLang = "en" }: { uiLang?: Lang }) {
           onClose={() => setQuick(null)}
         />
       ) : null}
+
+      {report ? (
+        <ReadabilityPanel
+          result={report}
+          ui={uiLang}
+          onClose={() => setReport(null)}
+        />
+      ) : null}
+
+      {matchOpen ? (
+        <JobMatchPanel
+          resume={liveData}
+          ui={uiLang}
+          onAddSkill={addSkill}
+          onClose={() => setMatchOpen(false)}
+        />
+      ) : null}
+
+      {gate.modal}
     </div>
   );
 }

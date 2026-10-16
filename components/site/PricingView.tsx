@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { Lang } from "@/lib/labels";
+import { PASS } from "@/lib/pass";
 
 const freeMode = process.env.NEXT_PUBLIC_FREE_DOWNLOAD === "true";
 
 const T = {
   en: {
     title: "Simple pricing",
-    text: "Build and preview for free. Pay once only when you download.",
+    text: "Build and preview for free. Pay only when you want to download.",
     banner: "Launch offer: downloads are free for now.",
     freeName: "Free",
     freePrice: "$0",
@@ -14,17 +15,24 @@ const T = {
       "Pick your profession",
       "Live preview as you type",
       "All templates and colors",
+      "Readability check and job-posting match",
+      "Internship request letter",
     ],
     freeCta: "Start building",
-    paidName: "Download",
-    paidPrice: "$4.99",
-    paidUnit: " per resume",
-    paid: ["Everything in Free", "Download as PDF", "Download as image"],
+    paidName: "Download pass",
+    paidUnit: ` for ${PASS.days} days`,
+    paid: [
+      "Everything in Free",
+      "Unlimited PDF and image downloads",
+      `Valid for ${PASS.days} days, on up to ${PASS.devices} devices`,
+      "One payment, no subscription, no automatic renewal",
+    ],
     paidCta: "Build my resume",
+    note: "Your code arrives by email right after payment. Payments are handled by Lemon Squeezy.",
   },
   fr: {
     title: "Des tarifs simples",
-    text: "Créez et prévisualisez gratuitement. Payez une seule fois, uniquement au téléchargement.",
+    text: "Créez et prévisualisez gratuitement. Ne payez que lorsque vous voulez télécharger.",
     banner: "Offre de lancement : les téléchargements sont gratuits pour le moment.",
     freeName: "Gratuit",
     freePrice: "0 $",
@@ -32,13 +40,20 @@ const T = {
       "Choisissez votre métier",
       "Aperçu en direct pendant que vous écrivez",
       "Tous les modèles et toutes les couleurs",
+      "Contrôle de lisibilité et comparaison à une offre",
+      "Lettre de demande de stage",
     ],
     freeCta: "Commencer",
-    paidName: "Téléchargement",
-    paidPrice: "4,99 $",
-    paidUnit: " par CV",
-    paid: ["Tout ce qui est gratuit", "Téléchargement en PDF", "Téléchargement en image"],
+    paidName: "Accès au téléchargement",
+    paidUnit: ` pour ${PASS.days} jours`,
+    paid: [
+      "Tout ce qui est gratuit",
+      "Téléchargements PDF et image illimités",
+      `Valable ${PASS.days} jours, sur ${PASS.devices} appareils au maximum`,
+      "Un seul paiement, sans abonnement ni renouvellement automatique",
+    ],
     paidCta: "Créer mon CV",
+    note: "Votre code vous est envoyé par email juste après le paiement. Les paiements sont gérés par Lemon Squeezy.",
   },
 };
 
@@ -79,7 +94,7 @@ export default function PricingView({ lang }: { lang: Lang }) {
         <div className="rounded-lg border-2 border-slate-900 p-6">
           <h2 className="font-semibold text-slate-900">{t.paidName}</h2>
           <p className="mt-2 text-3xl font-semibold text-slate-900">
-            {t.paidPrice}
+            {PASS.price}
             <span className="text-sm font-normal text-slate-500">{t.paidUnit}</span>
           </p>
           <ul className="mt-5 space-y-2 text-sm text-slate-600">
@@ -95,6 +110,8 @@ export default function PricingView({ lang }: { lang: Lang }) {
           </Link>
         </div>
       </div>
+
+      <p className="mt-6 text-center text-xs text-slate-500">{t.note}</p>
     </main>
   );
 }
