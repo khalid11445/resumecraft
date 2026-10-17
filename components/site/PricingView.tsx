@@ -10,7 +10,7 @@ const T = {
     text: "Build and preview for free. Pay only when you want to download.",
     banner: "Launch offer: downloads are free for now.",
     freeName: "Free",
-    freePrice: "$0",
+    freePrice: "0 MAD",
     free: [
       "Pick your profession",
       "Live preview as you type",
@@ -35,7 +35,7 @@ const T = {
     text: "Créez et prévisualisez gratuitement. Ne payez que lorsque vous voulez télécharger.",
     banner: "Offre de lancement : les téléchargements sont gratuits pour le moment.",
     freeName: "Gratuit",
-    freePrice: "0 $",
+    freePrice: "0 MAD",
     free: [
       "Choisissez votre métier",
       "Aperçu en direct pendant que vous écrivez",

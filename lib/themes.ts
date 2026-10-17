@@ -6,6 +6,7 @@ export const palettes = [
   { id: "forest", name: "Forest", accent: "#166534" },
   { id: "orange", name: "Orange", accent: "#c2410c" },
   { id: "graphite", name: "Graphite", accent: "#334155" },
+  { id: "bw", name: "Black & white", accent: "#000000" },
 ];
 
 // Default color for each profession, so every category looks different

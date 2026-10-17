@@ -7,6 +7,8 @@ const T = {
   en: {
     templates: "Templates",
     stage: "Internships",
+    interview: "Interview prep",
+    jobs: "Jobs in Morocco",
     examples: "Examples",
     pricing: "Pricing",
     privacy: "Privacy",
@@ -16,6 +18,8 @@ const T = {
   fr: {
     templates: "Modèles",
     stage: "Stage / PFE",
+    interview: "Entretien",
+    jobs: "Emploi au Maroc",
     examples: "Exemples",
     pricing: "Tarifs",
     privacy: "Confidentialité",
@@ -33,6 +37,8 @@ export default function SiteFooter() {
   const links = [
     { href: `${base}/templates`, label: t.templates },
     { href: `${base}/stage`, label: t.stage },
+    { href: `${base}/interview`, label: t.interview },
+    { href: `${base}/jobs`, label: t.jobs },
     { href: `${base}/examples`, label: t.examples },
     { href: `${base}/pricing`, label: t.pricing },
     { href: `${base}/privacy`, label: t.privacy },

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -19,6 +19,14 @@ import { loadDraft, saveDraft, clearDraft, normalizeResume } from "@/lib/draft";
 import { templates, getTemplate } from "@/lib/templates";
 import { palettes, categoryAccent } from "@/lib/themes";
 import { Lang } from "@/lib/labels";
+import { isBlackAndWhite, toGrayscale } from "@/lib/grayscale";
+import {
+  FORMAT_IDS,
+  ResumeFormat,
+  allowsPhoto,
+  formatCopy,
+  isFormat,
+} from "@/lib/formats";
 import { getUi } from "@/lib/i18n";
 import { useDownloadGate } from "@/lib/useDownloadGate";
 
@@ -76,12 +84,18 @@ export default function BuilderClient({ uiLang = "en" }: { uiLang?: Lang }) {
   const qTemplate = search.get("template");
   const qColor = search.get("color");
   const qLang = search.get("lang");
+  const qFormat = search.get("format");
   const initialLang: Lang = qLang === "fr" || qLang === "en" ? qLang : uiLang;
 
   const gate = useDownloadGate(uiLang);
 
   const [tab, setTab] = useState<Tab>("edit");
   const [lang, setLang] = useState<Lang>(initialLang);
+  const [format, setFormat] = useState<ResumeFormat>(
+    isFormat(qFormat) ? qFormat : "morocco"
+  );
+  const fmt = formatCopy[uiLang];
+  const hidePhoto = !allowsPhoto(format);
   const [templateId, setTemplateId] = useState(
     templates.some((x) => x.id === qTemplate) ? (qTemplate as string) : "elegant"
   );
@@ -124,6 +138,33 @@ export default function BuilderClient({ uiLang = "en" }: { uiLang?: Lang }) {
     const timer = setTimeout(() => setPreviewData(structuredClone(liveData)), 500);
     return () => clearTimeout(timer);
   }, [JSON.stringify(liveData)]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Black & white mode: the photo is converted to grayscale for the
+  // preview and the downloads (the saved draft is not changed)
+  const bw = isBlackAndWhite(accent);
+  const sourcePhoto = previewData.personal.photo;
+  const [grayPhoto, setGrayPhoto] = useState<{ src: string; out: string } | null>(null);
+  useEffect(() => {
+    if (!bw || !sourcePhoto) return;
+    let cancelled = false;
+    toGrayscale(sourcePhoto).then((out) => {
+      if (!cancelled) setGrayPhoto({ src: sourcePhoto, out });
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [bw, sourcePhoto]);
+  const renderData = useMemo<ResumeData>(() => {
+    // Canada and US formats: the photo is not shown
+    if (hidePhoto) {
+      return sourcePhoto
+        ? { ...previewData, personal: { ...previewData.personal, photo: "" } }
+        : previewData;
+    }
+    return bw && sourcePhoto && grayPhoto && grayPhoto.src === sourcePhoto
+      ? { ...previewData, personal: { ...previewData.personal, photo: grayPhoto.out } }
+      : previewData;
+  }, [hidePhoto, bw, sourcePhoto, grayPhoto, previewData]);
 
   // Restore the saved draft once, when the page opens
   useEffect(() => {
@@ -211,7 +252,7 @@ export default function BuilderClient({ uiLang = "en" }: { uiLang?: Lang }) {
     try {
       const { pdf } = await import("@react-pdf/renderer");
       const blob = await pdf(
-        <Template data={previewData} accent={accent} lang={lang} />
+        <Template data={renderData} accent={accent} lang={lang} format={format} />
       ).toBlob();
       saveBlob(blob, `${previewData.personal.fullName || "cv"}.pdf`);
     } catch (e) {
@@ -225,7 +266,7 @@ export default function BuilderClient({ uiLang = "en" }: { uiLang?: Lang }) {
     try {
       const { pdf } = await import("@react-pdf/renderer");
       const pdfBlob = await pdf(
-        <Template data={previewData} accent={accent} lang={lang} />
+        <Template data={renderData} accent={accent} lang={lang} format={format} />
       ).toBlob();
       const buffer = await pdfBlob.arrayBuffer();
 
@@ -261,7 +302,7 @@ export default function BuilderClient({ uiLang = "en" }: { uiLang?: Lang }) {
     try {
       const { pdf } = await import("@react-pdf/renderer");
       const blob = await pdf(
-        <Template data={previewData} accent={accent} lang={lang} />
+        <Template data={renderData} accent={accent} lang={lang} format={format} />
       ).toBlob();
       setReport(
         await analyzeResume(
@@ -408,6 +449,36 @@ export default function BuilderClient({ uiLang = "en" }: { uiLang?: Lang }) {
             ))}
           </div>
 
+          {/* Country format */}
+          <div className="mt-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs text-gray-500">{fmt.label}</span>
+              {FORMAT_IDS.map((f) => (
+                <button
+                  key={f}
+                  type="button"
+                  onClick={() => setFormat(f)}
+                  className={`rounded border px-3 py-1 text-sm ${
+                    format === f
+                      ? "border-blue-600 bg-blue-600 text-white"
+                      : "border-gray-300 bg-white text-black"
+                  }`}
+                >
+                  {fmt.formats[f].name}
+                </button>
+              ))}
+            </div>
+            <ul className="mt-2 list-disc space-y-0.5 pl-5 text-xs text-gray-500">
+              {fmt.formats[format].tips.map((tip) => (
+                <li key={tip}>{tip}</li>
+              ))}
+            </ul>
+            {hidePhoto && sourcePhoto ? (
+              <p className="mt-1 text-xs text-amber-700">{fmt.photoHidden}</p>
+            ) : null}
+            <p className="mt-1 text-xs text-gray-400">{fmt.note}</p>
+          </div>
+
           <div className="mt-3 flex flex-wrap items-center gap-2">
             {templateButtons}
           </div>
@@ -500,9 +571,10 @@ export default function BuilderClient({ uiLang = "en" }: { uiLang?: Lang }) {
           <div className="absolute inset-0">
             <PdfPreview
               Template={Template}
-              data={previewData}
+              data={renderData}
               accent={accent}
               lang={lang}
+              format={format}
               hint={t.previewHint}
               loadingText={t.loadingPreview}
               onPickText={handlePick}

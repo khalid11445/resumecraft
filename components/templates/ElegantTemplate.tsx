@@ -14,15 +14,22 @@ const GOLD = "#b08d57";
 const GRAY = "#5f6b7a";
 const LINE = "#d9dee5";
 
-const makeStyles = (accent: string) =>
-  StyleSheet.create({
+const makeStyles = (accent: string) => {
+  // Black & white mode: the fixed gold and blue-gray tones become neutral
+  const bw = accent.toLowerCase() === "#000000";
+  const gold = bw ? "#000000" : GOLD;
+  const gray = bw ? "#555555" : GRAY;
+  const line = bw ? "#cccccc" : LINE;
+  const text = bw ? "#111111" : "#2b2f36";
+
+  return StyleSheet.create({
     page: {
       paddingTop: 44,
       paddingBottom: 44,
       paddingHorizontal: 48,
       fontSize: 9.5,
       fontFamily: "Helvetica",
-      color: "#2b2f36",
+      color: text,
       lineHeight: 1.5,
     },
     header: { marginBottom: 24 },
@@ -43,14 +50,14 @@ const makeStyles = (accent: string) =>
     jobTitle: {
       fontSize: 9.5,
       lineHeight: 1.2,
-      color: GOLD,
+      color: gold,
       textTransform: "uppercase",
       letterSpacing: 3,
       marginTop: 10,
     },
-    rule: { height: 1, backgroundColor: LINE, marginTop: 14, marginBottom: 8 },
+    rule: { height: 1, backgroundColor: line, marginTop: 14, marginBottom: 8 },
     contactRow: { flexDirection: "row", flexWrap: "wrap" },
-    contactItem: { fontSize: 8.5, color: GRAY, marginRight: 14 },
+    contactItem: { fontSize: 8.5, color: gray, marginRight: 14 },
     section: { marginBottom: 20 },
     sectionTitle: {
       fontFamily: "Helvetica-Bold",
@@ -62,7 +69,7 @@ const makeStyles = (accent: string) =>
     sectionAccent: {
       width: 28,
       height: 1.5,
-      backgroundColor: GOLD,
+      backgroundColor: gold,
       marginTop: 4,
       marginBottom: 10,
     },
@@ -73,16 +80,16 @@ const makeStyles = (accent: string) =>
       alignItems: "flex-start",
     },
     role: { fontFamily: "Helvetica-Bold", fontSize: 10.5, color: accent },
-    date: { fontSize: 8.5, color: GRAY },
-    company: { fontFamily: "Helvetica-Oblique", color: GRAY, marginTop: 1 },
-    detail: { color: GRAY, marginTop: 1 },
+    date: { fontSize: 8.5, color: gray },
+    company: { fontFamily: "Helvetica-Oblique", color: gray, marginTop: 1 },
+    detail: { color: gray, marginTop: 1 },
     bullet: { flexDirection: "row", marginTop: 3 },
-    bulletDot: { width: 10, color: GOLD },
+    bulletDot: { width: 10, color: gold },
     bulletText: { flex: 1 },
     chips: { flexDirection: "row", flexWrap: "wrap" },
     chip: {
       borderWidth: 0.75,
-      borderColor: LINE,
+      borderColor: line,
       borderStyle: "solid",
       borderRadius: 2,
       paddingVertical: 2.5,
@@ -92,6 +99,7 @@ const makeStyles = (accent: string) =>
     },
     chipText: { fontSize: 8.5, color: accent },
   });
+};
 
 type Styles = ReturnType<typeof makeStyles>;
 

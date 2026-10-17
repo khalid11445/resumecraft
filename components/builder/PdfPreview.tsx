@@ -4,12 +4,19 @@ import { ComponentType, useEffect, useRef, useState } from "react";
 import { pdf } from "@react-pdf/renderer";
 import { ResumeData } from "@/lib/resume-schema";
 import { Lang } from "@/lib/labels";
+import { ResumeFormat } from "@/lib/formats";
 
 type Props = {
-  Template: ComponentType<{ data: ResumeData; accent?: string; lang?: Lang }>;
+  Template: ComponentType<{
+    data: ResumeData;
+    accent?: string;
+    lang?: Lang;
+    format?: ResumeFormat;
+  }>;
   data: ResumeData;
   accent?: string;
   lang?: Lang;
+  format?: ResumeFormat;
   hint?: string;
   loadingText?: string;
   onPickText?: (text: string, x: number, y: number) => void;
@@ -22,6 +29,7 @@ export default function PdfPreview({
   data,
   accent,
   lang,
+  format,
   hint,
   loadingText,
   onPickText,
@@ -61,7 +69,7 @@ export default function PdfPreview({
     (async () => {
       try {
         const blob = await pdf(
-          <Template data={data} accent={accent} lang={lang} />
+          <Template data={data} accent={accent} lang={lang} format={format} />
         ).toBlob();
         if (run !== runRef.current) return;
 
@@ -135,7 +143,7 @@ export default function PdfPreview({
         console.error("Preview error:", err);
       }
     })();
-  }, [Template, data, accent, lang, zoom, boxWidth]);
+  }, [Template, data, accent, lang, format, zoom, boxWidth]);
 
   return (
     <div className="flex h-full w-full flex-col bg-gray-100">
