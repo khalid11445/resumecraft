@@ -15,6 +15,7 @@ import JobMatchPanel from "@/components/builder/JobMatchPanel";
 import { findEditFields, EditField } from "@/lib/quickedit";
 import { analyzeResume, ReadabilityResult } from "@/lib/readability";
 import { countPlaceholders } from "@/lib/placeholders";
+import { loadDraft, saveDraft, clearDraft, normalizeResume } from "@/lib/draft";
 import { templates, getTemplate } from "@/lib/templates";
 import { palettes, categoryAccent } from "@/lib/themes";
 import { Lang } from "@/lib/labels";
@@ -46,6 +47,26 @@ export default function BuilderClient({ uiLang = "en" }: { uiLang?: Lang }) {
           checking: "Checking...",
           match: "Match a job posting",
         };
+  const draftText =
+    uiLang === "fr"
+      ? {
+          saved: "Enregistré automatiquement sur cet appareil.",
+          restored: (d: string) => `Brouillon restauré (${d}).`,
+          startOver: "Recommencer",
+          confirm: "Effacer votre CV actuel et recommencer à zéro ?",
+          shared:
+            "Ordinateur partagé ? Cliquez sur « Recommencer » quand vous avez terminé.",
+        }
+      : {
+          saved: "Saved automatically on this device.",
+          restored: (d: string) => `Draft restored (${d}).`,
+          startOver: "Start over",
+          confirm: "Erase your current resume and start from scratch?",
+          shared: "Shared computer? Click “Start over” when you are done.",
+        };
+
+  // Set NEXT_PUBLIC_AI_ENABLED=false to hide the AI Writer
+  const aiEnabled = process.env.NEXT_PUBLIC_AI_ENABLED !== "false";
 
   const params = useParams<{ category: string }>();
   const categoryId = String(params.category);
@@ -83,6 +104,13 @@ export default function BuilderClient({ uiLang = "en" }: { uiLang?: Lang }) {
     y: number;
   } | null>(null);
 
+  // Saved draft: true once the restore attempt is done, and when it was saved
+  const [restored, setRestored] = useState(false);
+  const [restoredAt, setRestoredAt] = useState<string | null>(null);
+  // Changing this number rebuilds the form panel so its small local states
+  // (photo checkbox, "currently working" boxes) match the new content
+  const [formVersion, setFormVersion] = useState(0);
+
   const form = useForm<ResumeData>({
     resolver: zodResolver(resumeSchema),
     defaultValues: starter,
@@ -96,6 +124,62 @@ export default function BuilderClient({ uiLang = "en" }: { uiLang?: Lang }) {
     const timer = setTimeout(() => setPreviewData(structuredClone(liveData)), 500);
     return () => clearTimeout(timer);
   }, [JSON.stringify(liveData)]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Restore the saved draft once, when the page opens
+  useEffect(() => {
+    const draft = loadDraft(categoryId);
+    if (draft) {
+      // A link from the examples gallery keeps its own template and color
+      if (!qTemplate && templates.some((x) => x.id === draft.templateId)) {
+        setTemplateId(draft.templateId);
+      }
+      if (!qColor && /^#[0-9a-fA-F]{6}$/.test(draft.accent)) {
+        setAccent(draft.accent);
+      }
+      // Only a resume the visitor really edited is restored
+      if (draft.data) {
+        form.reset(draft.data);
+        setPreviewData(structuredClone(draft.data));
+        if (!qLang && (draft.lang === "en" || draft.lang === "fr")) {
+          setLang(draft.lang);
+        }
+        setRestoredAt(draft.savedAt || null);
+        setFormVersion((v) => v + 1);
+      }
+    }
+    setRestored(true);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Save the draft shortly after every change
+  useEffect(() => {
+    if (!restored) return;
+
+    const timer = setTimeout(() => {
+      // A resume still identical to the sample is not saved as content
+      const json = JSON.stringify(normalizeResume(liveData));
+      const untouched = (["en", "fr"] as Lang[]).some(
+        (l) =>
+          JSON.stringify(normalizeResume(getCategory(categoryId, l).starter)) === json
+      );
+      saveDraft(categoryId, {
+        data: untouched ? null : liveData,
+        templateId,
+        accent,
+        lang,
+      });
+    }, 800);
+
+    return () => clearTimeout(timer);
+  }, [restored, categoryId, templateId, accent, lang, JSON.stringify(liveData)]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  function startOver() {
+    if (!window.confirm(draftText.confirm)) return;
+    clearDraft(categoryId);
+    form.reset(starter);
+    setPreviewData(structuredClone(starter));
+    setRestoredAt(null);
+    setFormVersion((v) => v + 1);
+  }
 
   // True while any suggested line still contains a [bracket] placeholder
   const hasPlaceholders = countPlaceholders(liveData) > 0;
@@ -195,13 +279,15 @@ export default function BuilderClient({ uiLang = "en" }: { uiLang?: Lang }) {
     }
   }
 
+  const locale = uiLang === "fr" ? "fr-FR" : "en-US";
+
   // Small line shown once a valid code is saved in this browser
   const passText = gate.pass.active
     ? `${uiLang === "fr" ? "Accès au téléchargement actif" : "Download pass active"}${
         gate.pass.expiresAt
           ? ` ${uiLang === "fr" ? "jusqu'au" : "until"} ${new Date(
               gate.pass.expiresAt
-            ).toLocaleDateString(uiLang === "fr" ? "fr-FR" : "en-US")}`
+            ).toLocaleDateString(locale)}`
           : ""
       }`
     : "";
@@ -342,15 +428,43 @@ export default function BuilderClient({ uiLang = "en" }: { uiLang?: Lang }) {
           {hasPlaceholders ? (
             <p className="mt-2 text-xs text-amber-700">{t.placeholderWarning}</p>
           ) : null}
+
+          {restored ? (
+            <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-500">
+              <span>
+                {restoredAt
+                  ? draftText.restored(
+                      new Date(restoredAt).toLocaleString(locale, {
+                        dateStyle: "medium",
+                        timeStyle: "short",
+                      })
+                    )
+                  : draftText.saved}
+              </span>
+              <button
+                type="button"
+                onClick={startOver}
+                className="font-semibold text-red-600 hover:underline"
+              >
+                {draftText.startOver}
+              </button>
+            </div>
+          ) : null}
+          <p className="mt-1 text-xs text-gray-400">{draftText.shared}</p>
         </div>
 
-        <AiWriter
-          form={form}
-          categoryName={category.name}
-          resumeLanguage={lang === "fr" ? "French" : "English"}
-          t={t}
-        />
+        {aiEnabled ? (
+          <AiWriter
+            form={form}
+            categoryName={category.name}
+            resumeLanguage={lang === "fr" ? "French" : "English"}
+            uiLang={uiLang}
+            t={t}
+            onApplied={() => setFormVersion((v) => v + 1)}
+          />
+        ) : null}
         <BuilderForm
+          key={formVersion}
           form={form}
           categoryId={category.id}
           t={t}

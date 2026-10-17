@@ -1,11 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { ResumeData } from "@/lib/resume-schema";
+import { Lang } from "@/lib/labels";
 import { Ui } from "@/lib/i18n";
 
 const newId = () => Math.random().toString(36).slice(2, 9);
+const CONSENT_KEY = "rc_ai_consent";
+
+const CONSENT = {
+  en: {
+    text: "I understand that the text I write here is sent to an AI service, which may be located outside Morocco, to write my draft. I will not include ID numbers or other sensitive details.",
+    needed: "Please tick the box to confirm before using the AI Writer.",
+  },
+  fr: {
+    text: "Je comprends que le texte que j'écris ici est envoyé à un service d'IA, qui peut être situé hors du Maroc, pour rédiger mon brouillon. Je n'y mettrai ni numéro de pièce d'identité ni autre information sensible.",
+    needed: "Cochez la case pour confirmer avant d'utiliser le Rédacteur IA.",
+  },
+};
 
 type AiResume = {
   personal: Record<string, string>;
@@ -33,20 +46,50 @@ export default function AiWriter({
   form,
   categoryName,
   resumeLanguage,
+  uiLang,
   t,
+  onApplied,
 }: {
   form: UseFormReturn<ResumeData>;
   categoryName: string;
   resumeLanguage: "English" | "French";
+  uiLang: Lang;
   t: Ui;
+  onApplied?: () => void;
 }) {
+  const c = CONSENT[uiLang];
+
   const [prompt, setPrompt] = useState("");
   const [useCurrent, setUseCurrent] = useState(false);
+  const [agreed, setAgreed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
 
+  // Remember the confirmation on this device
+  useEffect(() => {
+    try {
+      if (window.localStorage.getItem(CONSENT_KEY) === "1") setAgreed(true);
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  function toggleAgreed(value: boolean) {
+    setAgreed(value);
+    try {
+      if (value) window.localStorage.setItem(CONSENT_KEY, "1");
+      else window.localStorage.removeItem(CONSENT_KEY);
+    } catch {
+      // ignore
+    }
+  }
+
   async function generate() {
+    if (!agreed) {
+      setError(c.needed);
+      return;
+    }
     if (prompt.trim().length < 20) {
       setError(t.aiTooShort);
       return;
@@ -91,8 +134,9 @@ export default function AiWriter({
         experience: r.experience.map((j) => ({ id: newId(), ...j })),
         education: r.education.map((e) => ({ id: newId(), ...e })),
         skills: r.skills ?? [],
-        customSections: r.customSections.map((c) => ({ id: newId(), ...c })),
+        customSections: r.customSections.map((s) => ({ id: newId(), ...s })),
       });
+      onApplied?.();
 
       setMessage(data.message || t.aiReady);
       setUseCurrent(true);
@@ -137,6 +181,16 @@ export default function AiWriter({
         ))}
       </div>
 
+      <label className="mt-3 flex items-start gap-2 text-xs text-gray-700">
+        <input
+          type="checkbox"
+          className="mt-0.5"
+          checked={agreed}
+          onChange={(e) => toggleAgreed(e.target.checked)}
+        />
+        <span>{c.text}</span>
+      </label>
+
       <div className="mt-3 flex flex-wrap items-center gap-3">
         <label className="flex items-center gap-2 text-xs text-gray-700">
           <input
@@ -150,7 +204,7 @@ export default function AiWriter({
         <button
           type="button"
           onClick={generate}
-          disabled={loading}
+          disabled={loading || !agreed}
           className="ml-auto rounded bg-blue-600 px-4 py-1.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
         >
           {loading ? t.aiWriting : useCurrent ? t.aiUpdate : t.aiWrite}
