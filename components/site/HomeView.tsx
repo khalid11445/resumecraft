@@ -11,6 +11,46 @@ const LAYOUTS = ["Elegant", "Bold", "Timeline", "Modern", "Classic", "Compact"];
 const T = {
   en: {
     badge: "New: AI Writer drafts your resume for you",
+    badgeNoAi: "New: resume formats for Morocco, Canada and the US",
+    subNoAi:
+      "Pick your profession, choose the format for your country, click anything to edit, and download. No design skills needed.",
+    chipFormats: "Morocco · Canada · US",
+    formatsLabel: "Country formats",
+    formatsTitle: "A resume that follows local rules",
+    formatsText:
+      "Switch between Morocco, Canada and US formats. The page size and the photo rule change for you.",
+    formatsCards: [
+      { name: "Morocco", detail: "A4 page, photo optional" },
+      { name: "Canada", detail: "Letter page, no photo" },
+      { name: "United States", detail: "Letter page, no photo" },
+    ],
+    toolsTitle: "More than a resume",
+    toolsSub: "Free guides and tools for the rest of your job search and your studies.",
+    toolsGo: "Open",
+    tools: [
+      {
+        title: "Interview prep",
+        text: "Common questions with sample answers, by profession.",
+        href: "/interview",
+      },
+      {
+        title: "PFE guide",
+        text: "From choosing a topic to the final defense.",
+        href: "/pfe",
+      },
+      {
+        title: "Study abroad",
+        text: "France and Canada: steps, documents and official links.",
+        href: "/study-abroad",
+      },
+      {
+        title: "Jobs in Morocco",
+        text: "Where to find offers and how to apply.",
+        href: "/jobs",
+      },
+    ],
+    step2NoAi:
+      "Fill the form, use the suggestions, and click any text on the preview to fix it.",
     h1Before: "A resume that looks like you ",
     h1Highlight: "hired a designer",
     sub: "Pick your profession, let the AI Writer draft it, click anything to edit, and download. No design skills needed.",
@@ -94,28 +134,34 @@ const T = {
       },
     ],
     faqTitle: "Questions, answered honestly",
-    faqs: [
-      {
-        q: "Is it free?",
-        a: "You can pick a profession, build, and preview your resume for free. See the Pricing page for how downloads work.",
-      },
-      {
-        q: "Will my resume pass applicant tracking systems (ATS)?",
-        a: "No tool can promise that, because every employer's system reads files differently. Simple single-column layouts such as Classic and Compact use real, selectable text and are generally easier for software to read. Two-column designs like Modern look great to people but can be harder for some systems.",
-      },
-      {
-        q: "Does the AI make things up?",
-        a: "We tell it to use only what you write and to leave a [bracket] placeholder where a number is missing. Still, read every line before you send your resume: you are responsible for what it says.",
-      },
-      {
-        q: "Is my information private?",
-        a: "What you type stays in your browser while you build. If you use the AI Writer, the text you submit is sent to our AI provider to produce your draft. See the Privacy policy for details.",
-      },
-      {
-        q: "Should I add a photo?",
-        a: "It depends on the country. Photos are common in many places but usually left out in the US, Canada, and the UK. It is optional here, so you decide.",
-      },
-    ],
+    faqFree: {
+      q: "Is it free?",
+      a: "You can pick a profession, build, and preview your resume for free. See the Pricing page for how downloads work.",
+    },
+    faqAts: {
+      q: "Will my resume pass applicant tracking systems (ATS)?",
+      a: "No tool can promise that, because every employer's system reads files differently. Simple single-column layouts such as Classic and Compact use real, selectable text and are generally easier for software to read. Two-column designs like Modern look great to people but can be harder for some systems.",
+    },
+    faqAi: {
+      q: "Does the AI make things up?",
+      a: "We tell it to use only what you write and to leave a [bracket] placeholder where a number is missing. Still, read every line before you send your resume: you are responsible for what it says.",
+    },
+    faqPrivacy: {
+      q: "Is my information private?",
+      a: "What you type stays in your browser while you build, and your draft is saved on your own device. See the Privacy policy for details.",
+    },
+    faqPrivacyAi: {
+      q: "Is my information private?",
+      a: "What you type stays in your browser while you build. If you use the AI Writer, the text you submit is sent to our AI provider to produce your draft. See the Privacy policy for details.",
+    },
+    faqFormat: {
+      q: "Which format should I choose for Canada or the US?",
+      a: "Choose the Canada or United States format in the builder. It uses a Letter-size page and hides your photo. Also leave out personal details such as age or marital status. Conventions can vary by employer, so always follow the job posting.",
+    },
+    faqPhoto: {
+      q: "Should I add a photo?",
+      a: "It depends on the country. Photos are common in Morocco and France but usually left out in the US and Canada. Pick the country format in the builder and the photo is hidden for you where it is not used.",
+    },
     faqMore: "More details in our",
     privacyLabel: "Privacy policy",
     and: "and",
@@ -125,6 +171,46 @@ const T = {
   },
   fr: {
     badge: "Nouveau : le Rédacteur IA écrit votre CV avec vous",
+    badgeNoAi: "Nouveau : des formats de CV pour le Maroc, le Canada et les États-Unis",
+    subNoAi:
+      "Choisissez votre métier, choisissez le format de votre pays, cliquez sur n'importe quel texte pour le modifier, puis téléchargez. Aucune compétence en design nécessaire.",
+    chipFormats: "Maroc · Canada · États-Unis",
+    formatsLabel: "Formats par pays",
+    formatsTitle: "Un CV qui respecte les usages locaux",
+    formatsText:
+      "Passez du format Maroc au format Canada ou États-Unis. La taille de page et la règle sur la photo changent pour vous.",
+    formatsCards: [
+      { name: "Maroc", detail: "Page A4, photo facultative" },
+      { name: "Canada", detail: "Page Letter, sans photo" },
+      { name: "États-Unis", detail: "Page Letter, sans photo" },
+    ],
+    toolsTitle: "Plus qu'un CV",
+    toolsSub: "Des guides et des outils gratuits pour la suite de votre recherche d'emploi et de vos études.",
+    toolsGo: "Ouvrir",
+    tools: [
+      {
+        title: "Préparation d'entretien",
+        text: "Les questions fréquentes avec des exemples de réponses, par métier.",
+        href: "/interview",
+      },
+      {
+        title: "Guide PFE",
+        text: "Du choix du sujet à la soutenance finale.",
+        href: "/pfe",
+      },
+      {
+        title: "Études à l'étranger",
+        text: "France et Canada : étapes, documents et liens officiels.",
+        href: "/study-abroad",
+      },
+      {
+        title: "Emploi au Maroc",
+        text: "Où trouver des offres et comment postuler.",
+        href: "/jobs",
+      },
+    ],
+    step2NoAi:
+      "Remplissez le formulaire, utilisez les suggestions et cliquez sur un texte de l'aperçu pour le corriger.",
     h1Before: "Un CV qui donne l'impression d'avoir fait appel à ",
     h1Highlight: "un designer",
     sub: "Choisissez votre métier, laissez le Rédacteur IA écrire un premier jet, cliquez sur n'importe quel texte pour le modifier, puis téléchargez. Aucune compétence en design nécessaire.",
@@ -208,28 +294,34 @@ const T = {
       },
     ],
     faqTitle: "Vos questions, des réponses honnêtes",
-    faqs: [
-      {
-        q: "C'est gratuit ?",
-        a: "Vous pouvez choisir un métier, créer et prévisualiser votre CV gratuitement. Consultez la page Tarifs pour le téléchargement.",
-      },
-      {
-        q: "Mon CV passera-t-il les logiciels de tri des candidatures (ATS) ?",
-        a: "Aucun outil ne peut le promettre, car chaque employeur utilise un logiciel différent. Les modèles simples sur une colonne, comme Classic et Compact, utilisent du vrai texte sélectionnable et sont en général plus faciles à lire pour un logiciel. Les designs à deux colonnes, comme Modern, plaisent aux recruteurs mais peuvent être plus difficiles à lire pour certains systèmes.",
-      },
-      {
-        q: "L'IA invente-t-elle des choses ?",
-        a: "Nous lui demandons de n'utiliser que ce que vous écrivez et de laisser un [crochet] quand un chiffre manque. Relisez malgré tout chaque ligne avant d'envoyer votre CV : vous êtes responsable de son contenu.",
-      },
-      {
-        q: "Mes informations sont-elles privées ?",
-        a: "Ce que vous saisissez reste dans votre navigateur pendant la création. Si vous utilisez le Rédacteur IA, le texte envoyé est transmis à notre prestataire d'IA pour produire votre brouillon. Voir la politique de confidentialité.",
-      },
-      {
-        q: "Faut-il ajouter une photo ?",
-        a: "Cela dépend du pays. Les photos sont courantes dans beaucoup d'endroits, mais généralement omises aux États-Unis, au Canada et au Royaume-Uni. Elle est optionnelle ici : vous décidez.",
-      },
-    ],
+    faqFree: {
+      q: "C'est gratuit ?",
+      a: "Vous pouvez choisir un métier, créer et prévisualiser votre CV gratuitement. Consultez la page Tarifs pour le téléchargement.",
+    },
+    faqAts: {
+      q: "Mon CV passera-t-il les logiciels de tri des candidatures (ATS) ?",
+      a: "Aucun outil ne peut le promettre, car chaque employeur utilise un logiciel différent. Les modèles simples sur une colonne, comme Classic et Compact, utilisent du vrai texte sélectionnable et sont en général plus faciles à lire pour un logiciel. Les designs à deux colonnes, comme Modern, plaisent aux recruteurs mais peuvent être plus difficiles à lire pour certains systèmes.",
+    },
+    faqAi: {
+      q: "L'IA invente-t-elle des choses ?",
+      a: "Nous lui demandons de n'utiliser que ce que vous écrivez et de laisser un [crochet] quand un chiffre manque. Relisez malgré tout chaque ligne avant d'envoyer votre CV : vous êtes responsable de son contenu.",
+    },
+    faqPrivacy: {
+      q: "Mes informations sont-elles privées ?",
+      a: "Ce que vous saisissez reste dans votre navigateur pendant la création, et votre brouillon est enregistré sur votre propre appareil. Voir la politique de confidentialité.",
+    },
+    faqPrivacyAi: {
+      q: "Mes informations sont-elles privées ?",
+      a: "Ce que vous saisissez reste dans votre navigateur pendant la création. Si vous utilisez le Rédacteur IA, le texte envoyé est transmis à notre prestataire d'IA pour produire votre brouillon. Voir la politique de confidentialité.",
+    },
+    faqFormat: {
+      q: "Quel format choisir pour le Canada ou les États-Unis ?",
+      a: "Choisissez le format Canada ou États-Unis dans le créateur. Il utilise une page de taille Letter et masque votre photo. Évitez aussi les informations personnelles comme l'âge ou la situation familiale. Les usages varient selon les employeurs : suivez toujours l'offre d'emploi.",
+    },
+    faqPhoto: {
+      q: "Faut-il ajouter une photo ?",
+      a: "Cela dépend du pays. Les photos sont courantes au Maroc et en France, mais généralement omises aux États-Unis et au Canada. Choisissez le format du pays dans le créateur et la photo est masquée pour vous là où elle n'est pas utilisée.",
+    },
     faqMore: "Plus de détails dans notre",
     privacyLabel: "politique de confidentialité",
     and: "et notre",
@@ -246,6 +338,17 @@ export default function HomeView({ lang }: { lang: Lang }) {
   const hero = examples.slice(0, 3);
   const stats = [categories.length, LAYOUTS.length, palettes.length];
 
+  // The AI Writer messages show only when the feature is turned on
+  const aiOn = process.env.NEXT_PUBLIC_AI_ENABLED !== "false";
+  const faqList = [
+    t.faqFree,
+    t.faqAts,
+    ...(aiOn ? [t.faqAi] : []),
+    aiOn ? t.faqPrivacyAi : t.faqPrivacy,
+    t.faqFormat,
+    t.faqPhoto,
+  ];
+
   return (
     <main>
       {/* HERO */}
@@ -256,7 +359,7 @@ export default function HomeView({ lang }: { lang: Lang }) {
         <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-6 py-16 lg:grid-cols-2 lg:py-24">
           <div className="motion-safe:animate-fade-up">
             <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs text-slate-200">
-              <span className="text-amber-300">✦</span> {t.badge}
+              <span className="text-amber-300">✦</span> {aiOn ? t.badge : t.badgeNoAi}
             </span>
 
             <h1 className="mt-6 text-4xl font-semibold leading-[1.1] tracking-tight sm:text-6xl">
@@ -267,7 +370,7 @@ export default function HomeView({ lang }: { lang: Lang }) {
             </h1>
 
             <p className="mt-6 max-w-lg text-base text-slate-300 sm:text-lg">
-              {t.sub}
+              {aiOn ? t.sub : t.subNoAi}
             </p>
 
             <div className="mt-8 flex flex-wrap gap-3">
@@ -342,7 +445,7 @@ export default function HomeView({ lang }: { lang: Lang }) {
             </div>
 
             <span className="absolute -left-1 bottom-12 z-20 rounded-full border border-white/20 bg-slate-900/80 px-3 py-1.5 text-xs text-white backdrop-blur">
-              {t.chipAi}
+              {aiOn ? t.chipAi : t.chipFormats}
             </span>
             <span className="absolute -right-1 bottom-24 z-20 rounded-full border border-white/20 bg-slate-900/80 px-3 py-1.5 text-xs text-white backdrop-blur">
               {t.chipEdit}
@@ -377,7 +480,29 @@ export default function HomeView({ lang }: { lang: Lang }) {
           </p>
 
           <div className="mt-12 grid gap-5 lg:grid-cols-3">
+            {/* Country formats (shown while the AI Writer is off) */}
+            {!aiOn ? (
+              <div className="rounded-2xl bg-slate-950 p-7 text-white lg:col-span-2">
+                <p className="text-xs font-semibold uppercase tracking-widest text-amber-300">
+                  {t.formatsLabel}
+                </p>
+                <h3 className="mt-2 text-xl font-semibold">{t.formatsTitle}</h3>
+                <p className="mt-2 max-w-md text-sm text-slate-400">
+                  {t.formatsText}
+                </p>
+                <div className="mt-6 grid gap-3 sm:grid-cols-3">
+                  {t.formatsCards.map((f) => (
+                    <div key={f.name} className="rounded-xl bg-white/10 px-4 py-3">
+                      <p className="font-semibold text-white">{f.name}</p>
+                      <p className="mt-1 text-xs text-slate-300">{f.detail}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
             {/* AI Writer */}
+            {aiOn ? (
             <div className="rounded-2xl bg-slate-950 p-7 text-white lg:col-span-2">
               <p className="text-xs font-semibold uppercase tracking-widest text-amber-300">
                 {t.aiLabel}
@@ -394,6 +519,7 @@ export default function HomeView({ lang }: { lang: Lang }) {
               </div>
               <p className="mt-4 text-xs text-slate-500">{t.aiCaption}</p>
             </div>
+            ) : null}
 
             {/* Click to edit */}
             <div className="rounded-2xl border border-slate-200 bg-white p-7">
@@ -488,8 +614,41 @@ export default function HomeView({ lang }: { lang: Lang }) {
         </div>
       </section>
 
+      {/* TOOLS */}
+      <section className="bg-white py-20">
+        <div className="mx-auto max-w-6xl px-6">
+          <h2 className="text-center text-3xl font-semibold tracking-tight text-slate-900">
+            {t.toolsTitle}
+          </h2>
+          <p className="mx-auto mt-3 max-w-xl text-center text-slate-600">
+            {t.toolsSub}
+          </p>
+
+          <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {t.tools.map((tool) => (
+              <Link
+                key={tool.href}
+                href={`${base}${tool.href}`}
+                className="group rounded-2xl border border-slate-200 bg-white p-6 transition hover:-translate-y-1 hover:shadow-xl"
+              >
+                <h3 className="text-lg font-semibold text-slate-900">
+                  {tool.title}
+                </h3>
+                <p className="mt-2 text-sm text-slate-600">{tool.text}</p>
+                <p className="mt-5 text-sm font-semibold text-slate-900">
+                  {t.toolsGo}{" "}
+                  <span className="inline-block transition group-hover:translate-x-1">
+                    →
+                  </span>
+                </p>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* PROFESSIONS */}
-      <section id="professions" className="bg-white py-20">
+      <section id="professions" className="bg-slate-50 py-20">
         <div className="mx-auto max-w-6xl px-6">
           <h2 className="text-center text-3xl font-semibold tracking-tight text-slate-900">
             {t.profTitle}
@@ -534,7 +693,7 @@ export default function HomeView({ lang }: { lang: Lang }) {
       </section>
 
       {/* GALLERY */}
-      <section className="bg-slate-50 py-20">
+      <section className="bg-white py-20">
         <div className="mx-auto max-w-6xl px-6">
           <h2 className="text-center text-3xl font-semibold tracking-tight text-slate-900">
             {t.galleryTitle}
@@ -573,7 +732,7 @@ export default function HomeView({ lang }: { lang: Lang }) {
       </section>
 
       {/* HOW IT WORKS */}
-      <section className="bg-white py-20">
+      <section className="bg-slate-50 py-20">
         <div className="mx-auto max-w-5xl px-6">
           <h2 className="text-center text-3xl font-semibold tracking-tight text-slate-900">
             {t.stepsTitle}
@@ -585,7 +744,9 @@ export default function HomeView({ lang }: { lang: Lang }) {
                 <h3 className="mt-3 text-lg font-semibold text-slate-900">
                   {s.title}
                 </h3>
-                <p className="mt-2 text-sm text-slate-600">{s.text}</p>
+                <p className="mt-2 text-sm text-slate-600">
+                  {!aiOn && s.n === "02" ? t.step2NoAi : s.text}
+                </p>
               </div>
             ))}
           </div>
@@ -593,13 +754,13 @@ export default function HomeView({ lang }: { lang: Lang }) {
       </section>
 
       {/* FAQ */}
-      <section className="bg-slate-50 py-20">
+      <section className="bg-white py-20">
         <div className="mx-auto max-w-3xl px-6">
           <h2 className="text-center text-3xl font-semibold tracking-tight text-slate-900">
             {t.faqTitle}
           </h2>
           <div className="mt-10 divide-y divide-slate-200 rounded-2xl border border-slate-200 bg-white">
-            {t.faqs.map((f) => (
+            {faqList.map((f) => (
               <details key={f.q} className="group px-6 py-5">
                 <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-medium text-slate-900">
                   {f.q}

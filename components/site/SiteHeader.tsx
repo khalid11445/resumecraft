@@ -31,6 +31,11 @@ const T: Record<"en" | "fr", Text> = {
             title: "Examples",
             desc: "See finished resumes for inspiration",
           },
+                    {
+            href: "/my-resumes",
+            title: "My resumes",
+            desc: "Open, duplicate and back up your saved resumes",
+          },
         ],
       },
       {
@@ -96,6 +101,11 @@ const T: Record<"en" | "fr", Text> = {
             href: "/examples",
             title: "Exemples",
             desc: "Voyez des CV terminés pour vous inspirer",
+          },
+                    {
+            href: "/my-resumes",
+            title: "Mes CV",
+            desc: "Ouvrez, dupliquez et sauvegardez vos CV",
           },
         ],
       },
