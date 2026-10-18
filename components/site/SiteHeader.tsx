@@ -31,10 +31,26 @@ const T: Record<"en" | "fr", Text> = {
             title: "Examples",
             desc: "See finished resumes for inspiration",
           },
+        ],
+      },
+      {
+        id: "students",
+        label: "Students",
+        items: [
           {
             href: "/stage",
-            title: "Internship resume",
-            desc: "Resume and calendar for PFE and internships",
+            title: "Internships",
+            desc: "Resume, request letter and when to apply",
+          },
+          {
+            href: "/pfe",
+            title: "PFE guide",
+            desc: "From topic to report and defense",
+          },
+          {
+            href: "/study-abroad",
+            title: "Study abroad",
+            desc: "France and Canada: steps and documents",
           },
         ],
       },
@@ -81,10 +97,26 @@ const T: Record<"en" | "fr", Text> = {
             title: "Exemples",
             desc: "Voyez des CV terminés pour vous inspirer",
           },
+        ],
+      },
+      {
+        id: "students",
+        label: "Étudiants",
+        items: [
           {
             href: "/stage",
-            title: "CV de stage",
-            desc: "CV et calendrier pour le PFE et les stages",
+            title: "Stages",
+            desc: "CV, demande de stage et quand postuler",
+          },
+          {
+            href: "/pfe",
+            title: "Guide PFE",
+            desc: "Du sujet au rapport et à la soutenance",
+          },
+          {
+            href: "/study-abroad",
+            title: "Études à l'étranger",
+            desc: "France et Canada : étapes et documents",
           },
         ],
       },

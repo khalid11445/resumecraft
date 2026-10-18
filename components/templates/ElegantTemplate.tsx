@@ -124,11 +124,11 @@ function Section({
 export default function ElegantTemplate({
   data,
   accent = "#1b2a41",
-  lang = "en",
+  lang = "en", format = "morocco",
 }: {
   data: ResumeData;
   accent?: string;
-  lang?: Lang;
+  lang?: Lang; format?: "morocco" | "canada" | "us";
 }) {
   const styles = makeStyles(accent);
   const L = getLabels(lang);
@@ -146,7 +146,7 @@ export default function ElegantTemplate({
 
   return (
     <Document title={`${personal.fullName} - CV`}>
-      <Page size="A4" style={styles.page}>
+      <Page size={format === "morocco" ? "A4" : "LETTER"} style={styles.page}>
         <View style={styles.header}>
           <View style={styles.headerTop}>
             <View style={styles.headerText}>

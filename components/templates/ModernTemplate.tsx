@@ -81,11 +81,11 @@ const makeStyles = (accent: string) =>
 export default function ModernTemplate({
   data,
   accent = "#1f4e79",
-  lang = "en",
+  lang = "en", format = "morocco",
 }: {
   data: ResumeData;
   accent?: string;
-  lang?: Lang;
+  lang?: Lang; format?: "morocco" | "canada" | "us";
 }) {
   const styles = makeStyles(accent);
   const L = getLabels(lang);
@@ -103,7 +103,7 @@ export default function ModernTemplate({
 
   return (
     <Document title={`${personal.fullName} - CV`}>
-      <Page size="A4" style={styles.page}>
+      <Page size={format === "morocco" ? "A4" : "LETTER"} style={styles.page}>
         <View style={styles.sidebar}>
           {personal.photo ? (
             <Image src={personal.photo} style={styles.photo} />

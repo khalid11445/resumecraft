@@ -65,11 +65,11 @@ const makeStyles = (accent: string) =>
 export default function ClassicTemplate({
   data,
   accent = "#222222",
-  lang = "en",
+  lang = "en", format = "morocco",
 }: {
   data: ResumeData;
   accent?: string;
-  lang?: Lang;
+  lang?: Lang; format?: "morocco" | "canada" | "us";
 }) {
   const styles = makeStyles(accent);
   const L = getLabels(lang);
@@ -89,7 +89,7 @@ export default function ClassicTemplate({
 
   return (
     <Document title={`${personal.fullName} - CV`}>
-      <Page size="A4" style={styles.page}>
+      <Page size={format === "morocco" ? "A4" : "LETTER"} style={styles.page}>
         <View style={styles.header}>
           {personal.photo ? (
             <Image src={personal.photo} style={styles.photo} />

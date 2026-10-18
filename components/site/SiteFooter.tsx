@@ -7,6 +7,8 @@ const T = {
   en: {
     templates: "Templates",
     stage: "Internships",
+    pfe: "PFE guide",
+    abroad: "Study abroad",
     interview: "Interview prep",
     jobs: "Jobs in Morocco",
     examples: "Examples",
@@ -18,6 +20,8 @@ const T = {
   fr: {
     templates: "Modèles",
     stage: "Stage / PFE",
+    pfe: "Guide PFE",
+    abroad: "Études à l'étranger",
     interview: "Entretien",
     jobs: "Emploi au Maroc",
     examples: "Exemples",
@@ -37,6 +41,8 @@ export default function SiteFooter() {
   const links = [
     { href: `${base}/templates`, label: t.templates },
     { href: `${base}/stage`, label: t.stage },
+    { href: `${base}/pfe`, label: t.pfe },
+    { href: `${base}/study-abroad`, label: t.abroad },
     { href: `${base}/interview`, label: t.interview },
     { href: `${base}/jobs`, label: t.jobs },
     { href: `${base}/examples`, label: t.examples },

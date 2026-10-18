@@ -113,11 +113,11 @@ function Entry({
 export default function TimelineTemplate({
   data,
   accent = "#4338ca",
-  lang = "en",
+  lang = "en", format = "morocco",
 }: {
   data: ResumeData;
   accent?: string;
-  lang?: Lang;
+  lang?: Lang; format?: "morocco" | "canada" | "us";
 }) {
   const styles = makeStyles(accent);
   const L = getLabels(lang);
@@ -135,7 +135,7 @@ export default function TimelineTemplate({
 
   return (
     <Document title={`${personal.fullName} - CV`}>
-      <Page size="A4" style={styles.page}>
+      <Page size={format === "morocco" ? "A4" : "LETTER"} style={styles.page}>
         <View style={styles.header}>
           <View style={styles.headerTop}>
             <View style={styles.headerText}>
