@@ -78,6 +78,11 @@ const T: Record<"en" | "fr", Text> = {
             title: "Jobs in Morocco",
             desc: "Where to find offers and how to apply",
           },
+                    {
+            href: "/tracker",
+            title: "Application tracker",
+            desc: "Follow every application and your follow-up dates",
+          },
         ],
       },
     ],
@@ -148,6 +153,11 @@ const T: Record<"en" | "fr", Text> = {
             href: "/jobs",
             title: "Emploi au Maroc",
             desc: "Où trouver des offres et comment postuler",
+          },
+                    {
+            href: "/tracker",
+            title: "Suivi de candidatures",
+            desc: "Suivez chaque candidature et vos dates de relance",
           },
         ],
       },
