@@ -32,6 +32,11 @@ const T: Record<"en" | "fr", Text> = {
             desc: "See finished resumes for inspiration",
           },
                     {
+            href: "/checker",
+            title: "Resume checker",
+            desc: "Upload your PDF and get a score with tips",
+          },
+                    {
             href: "/my-resumes",
             title: "My resumes",
             desc: "Open, duplicate and back up your saved resumes",
@@ -106,6 +111,11 @@ const T: Record<"en" | "fr", Text> = {
             href: "/examples",
             title: "Exemples",
             desc: "Voyez des CV terminés pour vous inspirer",
+          },
+                    {
+            href: "/checker",
+            title: "Vérificateur de CV",
+            desc: "Téléversez votre PDF et obtenez une note avec des conseils",
           },
                     {
             href: "/my-resumes",
