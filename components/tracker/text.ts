@@ -1,0 +1,178 @@
+import { Lang } from "@/lib/labels";
+import type { Status } from "@/lib/tracker";
+import type { MessageKind } from "@/lib/messages";
+
+const en = {
+  title: "Application tracker",
+  intro:
+    "Keep every application in one place: what you sent, when to follow up and what to say. Everything stays in your browser.",
+  add: "Add an application",
+  export: "Export",
+  import: "Import",
+  myResume: "My resume",
+  letter: "Internship letter",
+  dragHint: "Drag cards between columns, or use the status menu on each card.",
+  statuses: {
+    saved: "To apply",
+    applied: "Applied",
+    interview: "Interview",
+    offer: "Offer",
+    rejected: "Rejected",
+  } as Record<Status, string>,
+  stats: "Follow-ups due",
+  emptyTitle: "No applications yet",
+  emptyText:
+    "Add the offers you are interested in. When you apply, move the card and we will show you when to follow up.",
+  emptyColumn: "Nothing here",
+  appliedOn: "Applied",
+  followUpOn: "Follow up",
+  due: "Follow-up due",
+  edit: "Edit",
+  messages: "Messages",
+  match: "Match",
+  openJob: "Open the job ad",
+  noResume:
+    "No saved resume yet. Edit a resume in the builder first, then come back to compare it with a job ad.",
+  openBuilder: "Open the builder",
+  storageNote:
+    "Saved on this device only. Export a copy from time to time, and clear your data if you use a shared computer.",
+  saveFailed:
+    "Your list could not be saved on this device (storage full or blocked). Export a copy now.",
+  imported: (n: number) => `${n} application${n > 1 ? "s" : ""} imported.`,
+  importNone: "Nothing new to import.",
+  importError: "This file could not be read. Use a file exported from this page.",
+  dismiss: "Close",
+
+  newTitle: "New application",
+  editTitle: "Edit application",
+  company: "Company",
+  role: "Role",
+  url: "Link to the job ad (optional)",
+  status: "Status",
+  applied: "Date applied",
+  followUp: "Follow up on",
+  plus7: "+7 days",
+  plus14: "+14 days",
+  contact: "Contact person (optional)",
+  contactEmail: "Contact email (optional)",
+  notes: "Notes",
+  posting: "Job ad text (optional)",
+  postingHint: "Paste the ad here and the Match button will use it.",
+  save: "Save",
+  cancel: "Cancel",
+  delete: "Delete",
+  deleteConfirm: "Delete this application?",
+  needOne: "Enter at least a company or a role.",
+  badUrl: "This link does not look valid.",
+  badEmail: "This email does not look valid.",
+
+  msgTitle: "Message for this application",
+  msgKind: "Type of message",
+  kinds: {
+    followup: "Follow-up",
+    thanks: "Thank you after an interview",
+    spontaneous: "Spontaneous application",
+    feedback: "Ask for feedback",
+  } as Record<MessageKind, string>,
+  msgLanguage: "Language",
+  subject: "Subject",
+  body: "Message",
+  copy: "Copy message",
+  copied: "Copied",
+  copyFailed: "Could not copy. Select the text and copy it yourself.",
+  mail: "Open in my email app",
+  mailHint: "Add the contact's email on the card to prefill the recipient.",
+  brackets: "Replace the [brackets] with your own details before you send it.",
+  close: "Close",
+};
+
+export type Tx = typeof en;
+
+const fr: Tx = {
+  title: "Suivi des candidatures",
+  intro:
+    "Gardez toutes vos candidatures au même endroit : ce que vous avez envoyé, quand relancer et quoi dire. Tout reste dans votre navigateur.",
+  add: "Ajouter une candidature",
+  export: "Exporter",
+  import: "Importer",
+  myResume: "Mon CV",
+  letter: "Demande de stage",
+  dragHint:
+    "Faites glisser les cartes entre les colonnes, ou utilisez le menu de statut de chaque carte.",
+  statuses: {
+    saved: "À postuler",
+    applied: "Postulé",
+    interview: "Entretien",
+    offer: "Offre",
+    rejected: "Refusé",
+  },
+  stats: "Relances à faire",
+  emptyTitle: "Aucune candidature pour le moment",
+  emptyText:
+    "Ajoutez les offres qui vous intéressent. Quand vous postulez, déplacez la carte et nous vous indiquerons quand relancer.",
+  emptyColumn: "Rien ici",
+  appliedOn: "Postulé le",
+  followUpOn: "Relance le",
+  due: "Relance à faire",
+  edit: "Modifier",
+  messages: "Messages",
+  match: "Comparer",
+  openJob: "Ouvrir l'offre",
+  noResume:
+    "Aucun CV enregistré pour le moment. Modifiez d'abord un CV dans le créateur, puis revenez le comparer à une offre.",
+  openBuilder: "Ouvrir le créateur",
+  storageNote:
+    "Enregistré uniquement sur cet appareil. Exportez une copie de temps en temps, et effacez vos données si vous utilisez un ordinateur partagé.",
+  saveFailed:
+    "Votre liste n'a pas pu être enregistrée sur cet appareil (stockage plein ou bloqué). Exportez une copie maintenant.",
+  imported: (n: number) => `${n} candidature${n > 1 ? "s" : ""} importée${n > 1 ? "s" : ""}.`,
+  importNone: "Rien de nouveau à importer.",
+  importError:
+    "Ce fichier n'a pas pu être lu. Utilisez un fichier exporté depuis cette page.",
+  dismiss: "Fermer",
+
+  newTitle: "Nouvelle candidature",
+  editTitle: "Modifier la candidature",
+  company: "Entreprise",
+  role: "Poste",
+  url: "Lien de l'offre (facultatif)",
+  status: "Statut",
+  applied: "Date de candidature",
+  followUp: "Relancer le",
+  plus7: "+7 jours",
+  plus14: "+14 jours",
+  contact: "Personne à contacter (facultatif)",
+  contactEmail: "Email du contact (facultatif)",
+  notes: "Notes",
+  posting: "Texte de l'offre (facultatif)",
+  postingHint: "Collez l'offre ici : le bouton Comparer l'utilisera.",
+  save: "Enregistrer",
+  cancel: "Annuler",
+  delete: "Supprimer",
+  deleteConfirm: "Supprimer cette candidature ?",
+  needOne: "Indiquez au moins une entreprise ou un poste.",
+  badUrl: "Ce lien ne semble pas valide.",
+  badEmail: "Cet email ne semble pas valide.",
+
+  msgTitle: "Message pour cette candidature",
+  msgKind: "Type de message",
+  kinds: {
+    followup: "Relance",
+    thanks: "Remerciement après un entretien",
+    spontaneous: "Candidature spontanée",
+    feedback: "Demander un retour",
+  },
+  msgLanguage: "Langue",
+  subject: "Objet",
+  body: "Message",
+  copy: "Copier le message",
+  copied: "Copié",
+  copyFailed: "Copie impossible. Sélectionnez le texte et copiez-le vous-même.",
+  mail: "Ouvrir dans ma messagerie",
+  mailHint:
+    "Ajoutez l'email du contact sur la carte pour préremplir le destinataire.",
+  brackets: "Remplacez les [crochets] par vos informations avant d'envoyer.",
+  close: "Fermer",
+};
+
+export const TT: Record<Lang, Tx> = { en, fr };

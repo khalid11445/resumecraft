@@ -1,141 +1,184 @@
-// Job application tracker. Everything is saved in this browser (localStorage).
-export const STATUSES = ["saved", "applied", "interview", "offer", "rejected"] as const;
-export type Status = (typeof STATUSES)[number];
+export type Status = "saved" | "applied" | "interview" | "offer" | "rejected";
+
+export const STATUSES: Status[] = [
+  "saved",
+  "applied",
+  "interview",
+  "offer",
+  "rejected",
+];
 
 export type Application = {
   id: string;
   company: string;
   role: string;
-  status: Status;
-  appliedDate: string; // YYYY-MM-DD or ""
-  followUp: string; // YYYY-MM-DD or ""
   url: string;
+  status: Status;
+  appliedOn: string; // yyyy-mm-dd or ""
+  followUpOn: string; // yyyy-mm-dd or ""
+  contact: string;
+  contactEmail: string;
   notes: string;
+  posting: string;
   updatedAt: string;
 };
 
-const KEY = "rc_applications";
-const DATE_OK = /^\d{4}-\d{2}-\d{2}$/;
+const STORAGE_KEY = "rc_tracker";
+const MAX_ITEMS = 500;
 
-const str = (v: unknown, max = 500) => (typeof v === "string" ? v.slice(0, max) : "");
-const date = (v: unknown) => (typeof v === "string" && DATE_OK.test(v) ? v : "");
-const isStatus = (v: unknown): v is Status =>
-  typeof v === "string" && (STATUSES as readonly string[]).includes(v);
+const str = (v: unknown, max: number) =>
+  typeof v === "string" ? v.slice(0, max) : "";
+const isDate = (v: string) => /^\d{4}-\d{2}-\d{2}$/.test(v);
 
-export const newId = () =>
-  Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
+export function newId(): string {
+  try {
+    if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+      return crypto.randomUUID();
+    }
+  } catch {
+    // fall through to the simple id below
+  }
+  return `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 10)}`;
+}
 
-function clean(raw: unknown): Application | null {
+// Only http and https links are kept, so a pasted "javascript:" link can never run
+export function safeUrl(value: string): string {
+  const v = value.trim();
+  if (!v) return "";
+  const withScheme = /^https?:\/\//i.test(v) ? v : `https://${v}`;
+  try {
+    const u = new URL(withScheme);
+    return u.protocol === "http:" || u.protocol === "https:" ? u.toString() : "";
+  } catch {
+    return "";
+  }
+}
+
+// Rebuilds an application from anything found in storage or in an imported file
+export function normalizeApplication(raw: unknown): Application | null {
   if (!raw || typeof raw !== "object") return null;
   const r = raw as Record<string, unknown>;
-  const company = str(r.company, 120).trim();
-  const role = str(r.role, 160).trim();
+
+  const company = str(r.company, 200).trim();
+  const role = str(r.role, 200).trim();
   if (!company && !role) return null;
+
+  const appliedOn = str(r.appliedOn, 10);
+  const followUpOn = str(r.followUpOn, 10);
+
   return {
-    id: str(r.id, 40) || newId(),
+    id: str(r.id, 100) || newId(),
     company,
     role,
-    status: isStatus(r.status) ? r.status : "applied",
-    appliedDate: date(r.appliedDate),
-    followUp: date(r.followUp),
-    url: str(r.url, 500),
-    notes: str(r.notes, 2000),
-    updatedAt: str(r.updatedAt, 40) || new Date().toISOString(),
+    url: safeUrl(str(r.url, 500)),
+    status: STATUSES.includes(r.status as Status) ? (r.status as Status) : "saved",
+    appliedOn: isDate(appliedOn) ? appliedOn : "",
+    followUpOn: isDate(followUpOn) ? followUpOn : "",
+    contact: str(r.contact, 200),
+    contactEmail: str(r.contactEmail, 200),
+    notes: str(r.notes, 5000),
+    posting: str(r.posting, 20000),
+    updatedAt: str(r.updatedAt, 40),
   };
 }
 
 export function loadApplications(): Application[] {
   try {
-    const raw = window.localStorage.getItem(KEY);
+    const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
-    const v = JSON.parse(raw);
-    if (!Array.isArray(v)) return [];
-    return v.map(clean).filter((x): x is Application => x !== null);
+    const v = JSON.parse(raw) as unknown;
+    const arr = Array.isArray(v) ? v : (v as { items?: unknown } | null)?.items;
+    if (!Array.isArray(arr)) return [];
+    return arr
+      .map(normalizeApplication)
+      .filter((x): x is Application => x !== null)
+      .slice(0, MAX_ITEMS);
   } catch {
     return [];
   }
 }
 
-// Returns false when the browser storage is full or blocked
+// Returns false when the browser refused to store the list (full or blocked)
 export function saveApplications(items: Application[]): boolean {
   try {
-    window.localStorage.setItem(KEY, JSON.stringify(items));
+    window.localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ version: 1, items })
+    );
     return true;
   } catch {
     return false;
   }
 }
 
-// Only web links are turned into clickable links
-export function safeUrl(u: string): string {
-  const value = u.trim();
-  if (!value) return "";
-  const withScheme = /^[a-z][a-z0-9+.-]*:/i.test(value) ? value : `https://${value}`;
-  try {
-    const x = new URL(withScheme);
-    return x.protocol === "http:" || x.protocol === "https:" ? x.toString() : "";
-  } catch {
-    return "";
-  }
-}
-
-export function exportBackup(items: Application[]): string {
+export function exportJson(items: Application[]): string {
   return JSON.stringify(
-    {
-      app: "resumecraft-tracker",
-      version: 1,
-      exportedAt: new Date().toISOString(),
-      applications: items,
-    },
+    { app: "resumecraft-tracker", version: 1, items },
     null,
     2
   );
 }
 
-// Entries that already exist (same id) are skipped, so restoring twice is safe
-export function importBackup(
-  text: string,
-  existing: Application[]
-): { items: Application[]; added: number } {
+export function parseImport(text: string): Application[] | null {
   try {
-    const v = JSON.parse(text) as Record<string, unknown>;
-    if (!v || v.app !== "resumecraft-tracker" || !Array.isArray(v.applications)) {
-      return { items: existing, added: 0 };
-    }
-    const ids = new Set(existing.map((a) => a.id));
-    const added: Application[] = [];
-    for (const raw of v.applications) {
-      const a = clean(raw);
-      if (!a || ids.has(a.id)) continue;
-      ids.add(a.id);
-      added.push(a);
-    }
-    return { items: [...added, ...existing], added: added.length };
+    const v = JSON.parse(text) as unknown;
+    const arr = Array.isArray(v) ? v : (v as { items?: unknown } | null)?.items;
+    if (!Array.isArray(arr)) return null;
+    return arr
+      .map(normalizeApplication)
+      .filter((x): x is Application => x !== null)
+      .slice(0, MAX_ITEMS);
   } catch {
-    return { items: existing, added: 0 };
+    return null;
   }
 }
 
-const csvCell = (v: string) => `"${v.replace(/"/g, '""')}"`;
+// ---- Dates (local time, no time zone surprises) ----
 
-// Opens correctly in Excel, including accents
-export function toCsv(
-  items: Application[],
-  headers: string[],
-  statusLabel: (s: Status) => string
-): string {
-  const rows = items.map((a) =>
-    [
-      a.company,
-      a.role,
-      statusLabel(a.status),
-      a.appliedDate,
-      a.followUp,
-      a.url,
-      a.notes,
-    ]
-      .map(csvCell)
-      .join(",")
+export function toISODate(d: Date): string {
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}
+
+// Only call this from an effect or an event handler, never while rendering
+export const todayISO = () => toISODate(new Date());
+
+export function addDays(iso: string, days: number): string {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
+  if (!m) return "";
+  const d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+  d.setDate(d.getDate() + days);
+  return toISODate(d);
+}
+
+export function formatDate(iso: string, locale: string): string {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
+  if (!m) return "";
+  return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])).toLocaleDateString(
+    locale,
+    { day: "numeric", month: "long", year: "numeric" }
   );
-  return "\uFEFF" + [headers.map(csvCell).join(","), ...rows].join("\r\n");
+}
+
+export function isFollowUpDue(app: Application, today: string | null): boolean {
+  return (
+    !!today &&
+    !!app.followUpOn &&
+    app.followUpOn <= today &&
+    (app.status === "applied" || app.status === "interview")
+  );
+}
+
+// Moving a card to "Applied" fills in today's date and a follow-up 7 days later
+export function withStatus(app: Application, status: Status): Application {
+  const next: Application = {
+    ...app,
+    status,
+    updatedAt: new Date().toISOString(),
+  };
+  if (status === "applied" && !next.appliedOn) {
+    next.appliedOn = todayISO();
+    if (!next.followUpOn) next.followUpOn = addDays(next.appliedOn, 7);
+  }
+  return next;
 }

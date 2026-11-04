@@ -63,16 +63,18 @@ const T = {
 export default function JobMatchPanel({
   resume,
   ui,
+  initialPosting = "",
   onAddSkill,
   onClose,
 }: {
   resume: ResumeData;
   ui: Lang;
+  initialPosting?: string;
   onAddSkill: (term: string) => void;
   onClose: () => void;
 }) {
   const t = T[ui];
-  const [posting, setPosting] = useState("");
+  const [posting, setPosting] = useState(initialPosting);
   const [result, setResult] = useState<MatchResult | null>(null);
   const [added, setAdded] = useState<string[]>([]);
 

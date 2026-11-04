@@ -24,7 +24,7 @@ const T: Record<Lang, Record<Page, Content>> = {
         {
           title: "What stays on your device",
           paras: [
-            "Your resume, the template, color and language you chose, and your download code are saved in your browser's local storage, on your device. They are not sent to our servers.",
+            "Your resume, the template, color and language you chose, your application tracker list and your download code are saved in your browser's local storage, on your device. They are not sent to our servers.",
             "On a shared computer, click “Start over” when you finish, or clear your browser data.",
           ],
         },
@@ -137,7 +137,7 @@ const T: Record<Lang, Record<Page, Content>> = {
         {
           title: "Ce qui reste sur votre appareil",
           paras: [
-            "Votre CV, le modèle, la couleur et la langue choisis, ainsi que votre code de téléchargement sont enregistrés dans le stockage local de votre navigateur, sur votre appareil. Ils ne sont pas envoyés à nos serveurs.",
+            "Votre CV, le modèle, la couleur et la langue choisis, votre liste de suivi des candidatures ainsi que votre code de téléchargement sont enregistrés dans le stockage local de votre navigateur, sur votre appareil.",
             "Sur un ordinateur partagé, cliquez sur « Recommencer » quand vous avez terminé, ou effacez les données de votre navigateur.",
           ],
         },

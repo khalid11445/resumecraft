@@ -103,3 +103,39 @@ export function clearDraft(categoryId: string) {
     // ignore
   }
 }
+// The resume edited most recently, across all categories
+export function loadLatestDraft(): { categoryId: string; draft: Draft } | null {
+  try {
+    let best: { categoryId: string; draft: Draft } | null = null;
+    for (let i = 0; i < window.localStorage.length; i++) {
+      const k = window.localStorage.key(i);
+      if (!k || !k.startsWith("rc_draft:")) continue;
+      const categoryId = k.slice("rc_draft:".length);
+      const draft = loadDraft(categoryId);
+      if (!draft || !draft.data) continue;
+      if (!best || draft.savedAt > best.draft.savedAt) best = { categoryId, draft };
+    }
+    return best;
+  } catch {
+    return null;
+  }
+}
+
+// Adds a skill to that resume (used by the "+" button of the job-posting match)
+export function addSkillToLatestDraft(term: string): boolean {
+  const found = loadLatestDraft();
+  if (!found || !found.draft.data) return false;
+
+  const { categoryId, draft } = found;
+  const data = draft.data as ResumeData;
+  const skills = data.skills.filter((s) => s.trim());
+  if (skills.some((s) => s.trim().toLowerCase() === term.toLowerCase())) return true;
+
+  saveDraft(categoryId, {
+    data: { ...data, skills: [...skills, term] },
+    templateId: draft.templateId,
+    accent: draft.accent,
+    lang: draft.lang,
+  });
+  return true;
+}

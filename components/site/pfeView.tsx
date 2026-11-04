@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "next/link"; import ShareButtons from "@/components/site/ShareButtons";
 import { Lang } from "@/lib/labels";
 import { pfeSections } from "@/lib/pfe";
 
@@ -47,7 +47,7 @@ export default function PfeView({ lang }: { lang: Lang }) {
       <h1 className="mt-4 text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
         {t.title}
       </h1>
-      <p className="mt-3 text-slate-600">{t.intro}</p>
+      <p className="mt-3 text-slate-600">{t.intro}</p><ShareButtons lang={lang} />
 
       <div className="mt-6 flex flex-wrap gap-2">
         {sections.map((s) => (

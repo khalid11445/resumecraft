@@ -14,7 +14,7 @@ import {
   exportBackup,
   importBackup,
   toCsv,
-} from "@/lib/tracker";
+} from "@/lib/appstore";
 
 const T = {
   en: {

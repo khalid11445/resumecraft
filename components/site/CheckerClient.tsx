@@ -1,7 +1,7 @@
 "use client";
 
 import { DragEvent, useRef, useState } from "react";
-import Link from "next/link";
+import Link from "next/link"; import ShareButtons from "@/components/site/ShareButtons";
 import { Lang } from "@/lib/labels";
 import {
   Check,
@@ -325,7 +325,7 @@ export default function CheckerClient({ lang }: { lang: Lang }) {
       <h1 className="mt-4 text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
         {t.title}
       </h1>
-      <p className="mt-3 text-slate-600">{t.intro}</p>
+      <p className="mt-3 text-slate-600">{t.intro}</p><ShareButtons lang={lang} />
       <p className="mt-3 rounded-lg bg-emerald-50 p-3 text-sm text-emerald-900">
         {t.privacy}
       </p>

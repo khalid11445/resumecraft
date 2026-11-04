@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import TrackerClient from "@/components/site/TrackerClient";
 
 export const metadata: Metadata = {
-  title: "Suivi de candidatures | ResumeCraft",
+  title: "Suivi des candidatures | ResumeCraft",
 };
 
 export default function Page() {
