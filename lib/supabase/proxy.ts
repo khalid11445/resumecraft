@@ -1,8 +1,12 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-const CRM_PATH = /^\/(fr\/)?crm(\/|$)/;
+const PROTECTED_PATH = /^\/(fr\/)?(crm|join)(\/|$)/;
 const AUTH_PATH = /^\/(fr\/)?(login|signup)\/?$/;
+
+// Only paths of this same site are accepted as a destination
+const safeNextPath = (value: string | null) =>
+  value && /^\/(?!\/)/.test(value) ? value : null;
 
 // Refreshes the login session and sends visitors to the right page.
 // This is a convenience, not the security boundary: the database
@@ -15,7 +19,7 @@ export async function updateSession(request: NextRequest) {
 
   // Without the Supabase variables, the rest of the site keeps working
   if (!url || !key) {
-    if (CRM_PATH.test(path)) {
+    if (PROTECTED_PATH.test(path)) {
       return NextResponse.redirect(new URL(`${prefix}/login`, request.url));
     }
     return NextResponse.next();
@@ -44,7 +48,7 @@ export async function updateSession(request: NextRequest) {
     const { data } = await supabase.auth.getClaims();
     const signedIn = Boolean(data?.claims);
 
-    if (!signedIn && CRM_PATH.test(path)) {
+    if (!signedIn && PROTECTED_PATH.test(path)) {
       const login = request.nextUrl.clone();
       login.pathname = `${prefix}/login`;
       login.search = "";
@@ -53,14 +57,21 @@ export async function updateSession(request: NextRequest) {
     }
 
     if (signedIn && AUTH_PATH.test(path)) {
-      const crm = request.nextUrl.clone();
-      crm.pathname = `${prefix}/crm`;
-      crm.search = "";
-      return NextResponse.redirect(crm);
+      const target = safeNextPath(request.nextUrl.searchParams.get("next"));
+      const dest = request.nextUrl.clone();
+      if (target) {
+        const parsed = new URL(target, request.url);
+        dest.pathname = parsed.pathname;
+        dest.search = parsed.search;
+      } else {
+        dest.pathname = `${prefix}/crm`;
+        dest.search = "";
+      }
+      return NextResponse.redirect(dest);
     }
   } catch (err) {
     console.error("Session check failed:", err);
-    if (CRM_PATH.test(path)) {
+    if (PROTECTED_PATH.test(path)) {
       return NextResponse.redirect(new URL(`${prefix}/login`, request.url));
     }
   }

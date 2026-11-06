@@ -33,9 +33,16 @@ export default function AuthForm({
   );
 
   // A broken or expired email link sends people back here with ?error=confirm
+    const [nextQs, setNextQs] = useState("");
+
   useEffect(() => {
-    if (new URLSearchParams(window.location.search).get("error") === "confirm") {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("error") === "confirm") {
       setMsg({ tone: "error", text: t.confirmError });
+    }
+    const next = params.get("next");
+    if (next && /^\/(?!\/)/.test(next)) {
+      setNextQs(`?next=${encodeURIComponent(next)}`);
     }
   }, [t.confirmError]);
 
@@ -83,10 +90,13 @@ export default function AuthForm({
       return;
     }
 
+        const nextParam = new URLSearchParams(window.location.search).get("next");
+    const after =
+      nextParam && /^\/(?!\/)/.test(nextParam) ? nextParam : `${base}/crm`;
     const { data, error } = await supabase.auth.signUp({
       email: mail,
       password,
-      options: { emailRedirectTo: `${window.location.origin}${base}/crm` },
+      options: { emailRedirectTo: `${window.location.origin}${after}` },
     });
     setBusy(false);
     if (error) {
@@ -156,7 +166,7 @@ export default function AuthForm({
       <p className="mt-4 text-sm text-gray-600">
         {isLogin ? t.noAccount : t.haveAccount}{" "}
         <Link
-          href={`${base}/${isLogin ? "signup" : "login"}`}
+                    href={`${base}/${isLogin ? "signup" : "login"}${nextQs}`}
           className="font-semibold text-blue-600 hover:underline"
         >
           {isLogin ? t.signupBtn : t.loginBtn}

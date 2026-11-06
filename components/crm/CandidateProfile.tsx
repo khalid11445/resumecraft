@@ -83,7 +83,7 @@ function telLink(phone: string | null): string | null {
 }
 
 export default function CandidateProfile() {
-  const { supabase, orgId, t, lang, base } = useCrm();
+   const { supabase, orgId, t, lang, base, nameOf, role } = useCrm();
   const p = PT[lang];
   const router = useRouter();
   const params = useParams<{ id: string }>();
@@ -812,13 +812,13 @@ export default function CandidateProfile() {
                       </p>
                       <div className="mt-2 flex items-center justify-between text-xs text-gray-500">
                         <span>
-                          {mine ? p.you : p.teammate} ·{" "}
+                                                    {mine ? p.you : nameOf(n.author_id) || p.teammate} ·{" "}
                           {new Date(n.created_at).toLocaleString(locale, {
                             dateStyle: "medium",
                             timeStyle: "short",
                           })}
                         </span>
-                        {mine ? (
+                                                {mine || role !== "member" ? (
                           <button
                             type="button"
                             onClick={() => deleteNote(n.id)}
