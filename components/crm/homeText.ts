@@ -1,0 +1,103 @@
+import { Lang } from "@/lib/labels";
+
+const en = {
+  navDashboard: "Dashboard",
+  navTasks: "Tasks",
+
+  welcome: (org: string) => `Welcome, ${org}`,
+  dashIntro: "Where your recruiting stands today.",
+  statOpenJobs: "Open jobs",
+  statCandidates: "Candidates",
+  statActive: "In pipeline",
+  statActiveHint: "From sourced to offer",
+  statTasks: "Tasks due",
+  statTasksHint: (a: number, b: number) => `${a} overdue · ${b} today`,
+  byStage: "Pipeline by stage",
+  noPipeline: "No one is in a pipeline yet.",
+  nextTasks: "Next tasks",
+  seeAll: "See all",
+  noNext: "No open tasks.",
+  recent: "Recently added candidates",
+  noRecent: "No candidates yet.",
+  startTitle: "Get started",
+  startText: "Add a job, then add candidates to its pipeline.",
+  startJob: "Add your first job",
+  startCand: "Add a candidate",
+
+  tasksTitle: "Tasks",
+  tasksIntro: "Everything you need to follow up on, across all candidates.",
+  newTask: "New task",
+  taskLabel: "Task",
+  taskPlaceholder: "For example: send the contract draft",
+  forCandidate: "Candidate (optional)",
+  noCandidate: "— No candidate —",
+  dueLabel: "Due date (optional)",
+  addTask: "Add task",
+  needTask: "Enter the task.",
+  groups: {
+    overdue: "Overdue",
+    today: "Today",
+    upcoming: "Upcoming",
+    nodate: "No date",
+  },
+  allClear: "No open tasks. All clear.",
+  showDone: "Show completed tasks",
+  hideDone: "Hide completed tasks",
+  doneTitle: "Completed (latest 30)",
+  noDone: "No completed tasks yet.",
+  deleteTask: "Delete",
+};
+
+export type HTx = typeof en;
+
+const fr: HTx = {
+  navDashboard: "Tableau de bord",
+  navTasks: "Tâches",
+
+  welcome: (org: string) => `Bienvenue, ${org}`,
+  dashIntro: "Où en est votre recrutement aujourd'hui.",
+  statOpenJobs: "Offres ouvertes",
+  statCandidates: "Candidats",
+  statActive: "En pipeline",
+  statActiveHint: "De sourcé à offre",
+  statTasks: "Tâches à faire",
+  statTasksHint: (a: number, b: number) => `${a} en retard · ${b} aujourd'hui`,
+  byStage: "Pipeline par étape",
+  noPipeline: "Personne n'est encore dans un pipeline.",
+  nextTasks: "Prochaines tâches",
+  seeAll: "Tout voir",
+  noNext: "Aucune tâche en cours.",
+  recent: "Candidats ajoutés récemment",
+  noRecent: "Aucun candidat pour le moment.",
+  startTitle: "Pour commencer",
+  startText:
+    "Ajoutez une offre, puis ajoutez des candidats à son pipeline.",
+  startJob: "Ajouter votre première offre",
+  startCand: "Ajouter un candidat",
+
+  tasksTitle: "Tâches",
+  tasksIntro:
+    "Tout ce que vous devez relancer, pour l'ensemble de vos candidats.",
+  newTask: "Nouvelle tâche",
+  taskLabel: "Tâche",
+  taskPlaceholder: "Par exemple : envoyer le projet de contrat",
+  forCandidate: "Candidat (facultatif)",
+  noCandidate: "— Aucun candidat —",
+  dueLabel: "Échéance (facultatif)",
+  addTask: "Ajouter la tâche",
+  needTask: "Saisissez la tâche.",
+  groups: {
+    overdue: "En retard",
+    today: "Aujourd'hui",
+    upcoming: "À venir",
+    nodate: "Sans date",
+  },
+  allClear: "Aucune tâche en cours. Tout est à jour.",
+  showDone: "Afficher les tâches terminées",
+  hideDone: "Masquer les tâches terminées",
+  doneTitle: "Terminées (30 dernières)",
+  noDone: "Aucune tâche terminée pour le moment.",
+  deleteTask: "Supprimer",
+};
+
+export const HT: Record<Lang, HTx> = { en, fr };

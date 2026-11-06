@@ -16,6 +16,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient, supabaseConfigured } from "@/lib/supabase/client";
 import { Lang } from "@/lib/labels";
 import { CT, Tx } from "@/components/crm/text";
+import { HT } from "@/components/crm/homeText";
 
 type Ctx = {
   supabase: SupabaseClient;
@@ -47,6 +48,7 @@ export default function CrmShell({
   children: ReactNode;
 }) {
   const t = CT[lang];
+  const h = HT[lang];
   const base = lang === "fr" ? "/fr" : "";
   const router = useRouter();
   const pathname = usePathname() || "";
@@ -175,7 +177,32 @@ export default function CrmShell({
 
   if (!supabase || !org) return null;
 
-  const jobsActive = !pathname.startsWith(`${base}/crm/candidates`);
+  // The path without the language prefix, so "/fr/crm/jobs" reads "/crm/jobs"
+  const p = pathname.startsWith("/fr") ? pathname.slice(3) || "/" : pathname;
+
+  const nav = [
+    {
+      href: `${base}/crm`,
+      label: h.navDashboard,
+      active: p === "/crm" || p === "/crm/",
+    },
+    {
+      href: `${base}/crm/jobs`,
+      label: t.navJobs,
+      active: p.startsWith("/crm/jobs"),
+    },
+    {
+      href: `${base}/crm/candidates`,
+      label: t.navCandidates,
+      active: p.startsWith("/crm/candidates"),
+    },
+    {
+      href: `${base}/crm/tasks`,
+      label: h.navTasks,
+      active: p.startsWith("/crm/tasks"),
+    },
+  ];
+
   const link = (active: boolean) =>
     `rounded px-3 py-1.5 text-sm font-semibold ${
       active ? "bg-slate-900 text-white" : "text-gray-700 hover:bg-gray-100"
@@ -189,15 +216,11 @@ export default function CrmShell({
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-3">
           <div className="flex flex-wrap items-center gap-2">
             <span className="mr-2 text-sm font-bold text-black">{org.name}</span>
-            <Link href={`${base}/crm`} className={link(jobsActive)}>
-              {t.navJobs}
-            </Link>
-            <Link
-              href={`${base}/crm/candidates`}
-              className={link(!jobsActive)}
-            >
-              {t.navCandidates}
-            </Link>
+            {nav.map((n) => (
+              <Link key={n.href} href={n.href} className={link(n.active)}>
+                {n.label}
+              </Link>
+            ))}
           </div>
           <div className="flex items-center gap-3 text-xs text-gray-600">
             <span className="hidden sm:inline">{email}</span>

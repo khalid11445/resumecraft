@@ -231,8 +231,8 @@ export default function PipelineView() {
     return (
       <div>
         <p className="text-sm text-gray-700">{t.jobNotFound}</p>
-        <Link
-          href={`${base}/crm`}
+               <Link
+          href={`${base}/crm/jobs`}
           className="mt-3 inline-block text-sm font-semibold text-blue-600 hover:underline"
         >
           {t.back}
@@ -243,8 +243,8 @@ export default function PipelineView() {
 
   return (
     <div>
-      <Link
-        href={`${base}/crm`}
+            <Link
+        href={`${base}/crm/jobs`}
         className="text-sm font-semibold text-blue-600 hover:underline"
       >
         {t.back}

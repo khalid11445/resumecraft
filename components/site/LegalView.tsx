@@ -5,7 +5,8 @@ import { PASS } from "@/lib/pass";
 const CONTACT_EMAIL = "your-email@example.com";
 const OPERATOR = "the ResumeCraft team";
 const UPDATED = { en: "October 2026", fr: "octobre 2026" };
-
+// Replace with the region you chose in Supabase (for example "the European Union")
+const DATA_REGION = "REPLACE-WITH-YOUR-SUPABASE-REGION";
 type Page = "privacy" | "terms" | "refund";
 type Section = { title: string; paras: string[] };
 type Content = { title: string; sections: Section[] };
@@ -43,6 +44,17 @@ const T: Record<Lang, Record<Page, Content>> = {
             "We do not sell your personal data. We do not use advertising cookies. At the time of writing we do not use analytics or tracking tools.",
           ],
         },
+                {
+          title: "Recruiter workspaces",
+          paras: [
+            `If you create a workspace, we store your account email and the data you add to it: jobs, candidates, notes and tasks. This data is kept on our database provider's servers in ${DATA_REGION}.`,
+            "You decide why and how the candidate data you enter is used. We provide the tool and store the data on your behalf. You are responsible for having a lawful basis to keep it and for informing the people concerned.",
+            "Each workspace is separate: only its members can see its data. We access workspace data only when needed to give you support or to keep the service secure.",
+            "We do not sell this data or use it for advertising. For this service we use Supabase (database and login) and Vercel (hosting).",
+            "When you log in, we use cookies that keep you signed in. They are necessary for the service and are not used for advertising.",
+            `You can delete a candidate, which also deletes their notes and tasks. To delete your account or workspace, write to ${CONTACT_EMAIL}.`,
+          ],
+        },
         {
           title: "Your rights",
           paras: [
@@ -77,6 +89,14 @@ const T: Record<Lang, Record<Page, Content>> = {
           title: "AI drafts",
           paras: [
             "Text written by the AI Writer is a draft and can contain mistakes. You are responsible for checking that your resume is accurate and true before you send it.",
+          ],
+        },
+                {
+          title: "Recruiter workspaces",
+          paras: [
+            "A workspace is for professional recruiting work. You may store only data you are allowed to keep and only for a legitimate purpose. Do not store sensitive information such as health, religion or political views unless the law allows it and you have the right to.",
+            "Do not use the service to send spam, to harass people, or to store data you obtained unlawfully. We may suspend a workspace that breaks these rules.",
+            "The CRM is in early access. Features may change, and we will announce any pricing before charging you. On request, we will try to give you a copy of your workspace data.",
           ],
         },
         {
@@ -156,6 +176,17 @@ const T: Record<Lang, Record<Page, Content>> = {
             "Nous ne vendons pas vos données personnelles. Nous n'utilisons pas de cookies publicitaires. À la date de rédaction, nous n'utilisons pas d'outils de mesure d'audience ni de suivi.",
           ],
         },
+                {
+          title: "Espaces de travail recruteurs",
+          paras: [
+            `Si vous créez un espace de travail, nous conservons l'email de votre compte et les données que vous y ajoutez : offres, candidats, notes et tâches. Ces données sont conservées sur les serveurs de notre prestataire de base de données, dans ${DATA_REGION}.`,
+            "Vous décidez pourquoi et comment les données de candidats que vous saisissez sont utilisées. Nous fournissons l'outil et conservons les données pour votre compte. Vous êtes responsable d'avoir une base légale pour les conserver et d'informer les personnes concernées.",
+            "Chaque espace est séparé : seuls ses membres voient ses données. Nous n'accédons aux données d'un espace que lorsque c'est nécessaire pour vous aider ou pour assurer la sécurité du service.",
+            "Nous ne vendons pas ces données et ne les utilisons pas pour la publicité. Pour ce service, nous utilisons Supabase (base de données et connexion) et Vercel (hébergement).",
+            "Lorsque vous vous connectez, nous utilisons des cookies qui vous maintiennent connecté. Ils sont nécessaires au service et ne servent pas à la publicité.",
+            `Vous pouvez supprimer un candidat, ce qui supprime aussi ses notes et ses tâches. Pour supprimer votre compte ou votre espace, écrivez à ${CONTACT_EMAIL}.`,
+          ],
+        },
         {
           title: "Vos droits",
           paras: [
@@ -190,6 +221,14 @@ const T: Record<Lang, Record<Page, Content>> = {
           title: "Brouillons de l'IA",
           paras: [
             "Le texte écrit par le Rédacteur IA est un brouillon et peut contenir des erreurs. Il vous appartient de vérifier que votre CV est exact et sincère avant de l'envoyer.",
+          ],
+        },
+                {
+          title: "Espaces de travail recruteurs",
+          paras: [
+            "Un espace de travail est destiné à un usage professionnel de recrutement. Vous ne pouvez conserver que des données que vous avez le droit de conserver, et seulement dans un but légitime. N'enregistrez pas d'informations sensibles comme la santé, la religion ou les opinions politiques, sauf si la loi l'autorise et que vous en avez le droit.",
+            "N'utilisez pas le service pour envoyer du spam, harceler des personnes ou conserver des données obtenues illégalement. Nous pouvons suspendre un espace qui ne respecte pas ces règles.",
+            "Le CRM est en accès anticipé. Les fonctions peuvent changer, et nous annoncerons les tarifs avant de vous facturer. Sur demande, nous essaierons de vous remettre une copie des données de votre espace.",
           ],
         },
         {
