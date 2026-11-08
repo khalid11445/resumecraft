@@ -36,9 +36,17 @@ const T = {
         title: "One-tap contact",
         text: "WhatsApp, call and email buttons that open your own apps. We send nothing for you.",
       },
-      {
+            {
         title: "Consent reminders",
         text: "Record the lawful basis for each candidate and get a warning when it is missing.",
+      },
+      {
+        title: "Teams and roles",
+        text: "Invite colleagues with a link, give them a role and assign tasks to a person.",
+      },
+      {
+        title: "Spreadsheet import",
+        text: "Bring in your existing list from a CSV file, with a preview and duplicate detection.",
       },
     ],
 
@@ -71,10 +79,10 @@ const T = {
 
     laterTitle: "Not available yet",
     laterText: "We would rather tell you now than surprise you later.",
-    later: [
-      "Teammates and roles: today a workspace has one user",
+        later: [
       "Email reminders and notifications",
-      "Importing candidates from a spreadsheet",
+      "Exporting your candidates to a spreadsheet",
+      "Resume files and attachments on a candidate",
       "Arabic interface",
     ],
 
@@ -90,7 +98,7 @@ const T = {
       },
       {
         q: "Can my whole team use it?",
-        a: "Not yet. Today a workspace has one user. Teammates are the next feature we want to build.",
+        a: "Yes. The owner invites teammates with a link and gives each person a role, admin or member. Tasks can be assigned to a person.",
       },
       {
         q: "Does it send emails or messages to candidates?",
@@ -141,9 +149,17 @@ const T = {
         title: "Contact en un geste",
         text: "Des boutons WhatsApp, appel et email qui ouvrent vos propres applications. Nous n'envoyons rien à votre place.",
       },
-      {
+            {
         title: "Rappels de consentement",
         text: "Enregistrez la base légale de chaque candidat et recevez un avertissement quand elle manque.",
+      },
+      {
+        title: "Équipes et rôles",
+        text: "Invitez vos collègues avec un lien, donnez-leur un rôle et assignez des tâches à une personne.",
+      },
+      {
+        title: "Import depuis un tableur",
+        text: "Reprenez votre liste existante depuis un fichier CSV, avec aperçu et détection des doublons.",
       },
     ],
 
@@ -176,10 +192,10 @@ const T = {
 
     laterTitle: "Pas encore disponible",
     laterText: "Nous préférons vous le dire maintenant plutôt que vous surprendre plus tard.",
-    later: [
-      "Collègues et rôles : aujourd'hui, un espace n'a qu'un utilisateur",
+        later: [
       "Rappels et notifications par email",
-      "Import de candidats depuis un tableur",
+      "Export de vos candidats vers un tableur",
+      "Fichiers de CV et pièces jointes sur un candidat",
       "Interface en arabe",
     ],
 
@@ -195,7 +211,7 @@ const T = {
       },
       {
         q: "Toute mon équipe peut-elle l'utiliser ?",
-        a: "Pas encore. Aujourd'hui, un espace n'a qu'un utilisateur. Les collègues sont la prochaine fonction que nous voulons construire.",
+        a: "Oui. Le propriétaire invite ses collègues avec un lien et donne à chacun un rôle, admin ou membre. Les tâches peuvent être assignées à une personne.",
       },
       {
         q: "Envoie-t-il des emails ou des messages aux candidats ?",

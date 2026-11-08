@@ -30,6 +30,7 @@ type Task = {
   due_on: string | null;
   done: boolean;
   created_at: string;
+  assigned_to: string | null;
 };
 type JobRef = { id: string; title: string; client: string | null };
 type AppRow = {
@@ -158,7 +159,7 @@ export default function CandidateProfile() {
         .order("created_at", { ascending: false }),
       supabase
         .from("tasks")
-        .select("id,title,due_on,done,created_at")
+                .select("id,title,due_on,done,created_at,assigned_to")
         .eq("candidate_id", candId)
         .eq("org_id", orgId)
         .order("created_at", { ascending: false }),
@@ -324,9 +325,10 @@ export default function CandidateProfile() {
       setMsg(p.needTask);
       return;
     }
-    const { error } = await supabase.from("tasks").insert({
+        const { error } = await supabase.from("tasks").insert({
       org_id: orgId,
       candidate_id: candId,
+      assigned_to: userId,
       title,
       due_on: taskDue || null,
     });
@@ -712,11 +714,14 @@ export default function CandidateProfile() {
                         <p className="text-sm font-medium text-gray-900">
                           {task.title}
                         </p>
-                        {task.due_on ? (
-                          <p className="text-xs text-gray-500">
-                            {dateOnly(task.due_on)}
-                          </p>
-                        ) : null}
+                                                <p className="text-xs text-gray-500">
+                          {[
+                            task.due_on ? dateOnly(task.due_on) : "",
+                            task.assigned_to ? nameOf(task.assigned_to) : "",
+                          ]
+                            .filter(Boolean)
+                            .join(" · ")}
+                        </p>
                       </div>
                       {late ? (
                         <span className="rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-semibold text-red-800">

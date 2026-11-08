@@ -29,7 +29,7 @@ const emptyForm = {
 };
 
 export default function CandidatesView() {
-  const { supabase, orgId, t, base } = useCrm();
+    const { supabase, orgId, t, base, lang } = useCrm();
 
   const [items, setItems] = useState<Cand[] | null>(null);
   const [query, setQuery] = useState("");
@@ -131,13 +131,21 @@ export default function CandidatesView() {
           <h1 className="text-2xl font-bold text-black">{t.candTitle}</h1>
           <p className="mt-1 text-sm text-gray-600">{t.candIntro}</p>
         </div>
-        <button
-          type="button"
-          onClick={() => setOpen((v) => !v)}
-          className="rounded bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
-        >
-          + {t.addCand}
-        </button>
+                <div className="flex flex-wrap items-center gap-2">
+          <Link
+            href={`${base}/crm/import`}
+            className="rounded border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-50"
+          >
+            {lang === "fr" ? "Importer un fichier CSV" : "Import a CSV file"}
+          </Link>
+          <button
+            type="button"
+            onClick={() => setOpen((v) => !v)}
+            className="rounded bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+          >
+            + {t.addCand}
+          </button>
+        </div>
       </div>
 
       {msg ? <p className="mt-4 text-sm text-red-700">{msg}</p> : null}

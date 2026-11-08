@@ -4,6 +4,7 @@ import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useCrm } from "@/components/crm/CrmShell";
 import { HT } from "@/components/crm/homeText";
+import { AT } from "@/components/crm/assignText";
 
 type Cand = { id: string; full_name: string };
 type TaskRow = {
@@ -12,12 +13,16 @@ type TaskRow = {
   due_on: string | null;
   done: boolean;
   candidate_id: string | null;
+  assigned_to: string | null;
   candidates: Cand | Cand[] | null;
 };
 type Group = "overdue" | "today" | "upcoming" | "nodate";
+type Filter = "all" | "mine" | "unassigned";
 
 const GROUPS: Group[] = ["overdue", "today", "upcoming", "nodate"];
-const SELECT = "id,title,due_on,done,candidate_id,candidates(id,full_name)";
+const FILTERS: Filter[] = ["all", "mine", "unassigned"];
+const SELECT =
+  "id,title,due_on,done,candidate_id,assigned_to,candidates(id,full_name)";
 
 const input =
   "w-full rounded border border-gray-300 bg-white px-3 py-2 text-sm text-black";
@@ -39,8 +44,9 @@ function localISO(d: Date): string {
 }
 
 export default function TasksView() {
-  const { supabase, orgId, t, lang, base } = useCrm();
+  const { supabase, orgId, t, lang, base, userId, members, nameOf } = useCrm();
   const h = HT[lang];
+  const a = AT[lang];
   const locale = lang === "fr" ? "fr-FR" : "en-US";
 
   const [today, setToday] = useState<string | null>(null);
@@ -48,15 +54,22 @@ export default function TasksView() {
   const [done, setDone] = useState<TaskRow[] | null>(null);
   const [showDone, setShowDone] = useState(false);
   const [options, setOptions] = useState<Cand[]>([]);
+  const [filter, setFilter] = useState<Filter>("all");
   const [title, setTitle] = useState("");
   const [due, setDue] = useState("");
   const [candidate, setCandidate] = useState("");
+  const [assignee, setAssignee] = useState("");
   const [msg, setMsg] = useState("");
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     setToday(localISO(new Date()));
   }, []);
+
+  // New tasks are assigned to you unless you choose someone else
+  useEffect(() => {
+    if (userId) setAssignee(userId);
+  }, [userId]);
 
   const load = useCallback(async () => {
     const [o, c] = await Promise.all([
@@ -109,6 +122,20 @@ export default function TasksView() {
     if (showDone) void loadDone();
   }, [showDone, loadDone]);
 
+  const all = open ?? [];
+  const counts: Record<Filter, number> = {
+    all: all.length,
+    mine: all.filter((tk) => tk.assigned_to === userId).length,
+    unassigned: all.filter((tk) => !tk.assigned_to).length,
+  };
+
+  const mineLate = all.filter(
+    (tk) => tk.assigned_to === userId && tk.due_on && today && tk.due_on < today
+  ).length;
+  const mineToday = all.filter(
+    (tk) => tk.assigned_to === userId && tk.due_on && tk.due_on === today
+  ).length;
+
   const groups = useMemo(() => {
     const g: Record<Group, TaskRow[]> = {
       overdue: [],
@@ -116,15 +143,26 @@ export default function TasksView() {
       upcoming: [],
       nodate: [],
     };
-    (open ?? []).forEach((tk) => {
-      if (!tk.due_on) g.nodate.push(tk);
-      else if (!today) g.upcoming.push(tk);
-      else if (tk.due_on < today) g.overdue.push(tk);
-      else if (tk.due_on === today) g.today.push(tk);
-      else g.upcoming.push(tk);
-    });
+    all
+      .filter((tk) =>
+        filter === "mine"
+          ? tk.assigned_to === userId
+          : filter === "unassigned"
+            ? !tk.assigned_to
+            : true
+      )
+      .forEach((tk) => {
+        if (!tk.due_on) g.nodate.push(tk);
+        else if (!today) g.upcoming.push(tk);
+        else if (tk.due_on < today) g.overdue.push(tk);
+        else if (tk.due_on === today) g.today.push(tk);
+        else g.upcoming.push(tk);
+      });
     return g;
-  }, [open, today]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, filter, today, userId]);
+
+  const visibleCount = GROUPS.reduce((n, g) => n + groups[g].length, 0);
 
   const dateOnly = (iso: string) => {
     const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
@@ -147,6 +185,7 @@ export default function TasksView() {
     const { error } = await supabase.from("tasks").insert({
       org_id: orgId,
       candidate_id: candidate || null,
+      assigned_to: assignee || null,
       title: text,
       due_on: due || null,
     });
@@ -159,6 +198,7 @@ export default function TasksView() {
     setTitle("");
     setDue("");
     setCandidate("");
+    setAssignee(userId);
     await load();
   }
 
@@ -178,6 +218,26 @@ export default function TasksView() {
     if (showDone) await loadDone();
   }
 
+  async function reassign(tk: TaskRow, value: string) {
+    setMsg("");
+    const before = open;
+    setOpen((prev) =>
+      (prev ?? []).map((x) =>
+        x.id === tk.id ? { ...x, assigned_to: value || null } : x
+      )
+    );
+    const { error } = await supabase
+      .from("tasks")
+      .update({ assigned_to: value || null })
+      .eq("id", tk.id)
+      .eq("org_id", orgId);
+    if (error) {
+      console.error(error);
+      setOpen(before);
+      setMsg(t.saveError);
+    }
+  }
+
   async function remove(tk: TaskRow) {
     const { error } = await supabase
       .from("tasks")
@@ -195,10 +255,11 @@ export default function TasksView() {
 
   const row = (tk: TaskRow) => {
     const c = one(tk.candidates);
+    const who = nameOf(tk.assigned_to);
     return (
       <li
         key={tk.id}
-        className="flex items-start gap-3 rounded-lg border border-gray-100 bg-gray-50 p-3"
+        className="flex flex-wrap items-start gap-3 rounded-lg border border-gray-100 bg-gray-50 p-3"
       >
         <input
           type="checkbox"
@@ -228,6 +289,27 @@ export default function TasksView() {
             {tk.due_on ? dateOnly(tk.due_on) : ""}
           </p>
         </div>
+
+        {tk.done ? (
+          who ? (
+            <span className="text-xs text-gray-500">{who}</span>
+          ) : null
+        ) : (
+          <select
+            aria-label={a.assignLabel}
+            value={tk.assigned_to ?? ""}
+            onChange={(e) => reassign(tk, e.target.value)}
+            className="max-w-[11rem] rounded border border-gray-300 bg-white px-2 py-1 text-xs text-black"
+          >
+            <option value="">{a.unassigned}</option>
+            {members.map((mem) => (
+              <option key={mem.user_id} value={mem.user_id}>
+                {mem.name}
+              </option>
+            ))}
+          </select>
+        )}
+
         <button
           type="button"
           onClick={() => remove(tk)}
@@ -239,7 +321,11 @@ export default function TasksView() {
     );
   };
 
-  const total = (open ?? []).length;
+  const filterLabel: Record<Filter, string> = {
+    all: a.filterAll,
+    mine: a.filterMine,
+    unassigned: a.filterUnassigned,
+  };
 
   return (
     <div>
@@ -248,7 +334,7 @@ export default function TasksView() {
 
       <form
         onSubmit={addTask}
-        className="mt-5 grid gap-3 rounded-xl border border-gray-200 bg-white p-4 sm:grid-cols-2 lg:grid-cols-4"
+        className="mt-5 grid gap-3 rounded-xl border border-gray-200 bg-white p-4 sm:grid-cols-2 lg:grid-cols-5"
       >
         <label className="text-sm text-gray-700 lg:col-span-2">
           <span className={label}>{h.taskLabel}</span>
@@ -259,6 +345,21 @@ export default function TasksView() {
             placeholder={h.taskPlaceholder}
             onChange={(e) => setTitle(e.target.value)}
           />
+        </label>
+        <label className="text-sm text-gray-700">
+          <span className={label}>{a.assignLabel}</span>
+          <select
+            className={input}
+            value={assignee}
+            onChange={(e) => setAssignee(e.target.value)}
+          >
+            <option value="">{a.unassigned}</option>
+            {members.map((mem) => (
+              <option key={mem.user_id} value={mem.user_id}>
+                {mem.name}
+              </option>
+            ))}
+          </select>
         </label>
         <label className="text-sm text-gray-700">
           <span className={label}>{h.forCandidate}</span>
@@ -284,7 +385,7 @@ export default function TasksView() {
             onChange={(e) => setDue(e.target.value)}
           />
         </label>
-        <div className="sm:col-span-2 lg:col-span-4">
+        <div className="sm:col-span-2 lg:col-span-5">
           <button
             type="submit"
             disabled={busy}
@@ -297,11 +398,48 @@ export default function TasksView() {
 
       {msg ? <p className="mt-4 text-sm text-red-700">{msg}</p> : null}
 
+      {open !== null ? (
+        <>
+          <p
+            className={`mt-5 rounded-lg p-3 text-sm ${
+              mineLate + mineToday > 0
+                ? "bg-amber-50 text-amber-900"
+                : "bg-gray-50 text-gray-600"
+            }`}
+          >
+            {mineLate + mineToday > 0
+              ? a.mineSummary(mineLate, mineToday)
+              : a.mineClear}
+          </p>
+
+          <div className="mt-4 flex flex-wrap gap-2">
+            {FILTERS.map((f) => (
+              <button
+                key={f}
+                type="button"
+                onClick={() => setFilter(f)}
+                className={`rounded-full border px-3 py-1 text-xs font-semibold ${
+                  filter === f
+                    ? "border-slate-900 bg-slate-900 text-white"
+                    : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+                }`}
+              >
+                {filterLabel[f]} · {counts[f]}
+              </button>
+            ))}
+          </div>
+        </>
+      ) : null}
+
       {open === null ? (
         <p className="mt-6 text-sm text-gray-500">{t.loading}</p>
-      ) : total === 0 ? (
+      ) : all.length === 0 ? (
         <p className="mt-6 rounded-xl border border-dashed border-gray-300 p-8 text-center text-sm text-gray-600">
           {h.allClear}
+        </p>
+      ) : visibleCount === 0 ? (
+        <p className="mt-6 rounded-xl border border-dashed border-gray-300 p-8 text-center text-sm text-gray-600">
+          {a.nothingHere}
         </p>
       ) : (
         <div className="mt-6 space-y-6">
