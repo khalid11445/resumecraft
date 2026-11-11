@@ -135,7 +135,18 @@ export default function CandidatesView() {
           <Link
             href={`${base}/crm/import`}
             className="rounded border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-50"
+          >          <Link
+            href={`${base}/crm/import`}
+            className="rounded border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-50"
           >
+            {lang === "fr" ? "Importer un fichier CSV" : "Import a CSV file"}
+          </Link>
+          <Link
+            href={`${base}/crm/export`}
+            className="rounded border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-50"
+          >
+            {lang === "fr" ? "Exporter" : "Export"}
+          </Link>
             {lang === "fr" ? "Importer un fichier CSV" : "Import a CSV file"}
           </Link>
           <button

@@ -52,7 +52,7 @@ const T: Record<Lang, Record<Page, Content>> = {
             "Each workspace is separate: only its members can see its data. We access workspace data only when needed to give you support or to keep the service secure.",
             "We do not sell this data or use it for advertising. For this service we use Supabase (database and login) and Vercel (hosting).",
             "When you log in, we use cookies that keep you signed in. They are necessary for the service and are not used for advertising.",
-            `You can delete a candidate, which also deletes their notes and tasks. To delete your account or workspace, write to ${CONTACT_EMAIL}.`,
+            `You can delete a candidate, which also deletes their notes and tasks, and you can download your data from the Candidates page. To delete your account or workspace, write to ${CONTACT_EMAIL}.`,
           ],
         },
         {
@@ -96,7 +96,7 @@ const T: Record<Lang, Record<Page, Content>> = {
           paras: [
             "A workspace is for professional recruiting work. You may store only data you are allowed to keep and only for a legitimate purpose. Do not store sensitive information such as health, religion or political views unless the law allows it and you have the right to.",
             "Do not use the service to send spam, to harass people, or to store data you obtained unlawfully. We may suspend a workspace that breaks these rules.",
-            "The CRM is in early access. Features may change, and we will announce any pricing before charging you. On request, we will try to give you a copy of your workspace data.",
+            "The CRM is in early access. Features may change, and we will announce any pricing before charging you. You can download a copy of your candidates, and a full backup if you are the owner or an admin, at any time from the Candidates page.",
           ],
         },
         {
@@ -184,7 +184,7 @@ const T: Record<Lang, Record<Page, Content>> = {
             "Chaque espace est séparé : seuls ses membres voient ses données. Nous n'accédons aux données d'un espace que lorsque c'est nécessaire pour vous aider ou pour assurer la sécurité du service.",
             "Nous ne vendons pas ces données et ne les utilisons pas pour la publicité. Pour ce service, nous utilisons Supabase (base de données et connexion) et Vercel (hébergement).",
             "Lorsque vous vous connectez, nous utilisons des cookies qui vous maintiennent connecté. Ils sont nécessaires au service et ne servent pas à la publicité.",
-            `Vous pouvez supprimer un candidat, ce qui supprime aussi ses notes et ses tâches. Pour supprimer votre compte ou votre espace, écrivez à ${CONTACT_EMAIL}.`,
+            `Vous pouvez supprimer un candidat, ce qui supprime aussi ses notes et ses tâches, et télécharger vos données depuis la page Candidats. Pour supprimer votre compte ou votre espace, écrivez à ${CONTACT_EMAIL}.`,
           ],
         },
         {
@@ -228,7 +228,7 @@ const T: Record<Lang, Record<Page, Content>> = {
           paras: [
             "Un espace de travail est destiné à un usage professionnel de recrutement. Vous ne pouvez conserver que des données que vous avez le droit de conserver, et seulement dans un but légitime. N'enregistrez pas d'informations sensibles comme la santé, la religion ou les opinions politiques, sauf si la loi l'autorise et que vous en avez le droit.",
             "N'utilisez pas le service pour envoyer du spam, harceler des personnes ou conserver des données obtenues illégalement. Nous pouvons suspendre un espace qui ne respecte pas ces règles.",
-            "Le CRM est en accès anticipé. Les fonctions peuvent changer, et nous annoncerons les tarifs avant de vous facturer. Sur demande, nous essaierons de vous remettre une copie des données de votre espace.",
+            "Le CRM est en accès anticipé. Les fonctions peuvent changer, et nous annoncerons les tarifs avant de vous facturer. Vous pouvez télécharger à tout moment une copie de vos candidats, et une sauvegarde complète si vous êtes propriétaire ou admin, depuis la page Candidats.",
           ],
         },
         {

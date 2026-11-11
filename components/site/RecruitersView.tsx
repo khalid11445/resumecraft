@@ -45,8 +45,8 @@ const T = {
         text: "Invite colleagues with a link, give them a role and assign tasks to a person.",
       },
       {
-        title: "Spreadsheet import",
-        text: "Bring in your existing list from a CSV file, with a preview and duplicate detection.",
+        title: "Import and export",
+        text: "Bring in your existing list from a CSV file, with a preview and duplicate detection, and download your data whenever you want.",
       },
     ],
 
@@ -81,7 +81,7 @@ const T = {
     laterText: "We would rather tell you now than surprise you later.",
         later: [
       "Email reminders and notifications",
-      "Exporting your candidates to a spreadsheet",
+      "Restoring a backup file into a workspace",
       "Resume files and attachments on a candidate",
       "Arabic interface",
     ],
@@ -158,8 +158,8 @@ const T = {
         text: "Invitez vos collègues avec un lien, donnez-leur un rôle et assignez des tâches à une personne.",
       },
       {
-        title: "Import depuis un tableur",
-        text: "Reprenez votre liste existante depuis un fichier CSV, avec aperçu et détection des doublons.",
+        title: "Import et export",
+        text: "Reprenez votre liste existante depuis un fichier CSV, avec aperçu et détection des doublons, et téléchargez vos données quand vous voulez.",
       },
     ],
 
@@ -194,7 +194,7 @@ const T = {
     laterText: "Nous préférons vous le dire maintenant plutôt que vous surprendre plus tard.",
         later: [
       "Rappels et notifications par email",
-      "Export de vos candidats vers un tableur",
+      "Restauration d'un fichier de sauvegarde dans un espace",
       "Fichiers de CV et pièces jointes sur un candidat",
       "Interface en arabe",
     ],

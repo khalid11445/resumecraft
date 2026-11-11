@@ -273,10 +273,18 @@ export default function CrmShell({
     {
       href: `${base}/crm/candidates`,
       label: t.navCandidates,
-      active: p.startsWith("/crm/candidates") || p.startsWith("/crm/import"),
+      active:
+        p.startsWith("/crm/candidates") ||
+        p.startsWith("/crm/import") ||
+        p.startsWith("/crm/export"),
     },
     { href: `${base}/crm/tasks`, label: h.navTasks, active: p.startsWith("/crm/tasks") },
-    { href: `${base}/crm/team`, label: tm.navTeam, active: p.startsWith("/crm/team") },
+        { href: `${base}/crm/team`, label: tm.navTeam, active: p.startsWith("/crm/team") },
+    {
+      href: `${base}/crm/settings`,
+      label: lang === "fr" ? "Réglages" : "Settings",
+      active: p.startsWith("/crm/settings"),
+    },
   ];
 
   const link = (active: boolean) =>
