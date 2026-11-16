@@ -3,6 +3,7 @@
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useCrm } from "@/components/crm/CrmShell";
+import { planLimitText } from "@/lib/planlimit";
 
 type Cand = {
   id: string;
@@ -100,7 +101,7 @@ export default function CandidatesView() {
     setBusy(false);
     if (error) {
       console.error(error);
-      setMsg(t.saveError);
+      setMsg(planLimitText(error, lang) ?? t.saveError);
       return;
     }
     setForm(emptyForm);

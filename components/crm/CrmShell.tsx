@@ -281,6 +281,11 @@ export default function CrmShell({
     { href: `${base}/crm/tasks`, label: h.navTasks, active: p.startsWith("/crm/tasks") },
         { href: `${base}/crm/team`, label: tm.navTeam, active: p.startsWith("/crm/team") },
     {
+      href: `${base}/crm/plan`,
+      label: lang === "fr" ? "Formule" : "Plan",
+      active: p.startsWith("/crm/plan"),
+    },
+    {
       href: `${base}/crm/settings`,
       label: lang === "fr" ? "Réglages" : "Settings",
       active: p.startsWith("/crm/settings"),

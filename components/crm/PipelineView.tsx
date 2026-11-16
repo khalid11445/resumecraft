@@ -4,6 +4,7 @@ import { DragEvent, FormEvent, useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useCrm } from "@/components/crm/CrmShell";
+import { planLimitText } from "@/lib/planlimit";
 import { STAGES, Stage } from "@/components/crm/text";
 
 type Cand = {
@@ -42,7 +43,7 @@ const emptyNew = {
 };
 
 export default function PipelineView() {
-  const { supabase, orgId, t, base } = useCrm();
+  const { supabase, orgId, t, base, lang } = useCrm();
   const params = useParams<{ id: string }>();
   const jobId = String(params.id ?? "");
 
@@ -151,7 +152,7 @@ export default function PipelineView() {
       if (error || !data) {
         console.error(error);
         setBusy(false);
-        setMsg(t.saveError);
+        setMsg(planLimitText(error, lang) ?? t.saveError);
         return;
       }
       candidateId = data.id as string;

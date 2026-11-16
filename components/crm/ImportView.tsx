@@ -3,6 +3,7 @@
 import { ChangeEvent, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useCrm } from "@/components/crm/CrmShell";
+import { planLimitText } from "@/lib/planlimit";
 import { IT } from "@/components/crm/importText";
 import {
   ColumnMap,
@@ -184,6 +185,8 @@ export default function ImportView() {
       const { error: err } = await supabase.from("candidates").insert(batch);
       if (err) {
         console.error(err);
+        const limit = planLimitText(err, lang);
+        if (limit) setError(limit);
         setRunning(false);
         setResult({ imported: done, skipped, failed: true });
         setData([]);

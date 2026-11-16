@@ -3,6 +3,7 @@
 import { FormEvent, useCallback, useEffect, useState } from "react";
 import { Role, useCrm } from "@/components/crm/CrmShell";
 import { TMT } from "@/components/crm/teamText";
+import { planLimitText } from "@/lib/planlimit";
 
 type Invite = {
   id: string;
@@ -122,7 +123,12 @@ export default function TeamView() {
       console.error(error);
       setMsg(m.failed);
       return;
+    }    if (error) {
+      console.error(error);
+      setMsg(planLimitText(error, lang) ?? m.failed);
+      return;
     }
+    setInviteEmail("");
     setInviteEmail("");
     await loadInvites();
   }

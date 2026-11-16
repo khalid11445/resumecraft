@@ -90,7 +90,7 @@ const T = {
     faqs: [
       {
         q: "Is it free?",
-        a: "Right now you can create a workspace and try it. We will announce pricing before we charge anyone.",
+        a: "You can create a free workspace and try it. The free plan has limits on the number of candidates and teammates, shown in the Plan tab of your workspace. A Pro plan removes them. In this early phase, paid plans are agreed with each customer, invoiced by us and activated by hand. We will announce prices before we charge anyone.",
       },
       {
         q: "Is my candidates' data safe?",
@@ -203,7 +203,7 @@ const T = {
     faqs: [
       {
         q: "C'est gratuit ?",
-        a: "Pour l'instant, vous pouvez créer un espace et l'essayer. Nous annoncerons les tarifs avant de facturer qui que ce soit.",
+        a: "Vous pouvez créer un espace gratuit et l'essayer. La formule gratuite limite le nombre de candidats et de collègues, indiqué dans l'onglet Formule de votre espace. Une formule Pro supprime ces limites. Dans cette première phase, les formules payantes sont convenues avec chaque client, facturées par nous et activées à la main. Nous annoncerons les tarifs avant de facturer qui que ce soit.",
       },
       {
         q: "Les données de mes candidats sont-elles en sécurité ?",

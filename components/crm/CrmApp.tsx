@@ -12,6 +12,7 @@ import TeamView from "@/components/crm/TeamView";
 import ImportView from "@/components/crm/ImportView";
 import ExportView from "@/components/crm/ExportView";
 import SettingsView from "@/components/crm/SettingsView";
+import PlanView from "@/components/crm/PlanView";
 
 export type CrmViewName =
   | "dashboard"
@@ -23,7 +24,8 @@ export type CrmViewName =
   | "team"
   | "import"
   | "export"
-  | "settings";
+  | "settings"
+  | "plan";
 
 export default function CrmApp({
   lang,
@@ -52,6 +54,8 @@ export default function CrmApp({
         <ExportView />
       ) : view === "settings" ? (
         <SettingsView />
+      ) : view === "plan" ? (
+        <PlanView />
       ) : (
         <CandidatesView />
       )}
