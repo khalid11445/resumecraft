@@ -33,8 +33,8 @@ const T = {
         text: "Set due dates, see what is overdue or due today across all candidates, and check your numbers at a glance.",
       },
       {
-        title: "One-tap contact",
-        text: "WhatsApp, call and email buttons that open your own apps. We send nothing for you.",
+        title: "One-tap contact and message templates",
+        text: "WhatsApp, call and email buttons that open your own apps, plus shared message templates filled in for each candidate. We send nothing for you.",
       },
             {
         title: "Consent reminders",
@@ -146,8 +146,8 @@ const T = {
         text: "Fixez des échéances, voyez ce qui est en retard ou à faire aujourd'hui pour tous vos candidats, et suivez vos chiffres d'un coup d'œil.",
       },
       {
-        title: "Contact en un geste",
-        text: "Des boutons WhatsApp, appel et email qui ouvrent vos propres applications. Nous n'envoyons rien à votre place.",
+        title: "Contact en un geste et modèles de messages",
+        text: "Des boutons WhatsApp, appel et email qui ouvrent vos propres applications, et des modèles de messages partagés remplis pour chaque candidat. Nous n'envoyons rien à votre place.",
       },
             {
         title: "Rappels de consentement",

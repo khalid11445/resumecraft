@@ -7,6 +7,7 @@ import { useCrm } from "@/components/crm/CrmShell";
 import { PT } from "@/components/crm/profileText";
 import { Stage } from "@/components/crm/text";
 import CandidateFiles from "@/components/crm/CandidateFiles";
+import MessageComposer from "@/components/crm/MessageComposer";
 import { removeCandidateFiles } from "@/lib/candfiles";
 
 type Cand = {
@@ -669,6 +670,19 @@ export default function CandidateProfile() {
 
         {/* Right column: documents, tasks and notes */}
         <div className="space-y-6 lg:col-span-2">
+          <MessageComposer
+            candidate={{
+              id: cand.id,
+              full_name: cand.full_name,
+              email: cand.email,
+              phone: cand.phone,
+              consent_recorded: cand.consent_recorded,
+            }}
+            jobs={apps
+              .map((a) => jobOf(a.jobs))
+              .filter((j): j is JobRef => j !== null)}
+            onLogged={() => void load()}
+          />
           <CandidateFiles candidateId={candId} />
           <section className={box}>
             <h2 className="text-sm font-bold text-gray-900">{p.tasks}</h2>

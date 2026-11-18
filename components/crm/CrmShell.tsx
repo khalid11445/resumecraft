@@ -279,7 +279,12 @@ export default function CrmShell({
         p.startsWith("/crm/export"),
     },
     { href: `${base}/crm/tasks`, label: h.navTasks, active: p.startsWith("/crm/tasks") },
-        { href: `${base}/crm/team`, label: tm.navTeam, active: p.startsWith("/crm/team") },
+        {
+      href: `${base}/crm/templates`,
+      label: lang === "fr" ? "Modèles" : "Templates",
+      active: p.startsWith("/crm/templates"),
+    },
+    { href: `${base}/crm/team`, label: tm.navTeam, active: p.startsWith("/crm/team") },
     {
       href: `${base}/crm/plan`,
       label: lang === "fr" ? "Formule" : "Plan",
