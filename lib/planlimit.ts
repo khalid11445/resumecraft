@@ -7,6 +7,12 @@ export function planLimitText(
   lang: Lang
 ): string | null {
   const msg = error?.message ?? "";
+
+  if (msg.includes("file limit: candidate")) {
+    return lang === "fr"
+      ? "Ce candidat a déjà le maximum de 10 fichiers."
+      : "This candidate already has the maximum of 10 files.";
+  }
   if (!msg.includes("plan limit")) return null;
 
   if (msg.includes("candidates")) {
@@ -18,6 +24,11 @@ export function planLimitText(
     return lang === "fr"
       ? "Votre formule a atteint sa limite de membres. Ouvrez l'onglet Formule pour voir comment passer à Pro."
       : "Your plan has reached its member limit. Open the Plan tab to see how to upgrade to Pro.";
+  }
+  if (msg.includes("files")) {
+    return lang === "fr"
+      ? "Votre formule gratuite a atteint sa limite de fichiers joints. Ouvrez l'onglet Formule pour voir comment passer à Pro."
+      : "Your free plan has reached its attached-files limit. Open the Plan tab to see how to upgrade to Pro.";
   }
   return lang === "fr"
     ? "Cette action dépasse les limites de votre formule."

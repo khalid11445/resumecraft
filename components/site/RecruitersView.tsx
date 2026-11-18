@@ -26,7 +26,7 @@ const T = {
       },
       {
         title: "Candidate profiles",
-        text: "Contact details, the jobs they are on, a timeline of notes and a list of tasks, on one page.",
+        text: "Contact details, the jobs they are on, attached CVs, a timeline of notes and a list of tasks, on one page.",
       },
       {
         title: "Tasks and dashboard",
@@ -82,7 +82,7 @@ const T = {
         later: [
       "Email reminders and notifications",
       "Restoring a backup file into a workspace",
-      "Resume files and attachments on a candidate",
+      "Previewing attached files without downloading them",
       "Arabic interface",
     ],
 
@@ -139,7 +139,7 @@ const T = {
       },
       {
         title: "Fiches candidats",
-        text: "Coordonnées, offres concernées, historique de notes et liste de tâches, sur une seule page.",
+        text: "Coordonnées, offres concernées, CV joints, historique de notes et liste de tâches, sur une seule page.",
       },
       {
         title: "Tâches et tableau de bord",
@@ -195,7 +195,7 @@ const T = {
         later: [
       "Rappels et notifications par email",
       "Restauration d'un fichier de sauvegarde dans un espace",
-      "Fichiers de CV et pièces jointes sur un candidat",
+      "Aperçu des fichiers joints sans les télécharger",
       "Interface en arabe",
     ],
 

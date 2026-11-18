@@ -11,14 +11,17 @@ type Status = {
   valid_until: string | null;
   max_candidates: number | null;
   max_members: number | null;
+  max_files: number | null;
   candidates: number;
   members: number;
+  files: number;
   pending_invites: number;
 };
 type Limit = {
   plan: PlanId;
   max_candidates: number | null;
   max_members: number | null;
+  max_files: number | null;
 };
 
 const box = "rounded-xl border border-gray-200 bg-white p-5";
@@ -42,7 +45,7 @@ export default function PlanView() {
   const load = useCallback(async () => {
     const [s, l] = await Promise.all([
       supabase.rpc("org_plan_status", { p_org: orgId }),
-      supabase.from("plan_limits").select("plan,max_candidates,max_members"),
+      supabase.from("plan_limits").select("plan,max_candidates,max_members,max_files"),
     ]);
     if (s.error || l.error || !s.data) {
       console.error(s.error ?? l.error);
@@ -165,6 +168,7 @@ export default function PlanView() {
           <div className="mt-3 space-y-4">
             {usageRow(m.candidates, status.candidates, status.max_candidates)}
             {usageRow(m.members, status.members, status.max_members)}
+            {usageRow(m.files, status.files, status.max_files)}
           </div>
           {status.pending_invites > 0 ? (
             <p className="mt-3 text-xs text-gray-500">{m.pending(status.pending_invites)}</p>
@@ -179,6 +183,7 @@ export default function PlanView() {
                 <th className="py-2">{m.colPlan}</th>
                 <th className="py-2">{m.candidates}</th>
                 <th className="py-2">{m.members}</th>
+                <th className="py-2">{m.files}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -197,8 +202,11 @@ export default function PlanView() {
                     <td className="py-2 text-gray-700">
                       {l ? valueText(l.max_candidates) : "—"}
                     </td>
-                    <td className="py-2 text-gray-700">
+                                        <td className="py-2 text-gray-700">
                       {l ? valueText(l.max_members) : "—"}
+                    </td>
+                    <td className="py-2 text-gray-700">
+                      {l ? valueText(l.max_files) : "—"}
                     </td>
                   </tr>
                 );

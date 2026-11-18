@@ -4,6 +4,7 @@ import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { useCrm } from "@/components/crm/CrmShell";
 import { SET } from "@/components/crm/settingsText";
+import { removeCandidateFiles } from "@/lib/candfiles";
 
 const input =
   "w-full rounded border border-gray-300 bg-white px-3 py-2 text-sm text-black";
@@ -56,6 +57,13 @@ export default function SettingsView() {
     if (typed.trim() !== orgName) return;
     setBusy(true);
     setMsg(null);
+
+    // The stored files go first: the database cannot delete them itself
+    if (!(await removeCandidateFiles(supabase, orgId, null))) {
+      setBusy(false);
+      setMsg({ tone: "error", text: m.failed });
+      return;
+    }
 
     const { error } = await supabase.rpc("delete_organization", { p_org: orgId });
     if (error) {

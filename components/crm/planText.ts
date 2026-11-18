@@ -14,7 +14,8 @@ const en = {
 
   usage: "Usage",
   candidates: "Candidates",
-  members: "Members",
+    members: "Members",
+  files: "Attached files",
   pending: (n: number) => `${n} pending invitation${n === 1 ? "" : "s"}`,
   unlimited: "Unlimited",
   of: (a: number, b: number) => `${a} of ${b}`,
@@ -62,7 +63,8 @@ const fr: PLTx = {
 
   usage: "Utilisation",
   candidates: "Candidats",
-  members: "Membres",
+    members: "Membres",
+  files: "Fichiers joints",
   pending: (n: number) => `${n} invitation${n > 1 ? "s" : ""} en attente`,
   unlimited: "Illimité",
   of: (a: number, b: number) => `${a} sur ${b}`,

@@ -3,6 +3,7 @@
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useCrm } from "@/components/crm/CrmShell";
+import { removeCandidateFiles } from "@/lib/candfiles";
 import { planLimitText } from "@/lib/planlimit";
 
 type Cand = {
@@ -112,6 +113,10 @@ export default function CandidatesView() {
 
   async function remove(id: string) {
     if (!window.confirm(t.deleteCandConfirm)) return;
+    if (!(await removeCandidateFiles(supabase, orgId, id))) {
+      setMsg(t.saveError);
+      return;
+    }
     const { error } = await supabase
       .from("candidates")
       .delete()

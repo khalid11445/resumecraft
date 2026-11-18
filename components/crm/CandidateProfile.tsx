@@ -6,6 +6,8 @@ import { useParams, useRouter } from "next/navigation";
 import { useCrm } from "@/components/crm/CrmShell";
 import { PT } from "@/components/crm/profileText";
 import { Stage } from "@/components/crm/text";
+import CandidateFiles from "@/components/crm/CandidateFiles";
+import { removeCandidateFiles } from "@/lib/candfiles";
 
 type Cand = {
   id: string;
@@ -269,6 +271,10 @@ export default function CandidateProfile() {
 
   async function deleteCandidate() {
     if (!window.confirm(t.deleteCandConfirm)) return;
+    if (!(await removeCandidateFiles(supabase, orgId, candId))) {
+      setMsg(t.saveError);
+      return;
+    }
     const { error } = await supabase
       .from("candidates")
       .delete()
@@ -661,8 +667,9 @@ export default function CandidateProfile() {
           </button>
         </div>
 
-        {/* Right column: tasks and notes */}
+        {/* Right column: documents, tasks and notes */}
         <div className="space-y-6 lg:col-span-2">
+          <CandidateFiles candidateId={candId} />
           <section className={box}>
             <h2 className="text-sm font-bold text-gray-900">{p.tasks}</h2>
 
