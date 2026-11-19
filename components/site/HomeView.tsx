@@ -1,721 +1,414 @@
 import Image from "next/image";
 import Link from "next/link";
+import { Lang } from "@/lib/labels";
 import { getCategories } from "@/lib/catalog";
 import { examples, exampleImage, builderLink, exampleLabel } from "@/lib/examples";
-import { categoryAccent, palettes } from "@/lib/themes";
-import { Lang } from "@/lib/labels";
-
-// Update this list when you add a new layout
-const LAYOUTS = ["Elegant", "Bold", "Timeline", "Modern", "Classic", "Compact"];
+import { categoryAccent } from "@/lib/themes";
+import { hrefFor, linkById } from "@/lib/sitelinks";
+import { AppFrame, BoardMock } from "@/components/site/Mockups";
+import ProductTour from "@/components/site/ProductTour";
 
 const T = {
   en: {
-    badge: "New: AI Writer drafts your resume for you",
-    badgeNoAi: "New: resume formats for Morocco, Canada and the US",
-    subNoAi:
-      "Pick your profession, choose the format for your country, click anything to edit, and download. No design skills needed.",
-    chipFormats: "Morocco · Canada · US",
-    formatsLabel: "Country formats",
-    formatsTitle: "A resume that follows local rules",
-    formatsText:
-      "Switch between Morocco, Canada and US formats. The page size and the photo rule change for you.",
-    formatsCards: [
-      { name: "Morocco", detail: "A4 page, photo optional" },
-      { name: "Canada", detail: "Letter page, no photo" },
-      { name: "United States", detail: "Letter page, no photo" },
-    ],
-    toolsTitle: "More than a resume",
-    toolsSub: "Free guides and tools for the rest of your job search and your studies.",
-    toolsGo: "Open",
-    tools: [
+    eyebrow: "Resumes that get read · Hiring that stays organized",
+    h1a: "The smarter way to get hired,",
+    h1b: "and to hire.",
+    sub: "Build a clear, professional resume in minutes. Or run your recruiting from one simple CRM, built for small agencies and HR teams.",
+    ctaSeeker: "Build my resume",
+    ctaRecruiter: "Explore the CRM",
+    note: "Free to start. No credit card needed.",
+    frame: "ResumeCraft · Pipeline",
+
+    splitTitle: "Two ways to use ResumeCraft",
+    seekers: {
+      title: "For job seekers",
+      text: "Everything to apply well, from the first resume to the interview.",
+      points: [
+        "A resume for your profession, in French or English",
+        "Internship and PFE guide with a request letter",
+        "An application tracker with follow-up reminders",
+        "Interview preparation, question by question",
+      ],
+      link: "Build my resume",
+    },
+    recruiters: {
+      title: "For recruiters and HR teams",
+      text: "One place for your jobs, candidates, notes and follow-ups.",
+      points: [
+        "A pipeline board for every job",
+        "CVs, notes and tasks on each candidate",
+        "WhatsApp and email message templates",
+        "Invite your team with a link",
+      ],
+      link: "Explore the CRM",
+    },
+
+    seekersEyebrow: "For job seekers",
+    seekersTitle: "Resumes designed to be read",
+    seekersSub:
+      "Clean layouts that people and software can read, with the right sections for your profession.",
+    useDesign: "Use this design →",
+    professionsTitle: "Start with your profession",
+    toolsTitle: "Everything around the resume",
+    open: "Open",
+
+    crmEyebrow: "For recruiters",
+    crmTitle: "See the CRM in 25 seconds",
+    crmSub:
+      "A short animated tour of the product. It uses sample data and needs no sign-up.",
+    benefits: [
       {
-        title: "Interview prep",
-        text: "Common questions with sample answers, by profession.",
-        href: "/interview",
+        title: "Never lose a candidate",
+        text: "Every person sits in a stage, on a board your whole team can see.",
+        id: "pipeline",
       },
       {
-        title: "PFE guide",
-        text: "From choosing a topic to the final defense.",
-        href: "/pfe",
+        title: "Message faster, stay in control",
+        text: "Templates fill in each candidate's details. You press send yourself.",
+        id: "messages",
       },
       {
-        title: "Study abroad",
-        text: "France and Canada: steps, documents and official links.",
-        href: "/study-abroad",
-      },
-      {
-        title: "Jobs in Morocco",
-        text: "Where to find offers and how to apply.",
-        href: "/jobs",
-      },
-    ],
-    step2NoAi:
-      "Fill the form, use the suggestions, and click any text on the preview to fix it.",
-    h1Before: "A resume that looks like you ",
-    h1Highlight: "hired a designer",
-    sub: "Pick your profession, let the AI Writer draft it, click anything to edit, and download. No design skills needed.",
-    cta: "Build my resume",
-    secondary: "See examples",
-    note: "No sign-up needed to start building.",
-    statLabels: ["professions", "layouts", "colors"],
-    chipAi: "✦ AI Writer",
-    chipEdit: "Click to edit",
-    chipLayouts: (n: number) => `${n} layouts`,
-    marquee: [
-      "Nurses",
-      "Students",
-      "Bankers",
-      "Developers",
-      "Teachers",
-      "First jobs",
-      "Internships",
-      "Career changes",
-    ],
-    featuresTitle: "Everything you need, nothing you don't",
-    featuresSub:
-      "Built to get you from a blank page to a finished resume without fighting a design tool.",
-    aiLabel: "AI Writer",
-    aiTitle: "Tell your story. Get a full first draft.",
-    aiText:
-      "Describe your situation in your own words. Then keep chatting to refine it: shorter, more formal, add a new job.",
-    aiUser:
-      "I'm a final-year nursing student. ER and pediatrics placements, I speak Arabic, French and English. Looking for my first hospital job.",
-    aiBot:
-      "✦ Done. I wrote your summary, placements, and skills. Replace the [brackets] with your real numbers. Nothing was invented.",
-    aiCaption: "Illustration of the AI Writer",
-    editLabel: "Edit anywhere",
-    editTitle: "Click the resume itself",
-    editText:
-      "No hunting through form fields. Click any text on the preview and change it on the spot.",
-    editTag: "Edit text ✎",
-    lookLabel: "Look",
-    lookTitle: (n: number, m: number) => `${n} layouts, ${m} colors`,
-    lookText: "Switch design at any time without retyping a word.",
-    sugLabel: "Suggestions",
-    sugTitle: "Never stare at a blank line",
-    sugText:
-      "Ready-made bullet points for your role. Click to add, then make them yours.",
-    sugItems: [
-      "+ Triaged and treated [X]+ patients per shift",
-      "+ Built responsive interfaces with React",
-      "+ Served [X]+ customers per shift",
-    ],
-    honestLabel: "Honest by design",
-    honestTitle: "Your facts, not ours",
-    honestItems: [
-      "✓ Missing numbers stay as [brackets] until you fill them",
-      "✓ A warning appears if any [bracket] is left",
-      "✓ Photo is optional, you decide",
-      "✓ Student? Mark studies as still in progress",
-    ],
-    profTitle: "Start with your profession",
-    profSub: "Each one comes with the right sections and example content.",
-    profGo: "Start building",
-    galleryTitle: "Pick a design, make it yours",
-    gallerySub:
-      "Click any example to open it in the builder with the same layout and color.",
-    galleryUse: "Use this design →",
-    stepsTitle: "Three steps",
-    steps: [
-      {
-        n: "01",
-        title: "Pick your profession",
-        text: "Start with the right sections and example content for your field.",
-      },
-      {
-        n: "02",
-        title: "Write it your way",
-        text: "Fill the form, use suggestions, or let the AI Writer draft it. Click any text on the preview to fix it.",
-      },
-      {
-        n: "03",
-        title: "Choose a look and download",
-        text: "Switch layouts and colors anytime, then download your resume.",
+        title: "Work as a team",
+        text: "Invite colleagues with a link and assign tasks to a person.",
+        id: "team",
       },
     ],
+    crmCta: "Create your free workspace",
+    crmMore: "See all CRM features",
+
+    stepsTitle: "Getting started takes minutes",
+    tracks: [
+      {
+        title: "Job seekers",
+        steps: [
+          "Pick your profession",
+          "Edit with a live preview",
+          "Download your resume",
+        ],
+      },
+      {
+        title: "Recruiters",
+        steps: [
+          "Create your workspace",
+          "Add a job and your candidates",
+          "Move them through the pipeline",
+        ],
+      },
+    ],
+
+    trustTitle: "Honest by design",
+    trust: [
+      {
+        title: "No invented facts",
+        text: "Missing details stay visible as [brackets], so you never send a blank or a made-up number.",
+      },
+      {
+        title: "Your data stays separate",
+        text: "Each CRM workspace is separate: only its members can see its data.",
+      },
+      {
+        title: "You stay in control",
+        text: "Messages open in WhatsApp or your email app. We send nothing for you.",
+      },
+      {
+        title: "No surprise charges",
+        text: "Build and preview for free. For individuals, one payment, no subscription.",
+      },
+    ],
+    trustLink: "Read how we handle data",
+
     faqTitle: "Questions, answered honestly",
-    faqFree: {
-      q: "Is it free?",
-      a: "You can pick a profession, build, and preview your resume for free. See the Pricing page for how downloads work.",
-    },
-    faqAts: {
-      q: "Will my resume pass applicant tracking systems (ATS)?",
-      a: "No tool can promise that, because every employer's system reads files differently. Simple single-column layouts such as Classic and Compact use real, selectable text and are generally easier for software to read. Two-column designs like Modern look great to people but can be harder for some systems.",
-    },
-    faqAi: {
-      q: "Does the AI make things up?",
-      a: "We tell it to use only what you write and to leave a [bracket] placeholder where a number is missing. Still, read every line before you send your resume: you are responsible for what it says.",
-    },
-    faqPrivacy: {
-      q: "Is my information private?",
-      a: "What you type stays in your browser while you build, and your draft is saved on your own device. See the Privacy policy for details.",
-    },
-    faqPrivacyAi: {
-      q: "Is my information private?",
-      a: "What you type stays in your browser while you build. If you use the AI Writer, the text you submit is sent to our AI provider to produce your draft. See the Privacy policy for details.",
-    },
-    faqFormat: {
-      q: "Which format should I choose for Canada or the US?",
-      a: "Choose the Canada or United States format in the builder. It uses a Letter-size page and hides your photo. Also leave out personal details such as age or marital status. Conventions can vary by employer, so always follow the job posting.",
-    },
-    faqPhoto: {
-      q: "Should I add a photo?",
-      a: "It depends on the country. Photos are common in Morocco and France but usually left out in the US and Canada. Pick the country format in the builder and the photo is hidden for you where it is not used.",
-    },
-    faqMore: "More details in our",
-    privacyLabel: "Privacy policy",
-    and: "and",
-    refundLabel: "Refund policy",
-    finalTitle: "Your next resume is a few minutes away",
-    finalText: "Start for free and watch it take shape as you type.",
+    faqs: [
+      {
+        q: "Is it free?",
+        a: "You can build and preview a resume for free, and create a free CRM workspace with limits shown in its Plan tab. Downloading a resume uses a one-time pass. See the Pricing page.",
+      },
+      {
+        q: "Will my resume pass applicant tracking systems (ATS)?",
+        a: "No tool can promise that, because every employer's system reads files differently. Simple single-column layouts use real, selectable text and are generally easier for software to read. Two-column designs can be harder for some systems.",
+      },
+      {
+        q: "Is my information private?",
+        a: "What you type in the resume builder stays in your browser. CRM data is stored in your private workspace, visible only to its members. See the Privacy policy for details.",
+      },
+      {
+        q: "Does the CRM send messages to candidates?",
+        a: "No. The WhatsApp, call and email buttons open your own apps, and you send the message yourself.",
+      },
+      {
+        q: "Can my whole team use the CRM?",
+        a: "Yes. The owner invites colleagues with a link and gives each person a role. Tasks can be assigned to a person.",
+      },
+    ],
+
+    finalTitle: "Ready to start?",
+    finalText: "Pick the side that fits you. Both are free to try.",
+    privacy: "Privacy policy",
   },
   fr: {
-    badge: "Nouveau : le Rédacteur IA écrit votre CV avec vous",
-    badgeNoAi: "Nouveau : des formats de CV pour le Maroc, le Canada et les États-Unis",
-    subNoAi:
-      "Choisissez votre métier, choisissez le format de votre pays, cliquez sur n'importe quel texte pour le modifier, puis téléchargez. Aucune compétence en design nécessaire.",
-    chipFormats: "Maroc · Canada · États-Unis",
-    formatsLabel: "Formats par pays",
-    formatsTitle: "Un CV qui respecte les usages locaux",
-    formatsText:
-      "Passez du format Maroc au format Canada ou États-Unis. La taille de page et la règle sur la photo changent pour vous.",
-    formatsCards: [
-      { name: "Maroc", detail: "Page A4, photo facultative" },
-      { name: "Canada", detail: "Page Letter, sans photo" },
-      { name: "États-Unis", detail: "Page Letter, sans photo" },
-    ],
-    toolsTitle: "Plus qu'un CV",
-    toolsSub: "Des guides et des outils gratuits pour la suite de votre recherche d'emploi et de vos études.",
-    toolsGo: "Ouvrir",
-    tools: [
+    eyebrow: "Des CV qui se font lire · Un recrutement bien organisé",
+    h1a: "La façon la plus maligne de se faire embaucher,",
+    h1b: "et d'embaucher.",
+    sub: "Créez un CV clair et professionnel en quelques minutes. Ou pilotez votre recrutement depuis un CRM simple, pensé pour les petits cabinets et les équipes RH.",
+    ctaSeeker: "Créer mon CV",
+    ctaRecruiter: "Découvrir le CRM",
+    note: "Gratuit pour commencer. Aucune carte bancaire nécessaire.",
+    frame: "ResumeCraft · Pipeline",
+
+    splitTitle: "Deux façons d'utiliser ResumeCraft",
+    seekers: {
+      title: "Pour les candidats",
+      text: "Tout pour bien postuler, du premier CV à l'entretien.",
+      points: [
+        "Un CV adapté à votre métier, en français ou en anglais",
+        "Un guide stage et PFE avec une lettre de demande",
+        "Un suivi de candidatures avec rappels de relance",
+        "Une préparation à l'entretien, question par question",
+      ],
+      link: "Créer mon CV",
+    },
+    recruiters: {
+      title: "Pour les recruteurs et les équipes RH",
+      text: "Un seul endroit pour vos offres, vos candidats, vos notes et vos relances.",
+      points: [
+        "Un tableau de pipeline pour chaque offre",
+        "CV, notes et tâches sur chaque candidat",
+        "Des modèles de messages WhatsApp et email",
+        "Invitez votre équipe avec un lien",
+      ],
+      link: "Découvrir le CRM",
+    },
+
+    seekersEyebrow: "Pour les candidats",
+    seekersTitle: "Des CV pensés pour être lus",
+    seekersSub:
+      "Des mises en page claires, lisibles par les personnes comme par les logiciels, avec les bonnes sections pour votre métier.",
+    useDesign: "Utiliser ce design →",
+    professionsTitle: "Commencez avec votre métier",
+    toolsTitle: "Tout ce qui entoure le CV",
+    open: "Ouvrir",
+
+    crmEyebrow: "Pour les recruteurs",
+    crmTitle: "Découvrez le CRM en 25 secondes",
+    crmSub:
+      "Une courte visite animée du produit. Elle utilise des données d'exemple et ne demande aucune inscription.",
+    benefits: [
       {
-        title: "Préparation d'entretien",
-        text: "Les questions fréquentes avec des exemples de réponses, par métier.",
-        href: "/interview",
+        title: "Ne perdez plus aucun candidat",
+        text: "Chaque personne est dans une étape, sur un tableau que toute l'équipe voit.",
+        id: "pipeline",
       },
       {
-        title: "Guide PFE",
-        text: "Du choix du sujet à la soutenance finale.",
-        href: "/pfe",
+        title: "Écrivez plus vite, gardez la main",
+        text: "Les modèles remplissent les informations de chaque candidat. Vous envoyez vous-même.",
+        id: "messages",
       },
       {
-        title: "Études à l'étranger",
-        text: "France et Canada : étapes, documents et liens officiels.",
-        href: "/study-abroad",
-      },
-      {
-        title: "Emploi au Maroc",
-        text: "Où trouver des offres et comment postuler.",
-        href: "/jobs",
-      },
-    ],
-    step2NoAi:
-      "Remplissez le formulaire, utilisez les suggestions et cliquez sur un texte de l'aperçu pour le corriger.",
-    h1Before: "Un CV qui donne l'impression d'avoir fait appel à ",
-    h1Highlight: "un designer",
-    sub: "Choisissez votre métier, laissez le Rédacteur IA écrire un premier jet, cliquez sur n'importe quel texte pour le modifier, puis téléchargez. Aucune compétence en design nécessaire.",
-    cta: "Créer mon CV",
-    secondary: "Voir les exemples",
-    note: "Aucune inscription pour commencer.",
-    statLabels: ["métiers", "modèles", "couleurs"],
-    chipAi: "✦ Rédacteur IA",
-    chipEdit: "Cliquez pour modifier",
-    chipLayouts: (n: number) => `${n} modèles`,
-    marquee: [
-      "Infirmiers",
-      "Étudiants",
-      "Banque",
-      "Développeurs",
-      "Enseignants",
-      "Premier emploi",
-      "Stages",
-      "Reconversion",
-    ],
-    featuresTitle: "Tout ce qu'il faut, rien de superflu",
-    featuresSub:
-      "Conçu pour passer d'une page blanche à un CV terminé sans lutter contre un outil de design.",
-    aiLabel: "Rédacteur IA",
-    aiTitle: "Racontez votre parcours. Obtenez un premier jet complet.",
-    aiText:
-      "Décrivez votre situation avec vos propres mots. Continuez ensuite la conversation pour affiner : plus court, plus formel, ajouter un poste.",
-    aiUser:
-      "Je suis en dernière année d'études d'infirmier. Stages aux urgences et en pédiatrie, je parle arabe, français et anglais. Je cherche mon premier poste à l'hôpital.",
-    aiBot:
-      "✦ C'est fait. J'ai rédigé votre profil, vos stages et vos compétences. Remplacez les [crochets] par vos vrais chiffres. Rien n'a été inventé.",
-    aiCaption: "Illustration du Rédacteur IA",
-    editLabel: "Modifiez partout",
-    editTitle: "Cliquez sur le CV lui-même",
-    editText:
-      "Plus besoin de chercher dans les champs d'un formulaire. Cliquez sur un texte de l'aperçu et modifiez-le sur place.",
-    editTag: "Modifier le texte ✎",
-    lookLabel: "Style",
-    lookTitle: (n: number, m: number) => `${n} modèles, ${m} couleurs`,
-    lookText: "Changez de design à tout moment sans retaper un mot.",
-    sugLabel: "Suggestions",
-    sugTitle: "Ne restez jamais devant une ligne vide",
-    sugText:
-      "Des missions prêtes à l'emploi pour votre poste. Cliquez pour ajouter, puis faites-les vôtres.",
-    sugItems: [
-      "+ Prise en charge de [X]+ patients par garde",
-      "+ Création d'interfaces responsives avec React",
-      "+ Accueil de [X]+ clients par jour",
-    ],
-    honestLabel: "Honnête par conception",
-    honestTitle: "Vos faits, pas les nôtres",
-    honestItems: [
-      "✓ Les chiffres manquants restent entre [crochets] jusqu'à ce que vous les remplissiez",
-      "✓ Un avertissement s'affiche s'il reste un [crochet]",
-      "✓ La photo est optionnelle, c'est vous qui décidez",
-      "✓ Étudiant ? Indiquez que vos études sont en cours",
-    ],
-    profTitle: "Commencez avec votre métier",
-    profSub: "Chacun vient avec les bonnes sections et un contenu d'exemple.",
-    profGo: "Commencer",
-    galleryTitle: "Choisissez un design, faites-le vôtre",
-    gallerySub:
-      "Cliquez sur un exemple pour l'ouvrir dans le créateur avec le même modèle et la même couleur.",
-    galleryUse: "Utiliser ce design →",
-    stepsTitle: "Trois étapes",
-    steps: [
-      {
-        n: "01",
-        title: "Choisissez votre métier",
-        text: "Partez des bonnes sections et d'un contenu d'exemple pour votre domaine.",
-      },
-      {
-        n: "02",
-        title: "Écrivez à votre façon",
-        text: "Remplissez le formulaire, utilisez les suggestions ou laissez le Rédacteur IA rédiger. Cliquez sur un texte de l'aperçu pour le corriger.",
-      },
-      {
-        n: "03",
-        title: "Choisissez un style et téléchargez",
-        text: "Changez de modèle et de couleur à tout moment, puis téléchargez votre CV.",
+        title: "Travaillez en équipe",
+        text: "Invitez vos collègues avec un lien et assignez des tâches à une personne.",
+        id: "team",
       },
     ],
+    crmCta: "Créer votre espace gratuit",
+    crmMore: "Voir toutes les fonctions du CRM",
+
+    stepsTitle: "Démarrer prend quelques minutes",
+    tracks: [
+      {
+        title: "Candidats",
+        steps: [
+          "Choisissez votre métier",
+          "Modifiez avec un aperçu en direct",
+          "Téléchargez votre CV",
+        ],
+      },
+      {
+        title: "Recruteurs",
+        steps: [
+          "Créez votre espace",
+          "Ajoutez une offre et vos candidats",
+          "Faites-les avancer dans le pipeline",
+        ],
+      },
+    ],
+
+    trustTitle: "Honnête par conception",
+    trust: [
+      {
+        title: "Aucun fait inventé",
+        text: "Les informations manquantes restent visibles entre [crochets] : vous n'envoyez jamais un blanc ni un chiffre inventé.",
+      },
+      {
+        title: "Vos données restent séparées",
+        text: "Chaque espace du CRM est séparé : seuls ses membres voient ses données.",
+      },
+      {
+        title: "Vous gardez la main",
+        text: "Les messages s'ouvrent dans WhatsApp ou votre messagerie. Nous n'envoyons rien à votre place.",
+      },
+      {
+        title: "Pas de mauvaise surprise",
+        text: "Créez et prévisualisez gratuitement. Pour les particuliers, un seul paiement, sans abonnement.",
+      },
+    ],
+    trustLink: "Lire comment nous traitons les données",
+
     faqTitle: "Vos questions, des réponses honnêtes",
-    faqFree: {
-      q: "C'est gratuit ?",
-      a: "Vous pouvez choisir un métier, créer et prévisualiser votre CV gratuitement. Consultez la page Tarifs pour le téléchargement.",
-    },
-    faqAts: {
-      q: "Mon CV passera-t-il les logiciels de tri des candidatures (ATS) ?",
-      a: "Aucun outil ne peut le promettre, car chaque employeur utilise un logiciel différent. Les modèles simples sur une colonne, comme Classic et Compact, utilisent du vrai texte sélectionnable et sont en général plus faciles à lire pour un logiciel. Les designs à deux colonnes, comme Modern, plaisent aux recruteurs mais peuvent être plus difficiles à lire pour certains systèmes.",
-    },
-    faqAi: {
-      q: "L'IA invente-t-elle des choses ?",
-      a: "Nous lui demandons de n'utiliser que ce que vous écrivez et de laisser un [crochet] quand un chiffre manque. Relisez malgré tout chaque ligne avant d'envoyer votre CV : vous êtes responsable de son contenu.",
-    },
-    faqPrivacy: {
-      q: "Mes informations sont-elles privées ?",
-      a: "Ce que vous saisissez reste dans votre navigateur pendant la création, et votre brouillon est enregistré sur votre propre appareil. Voir la politique de confidentialité.",
-    },
-    faqPrivacyAi: {
-      q: "Mes informations sont-elles privées ?",
-      a: "Ce que vous saisissez reste dans votre navigateur pendant la création. Si vous utilisez le Rédacteur IA, le texte envoyé est transmis à notre prestataire d'IA pour produire votre brouillon. Voir la politique de confidentialité.",
-    },
-    faqFormat: {
-      q: "Quel format choisir pour le Canada ou les États-Unis ?",
-      a: "Choisissez le format Canada ou États-Unis dans le créateur. Il utilise une page de taille Letter et masque votre photo. Évitez aussi les informations personnelles comme l'âge ou la situation familiale. Les usages varient selon les employeurs : suivez toujours l'offre d'emploi.",
-    },
-    faqPhoto: {
-      q: "Faut-il ajouter une photo ?",
-      a: "Cela dépend du pays. Les photos sont courantes au Maroc et en France, mais généralement omises aux États-Unis et au Canada. Choisissez le format du pays dans le créateur et la photo est masquée pour vous là où elle n'est pas utilisée.",
-    },
-    faqMore: "Plus de détails dans notre",
-    privacyLabel: "politique de confidentialité",
-    and: "et notre",
-    refundLabel: "politique de remboursement",
-    finalTitle: "Votre prochain CV est à quelques minutes",
-    finalText: "Commencez gratuitement et regardez-le prendre forme pendant que vous écrivez.",
+    faqs: [
+      {
+        q: "C'est gratuit ?",
+        a: "Vous pouvez créer et prévisualiser un CV gratuitement, et créer un espace CRM gratuit avec des limites indiquées dans son onglet Formule. Le téléchargement d'un CV passe par un accès à paiement unique. Voir la page Tarifs.",
+      },
+      {
+        q: "Mon CV passera-t-il les logiciels de tri des candidatures (ATS) ?",
+        a: "Aucun outil ne peut le promettre, car chaque employeur utilise un logiciel différent. Les mises en page simples sur une colonne utilisent du vrai texte sélectionnable et sont en général plus faciles à lire pour un logiciel. Les designs à deux colonnes peuvent être plus difficiles pour certains systèmes.",
+      },
+      {
+        q: "Mes informations sont-elles privées ?",
+        a: "Ce que vous saisissez dans le créateur de CV reste dans votre navigateur. Les données du CRM sont conservées dans votre espace privé, visible uniquement par ses membres. Voir la Politique de confidentialité.",
+      },
+      {
+        q: "Le CRM envoie-t-il des messages aux candidats ?",
+        a: "Non. Les boutons WhatsApp, appel et email ouvrent vos propres applications, et c'est vous qui envoyez le message.",
+      },
+      {
+        q: "Toute mon équipe peut-elle utiliser le CRM ?",
+        a: "Oui. Le propriétaire invite ses collègues avec un lien et donne à chacun un rôle. Les tâches peuvent être assignées à une personne.",
+      },
+    ],
+
+    finalTitle: "Prêt à commencer ?",
+    finalText: "Choisissez le côté qui vous correspond. Les deux sont gratuits à essayer.",
+    privacy: "Politique de confidentialité",
   },
 };
+
+const TOOL_IDS = ["tracker", "interview", "letter", "stage"];
 
 export default function HomeView({ lang }: { lang: Lang }) {
   const t = T[lang];
   const base = lang === "fr" ? "/fr" : "";
   const categories = getCategories(lang);
-  const hero = examples.slice(0, 3);
-  const stats = [categories.length, LAYOUTS.length, palettes.length];
+  const featured = examples.slice(0, 3);
 
-  // The AI Writer messages show only when the feature is turned on
-  const aiOn = process.env.NEXT_PUBLIC_AI_ENABLED !== "false";
-  const faqList = [
-    t.faqFree,
-    t.faqAts,
-    ...(aiOn ? [t.faqAi] : []),
-    aiOn ? t.faqPrivacyAi : t.faqPrivacy,
-    t.faqFormat,
-    t.faqPhoto,
-  ];
+  const primaryBtn =
+    "rounded-lg bg-amber-300 px-6 py-3 text-sm font-semibold text-slate-900 shadow-lg shadow-amber-300/20 transition hover:-translate-y-0.5 hover:bg-amber-200";
+  const ghostBtn =
+    "rounded-lg border border-white/20 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10";
 
   return (
     <main>
       {/* HERO */}
       <section className="relative overflow-hidden bg-slate-950 text-white">
-        <div className="pointer-events-none absolute -top-32 left-1/4 h-96 w-96 rounded-full bg-indigo-500/30 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-32 right-0 h-96 w-96 rounded-full bg-teal-500/20 blur-3xl" />
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,#ffffff0a_1px,transparent_1px),linear-gradient(to_bottom,#ffffff0a_1px,transparent_1px)] bg-[size:48px_48px]" />
+        <div className="pointer-events-none absolute -top-40 left-1/4 h-[28rem] w-[28rem] rounded-full bg-indigo-500/30 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-40 right-0 h-[28rem] w-[28rem] rounded-full bg-teal-500/20 blur-3xl" />
 
-        <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-6 py-16 lg:grid-cols-2 lg:py-24">
+        <div className="relative mx-auto grid max-w-6xl items-center gap-14 px-6 py-16 lg:grid-cols-2 lg:py-24">
           <div className="motion-safe:animate-fade-up">
             <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs text-slate-200">
-              <span className="text-amber-300">✦</span> {aiOn ? t.badge : t.badgeNoAi}
+              <span className="text-amber-300">✦</span> {t.eyebrow}
             </span>
-
-            <h1 className="mt-6 text-4xl font-semibold leading-[1.1] tracking-tight sm:text-6xl">
-              {t.h1Before}
+            <h1 className="mt-6 text-4xl font-semibold leading-[1.08] tracking-tight sm:text-5xl lg:text-6xl">
+              {t.h1a}{" "}
               <span className="bg-linear-to-r from-amber-200 via-amber-300 to-orange-300 bg-clip-text text-transparent">
-                {t.h1Highlight}
+                {t.h1b}
               </span>
             </h1>
-
-            <p className="mt-6 max-w-lg text-base text-slate-300 sm:text-lg">
-              {aiOn ? t.sub : t.subNoAi}
+            <p className="mt-6 max-w-xl text-base text-slate-300 sm:text-lg">
+              {t.sub}
             </p>
-
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link
-                href={`${base}/templates`}
-                className="rounded-lg bg-amber-300 px-7 py-3.5 text-sm font-semibold text-slate-900 shadow-lg shadow-amber-300/20 transition hover:-translate-y-0.5 hover:bg-amber-200"
-              >
-                {t.cta}
+              <Link href={`${base}/templates`} className={primaryBtn}>
+                {t.ctaSeeker}
               </Link>
-              <Link
-                href={`${base}/examples`}
-                className="rounded-lg border border-white/20 px-7 py-3.5 text-sm font-semibold text-white transition hover:bg-white/10"
-              >
-                {t.secondary}
+              <Link href={`${base}/recruiters`} className={ghostBtn}>
+                {t.ctaRecruiter}
               </Link>
             </div>
-
             <p className="mt-4 text-xs text-slate-400">{t.note}</p>
-
-            <div className="mt-10 flex gap-8 border-t border-white/10 pt-6">
-              {stats.map((n, i) => (
-                <div key={t.statLabels[i]}>
-                  <p className="text-2xl font-semibold text-white">{n}</p>
-                  <p className="text-xs uppercase tracking-wider text-slate-400">
-                    {t.statLabels[i]}
-                  </p>
-                </div>
-              ))}
-            </div>
           </div>
 
-          {/* Fan of real resumes */}
-          <div className="relative mx-auto h-[420px] w-full max-w-[520px] sm:h-[540px]">
-            <div className="absolute left-0 top-16 w-[44%] -rotate-6">
-              <div className="overflow-hidden rounded-xl border border-white/10 bg-white shadow-2xl shadow-black/50 motion-safe:animate-float-slow">
-                <Image
-                  src={exampleImage(hero[1].id, lang)}
-                  alt={exampleLabel(hero[1], lang)}
-                  width={1190}
-                  height={1684}
-                  sizes="(min-width: 1024px) 22vw, 40vw"
-                  className="h-auto w-full"
-                />
-              </div>
+          <div className="relative mx-auto w-full max-w-xl pb-8">
+            <AppFrame title={t.frame}>
+              <BoardMock lang={lang} step={2} />
+            </AppFrame>
+            <div className="absolute -bottom-2 -left-3 hidden w-28 -rotate-6 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-2xl sm:block md:w-36">
+              <Image
+                src={exampleImage(examples[0].id, lang)}
+                alt={exampleLabel(examples[0], lang)}
+                width={1190}
+                height={1684}
+                sizes="144px"
+                loading="eager"
+                className="h-auto w-full"
+              />
             </div>
-
-            <div className="absolute right-0 top-20 w-[44%] rotate-6">
-              <div className="overflow-hidden rounded-xl border border-white/10 bg-white shadow-2xl shadow-black/50 [animation-delay:-4s] motion-safe:animate-float-slow">
-                <Image
-                  src={exampleImage(hero[2].id, lang)}
-                  alt={exampleLabel(hero[2], lang)}
-                  width={1190}
-                  height={1684}
-                  sizes="(min-width: 1024px) 22vw, 40vw"
-                  className="h-auto w-full"
-                />
-              </div>
-            </div>
-
-            <div className="absolute left-[26%] top-0 z-10 w-[48%]">
-              <div className="overflow-hidden rounded-xl border border-white/10 bg-white shadow-2xl shadow-black/60 motion-safe:animate-float">
-                <Image
-                  src={exampleImage(hero[0].id, lang)}
-                  alt={exampleLabel(hero[0], lang)}
-                  width={1190}
-                  height={1684}
-                  sizes="(min-width: 1024px) 24vw, 45vw"
-                  loading="eager"
-                  className="h-auto w-full"
-                />
-              </div>
-            </div>
-
-            <span className="absolute -left-1 bottom-12 z-20 rounded-full border border-white/20 bg-slate-900/80 px-3 py-1.5 text-xs text-white backdrop-blur">
-              {aiOn ? t.chipAi : t.chipFormats}
-            </span>
-            <span className="absolute -right-1 bottom-24 z-20 rounded-full border border-white/20 bg-slate-900/80 px-3 py-1.5 text-xs text-white backdrop-blur">
-              {t.chipEdit}
-            </span>
-            <span className="absolute bottom-2 left-1/3 z-20 rounded-full border border-white/20 bg-slate-900/80 px-3 py-1.5 text-xs text-white backdrop-blur">
-              {t.chipLayouts(LAYOUTS.length)}
-            </span>
           </div>
         </div>
       </section>
 
-      {/* MARQUEE */}
-      <section className="overflow-hidden border-b border-slate-200 bg-white py-4">
-        <div className="flex w-max whitespace-nowrap text-sm font-medium text-slate-500 motion-safe:animate-marquee">
-          {[...t.marquee, ...t.marquee].map((item, i) => (
-            <span key={i} className="mr-10 flex items-center gap-10">
-              {item}
-              <span className="text-amber-500">✦</span>
-            </span>
-          ))}
+      {/* TWO AUDIENCES */}
+      <section className="bg-white py-20">
+        <div className="mx-auto max-w-6xl px-6">
+          <h2 className="text-center text-3xl font-semibold tracking-tight text-slate-900">
+            {t.splitTitle}
+          </h2>
+          <div className="mt-12 grid gap-6 md:grid-cols-2">
+            {[
+              { data: t.seekers, href: `${base}/templates`, tone: "from-blue-50" },
+              { data: t.recruiters, href: `${base}/recruiters`, tone: "from-amber-50" },
+            ].map(({ data, href, tone }) => (
+              <div
+                key={data.title}
+                className={`flex flex-col rounded-3xl border border-slate-200 bg-linear-to-b ${tone} to-white p-8`}
+              >
+                <h3 className="text-xl font-semibold text-slate-900">{data.title}</h3>
+                <p className="mt-2 text-sm text-slate-600">{data.text}</p>
+                <ul className="mt-5 space-y-2.5 text-sm text-slate-700">
+                  {data.points.map((p) => (
+                    <li key={p} className="flex gap-3">
+                      <span className="text-emerald-600">✓</span>
+                      <span>{p}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Link
+                  href={href}
+                  className="mt-8 inline-block self-start rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-700"
+                >
+                  {data.link} →
+                </Link>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* FEATURES */}
+      {/* JOB SEEKERS */}
       <section className="bg-slate-50 py-20">
         <div className="mx-auto max-w-6xl px-6">
-          <h2 className="text-center text-3xl font-semibold tracking-tight text-slate-900">
-            {t.featuresTitle}
+          <p className="text-center text-xs font-bold uppercase tracking-widest text-amber-700">
+            {t.seekersEyebrow}
+          </p>
+          <h2 className="mt-2 text-center text-3xl font-semibold tracking-tight text-slate-900">
+            {t.seekersTitle}
           </h2>
           <p className="mx-auto mt-3 max-w-xl text-center text-slate-600">
-            {t.featuresSub}
+            {t.seekersSub}
           </p>
 
-          <div className="mt-12 grid gap-5 lg:grid-cols-3">
-            {/* Country formats (shown while the AI Writer is off) */}
-            {!aiOn ? (
-              <div className="rounded-2xl bg-slate-950 p-7 text-white lg:col-span-2">
-                <p className="text-xs font-semibold uppercase tracking-widest text-amber-300">
-                  {t.formatsLabel}
-                </p>
-                <h3 className="mt-2 text-xl font-semibold">{t.formatsTitle}</h3>
-                <p className="mt-2 max-w-md text-sm text-slate-400">
-                  {t.formatsText}
-                </p>
-                <div className="mt-6 grid gap-3 sm:grid-cols-3">
-                  {t.formatsCards.map((f) => (
-                    <div key={f.name} className="rounded-xl bg-white/10 px-4 py-3">
-                      <p className="font-semibold text-white">{f.name}</p>
-                      <p className="mt-1 text-xs text-slate-300">{f.detail}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : null}
-
-            {/* AI Writer */}
-            {aiOn ? (
-            <div className="rounded-2xl bg-slate-950 p-7 text-white lg:col-span-2">
-              <p className="text-xs font-semibold uppercase tracking-widest text-amber-300">
-                {t.aiLabel}
-              </p>
-              <h3 className="mt-2 text-xl font-semibold">{t.aiTitle}</h3>
-              <p className="mt-2 max-w-md text-sm text-slate-400">{t.aiText}</p>
-              <div className="mt-6 space-y-3 text-sm">
-                <div className="ml-auto max-w-[85%] rounded-2xl rounded-br-sm bg-white/10 px-4 py-3 text-slate-100">
-                  {t.aiUser}
-                </div>
-                <div className="max-w-[90%] rounded-2xl rounded-bl-sm bg-indigo-500/30 px-4 py-3 text-indigo-50">
-                  {t.aiBot}
-                </div>
-              </div>
-              <p className="mt-4 text-xs text-slate-500">{t.aiCaption}</p>
-            </div>
-            ) : null}
-
-            {/* Click to edit */}
-            <div className="rounded-2xl border border-slate-200 bg-white p-7">
-              <p className="text-xs font-semibold uppercase tracking-widest text-amber-700">
-                {t.editLabel}
-              </p>
-              <h3 className="mt-2 text-xl font-semibold text-slate-900">
-                {t.editTitle}
-              </h3>
-              <p className="mt-2 text-sm text-slate-600">{t.editText}</p>
-              <div className="relative mt-6 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-                <div className="h-3 w-1/2 rounded bg-slate-800" />
-                <div className="mt-2 h-2 w-1/3 rounded bg-amber-400" />
-                <div className="mt-4 space-y-2">
-                  <div className="h-2 w-full rounded bg-slate-200" />
-                  <div className="h-2 w-11/12 rounded bg-blue-200 ring-2 ring-blue-500" />
-                  <div className="h-2 w-4/5 rounded bg-slate-200" />
-                </div>
-                <div className="absolute -bottom-3 right-3 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-lg">
-                  {t.editTag}
-                </div>
-              </div>
-            </div>
-
-            {/* Layouts and colors */}
-            <div className="rounded-2xl border border-slate-200 bg-white p-7">
-              <p className="text-xs font-semibold uppercase tracking-widest text-amber-700">
-                {t.lookLabel}
-              </p>
-              <h3 className="mt-2 text-xl font-semibold text-slate-900">
-                {t.lookTitle(LAYOUTS.length, palettes.length)}
-              </h3>
-              <p className="mt-2 text-sm text-slate-600">{t.lookText}</p>
-              <div className="mt-5 flex flex-wrap gap-2">
-                {palettes.map((p) => (
-                  <span
-                    key={p.id}
-                    title={p.name}
-                    className="h-6 w-6 rounded-full ring-2 ring-white ring-offset-1 ring-offset-slate-200"
-                    style={{ backgroundColor: p.accent }}
-                  />
-                ))}
-              </div>
-              <div className="mt-4 flex flex-wrap gap-2">
-                {LAYOUTS.map((l) => (
-                  <span
-                    key={l}
-                    className="rounded-full border border-slate-200 px-3 py-1 text-xs text-slate-700"
-                  >
-                    {l}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {/* Suggestions */}
-            <div className="rounded-2xl border border-slate-200 bg-white p-7">
-              <p className="text-xs font-semibold uppercase tracking-widest text-amber-700">
-                {t.sugLabel}
-              </p>
-              <h3 className="mt-2 text-xl font-semibold text-slate-900">
-                {t.sugTitle}
-              </h3>
-              <p className="mt-2 text-sm text-slate-600">{t.sugText}</p>
-              <div className="mt-5 space-y-2">
-                {t.sugItems.map((item) => (
-                  <div
-                    key={item}
-                    className="rounded border border-dashed border-slate-300 px-3 py-2 text-xs text-slate-700"
-                  >
-                    {item}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Honest */}
-            <div className="rounded-2xl border border-slate-200 bg-white p-7">
-              <p className="text-xs font-semibold uppercase tracking-widest text-amber-700">
-                {t.honestLabel}
-              </p>
-              <h3 className="mt-2 text-xl font-semibold text-slate-900">
-                {t.honestTitle}
-              </h3>
-              <ul className="mt-4 space-y-3 text-sm text-slate-600">
-                {t.honestItems.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* TOOLS */}
-      <section className="bg-white py-20">
-        <div className="mx-auto max-w-6xl px-6">
-          <h2 className="text-center text-3xl font-semibold tracking-tight text-slate-900">
-            {t.toolsTitle}
-          </h2>
-          <p className="mx-auto mt-3 max-w-xl text-center text-slate-600">
-            {t.toolsSub}
-          </p>
-
-          <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {t.tools.map((tool) => (
-              <Link
-                key={tool.href}
-                href={`${base}${tool.href}`}
-                className="group rounded-2xl border border-slate-200 bg-white p-6 transition hover:-translate-y-1 hover:shadow-xl"
-              >
-                <h3 className="text-lg font-semibold text-slate-900">
-                  {tool.title}
-                </h3>
-                <p className="mt-2 text-sm text-slate-600">{tool.text}</p>
-                <p className="mt-5 text-sm font-semibold text-slate-900">
-                  {t.toolsGo}{" "}
-                  <span className="inline-block transition group-hover:translate-x-1">
-                    →
-                  </span>
-                </p>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* PROFESSIONS */}
-      <section id="professions" className="bg-slate-50 py-20">
-        <div className="mx-auto max-w-6xl px-6">
-          <h2 className="text-center text-3xl font-semibold tracking-tight text-slate-900">
-            {t.profTitle}
-          </h2>
-          <p className="mx-auto mt-3 max-w-xl text-center text-slate-600">
-            {t.profSub}
-          </p>
-
-          <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {categories.map((c) => (
-              <Link
-                key={c.id}
-                href={`${base}/builder/${c.id}`}
-                className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 transition hover:-translate-y-1 hover:shadow-xl"
-              >
-                <div
-                  className="absolute inset-x-0 top-0 h-1"
-                  style={{ backgroundColor: categoryAccent[c.id] ?? "#1b2a41" }}
-                />
-                <h3 className="text-lg font-semibold text-slate-900">{c.name}</h3>
-                <p className="mt-2 text-sm text-slate-600">{c.description}</p>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {c.recommendedSections.map((s) => (
-                    <span
-                      key={s}
-                      className="rounded-full bg-slate-100 px-2.5 py-1 text-xs text-slate-600"
-                    >
-                      {s}
-                    </span>
-                  ))}
-                </div>
-                <p className="mt-5 text-sm font-semibold text-slate-900">
-                  {t.profGo}{" "}
-                  <span className="inline-block transition group-hover:translate-x-1">
-                    →
-                  </span>
-                </p>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* GALLERY */}
-      <section className="bg-white py-20">
-        <div className="mx-auto max-w-6xl px-6">
-          <h2 className="text-center text-3xl font-semibold tracking-tight text-slate-900">
-            {t.galleryTitle}
-          </h2>
-          <p className="mx-auto mt-3 max-w-xl text-center text-slate-600">
-            {t.gallerySub}
-          </p>
-
-          <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {examples.map((ex) => (
-              <Link
-                key={ex.id}
-                href={builderLink(ex, lang)}
-                className="group block"
-              >
+          <div className="mt-12 grid gap-8 sm:grid-cols-3">
+            {featured.map((ex, i) => (
+              <Link key={ex.id} href={builderLink(ex, lang)} className="group block">
                 <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-md transition duration-300 group-hover:-translate-y-2 group-hover:shadow-2xl">
                   <Image
                     src={exampleImage(ex.id, lang)}
                     alt={exampleLabel(ex, lang)}
                     width={1190}
                     height={1684}
-                    sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                    sizes="(min-width: 640px) 33vw, 100vw"
+                    loading={i === 0 ? "eager" : "lazy"}
                     className="h-auto w-full"
                   />
                 </div>
@@ -723,44 +416,173 @@ export default function HomeView({ lang }: { lang: Lang }) {
                   {exampleLabel(ex, lang)}
                 </p>
                 <p className="text-center text-xs font-medium text-amber-700">
-                  {t.galleryUse}
+                  {t.useDesign}
                 </p>
               </Link>
             ))}
           </div>
+
+          <h3 className="mt-16 text-center text-lg font-semibold text-slate-900">
+            {t.professionsTitle}
+          </h3>
+          <div className="mt-5 flex flex-wrap justify-center gap-3">
+            {categories.map((c) => (
+              <Link
+                key={c.id}
+                href={`${base}/builder/${c.id}`}
+                className="group flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-800 transition hover:border-slate-900 hover:shadow"
+              >
+                <span
+                  className="h-2.5 w-2.5 rounded-full"
+                  style={{ backgroundColor: categoryAccent[c.id] ?? "#1b2a41" }}
+                />
+                {c.name}
+              </Link>
+            ))}
+          </div>
+
+          <h3 className="mt-16 text-center text-lg font-semibold text-slate-900">
+            {t.toolsTitle}
+          </h3>
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {TOOL_IDS.map((id) => {
+              const l = linkById(id);
+              if (!l) return null;
+              return (
+                <Link
+                  key={id}
+                  href={hrefFor(l.href, lang)}
+                  className="group rounded-2xl border border-slate-200 bg-white p-5 transition hover:-translate-y-0.5 hover:border-slate-900 hover:shadow-md"
+                >
+                  <p className="font-semibold text-slate-900">{l.title[lang]}</p>
+                  <p className="mt-1 text-sm text-slate-600">{l.desc[lang]}</p>
+                  <p className="mt-4 text-xs font-semibold text-blue-600">
+                    {t.open}{" "}
+                    <span className="inline-block transition group-hover:translate-x-1">
+                      →
+                    </span>
+                  </p>
+                </Link>
+              );
+            })}
+          </div>
         </div>
       </section>
 
-      {/* HOW IT WORKS */}
+      {/* RECRUITERS */}
+      <section className="bg-white py-20">
+        <div className="mx-auto max-w-6xl px-6">
+          <p className="text-center text-xs font-bold uppercase tracking-widest text-amber-700">
+            {t.crmEyebrow}
+          </p>
+          <h2 className="mt-2 text-center text-3xl font-semibold tracking-tight text-slate-900">
+            {t.crmTitle}
+          </h2>
+          <p className="mx-auto mt-3 max-w-xl text-center text-slate-600">
+            {t.crmSub}
+          </p>
+
+          <div className="mt-10">
+            <ProductTour lang={lang} />
+          </div>
+
+          <div className="mt-10 grid gap-5 md:grid-cols-3">
+            {t.benefits.map((b) => {
+              const l = linkById(b.id);
+              return (
+                <Link
+                  key={b.id}
+                  href={l ? hrefFor(l.href, lang) : `${base}/recruiters`}
+                  className="group rounded-2xl border border-slate-200 bg-white p-6 transition hover:-translate-y-0.5 hover:border-slate-900 hover:shadow-md"
+                >
+                  <h3 className="font-semibold text-slate-900">{b.title}</h3>
+                  <p className="mt-2 text-sm text-slate-600">{b.text}</p>
+                  <p className="mt-4 text-xs font-semibold text-blue-600">
+                    {t.open}{" "}
+                    <span className="inline-block transition group-hover:translate-x-1">
+                      →
+                    </span>
+                  </p>
+                </Link>
+              );
+            })}
+          </div>
+
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+            <Link
+              href={`${base}/signup`}
+              className="rounded-lg bg-slate-900 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-700"
+            >
+              {t.crmCta}
+            </Link>
+            <Link
+              href={`${base}/recruiters`}
+              className="text-sm font-semibold text-slate-900 underline"
+            >
+              {t.crmMore}
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* STEPS */}
       <section className="bg-slate-50 py-20">
         <div className="mx-auto max-w-5xl px-6">
           <h2 className="text-center text-3xl font-semibold tracking-tight text-slate-900">
             {t.stepsTitle}
           </h2>
-          <div className="mt-12 grid gap-10 sm:grid-cols-3">
-            {t.steps.map((s) => (
-              <div key={s.n}>
-                <p className="text-5xl font-semibold text-slate-200">{s.n}</p>
-                <h3 className="mt-3 text-lg font-semibold text-slate-900">
-                  {s.title}
-                </h3>
-                <p className="mt-2 text-sm text-slate-600">
-                  {!aiOn && s.n === "02" ? t.step2NoAi : s.text}
+          <div className="mt-12 grid gap-10 md:grid-cols-2">
+            {t.tracks.map((track) => (
+              <div key={track.title}>
+                <p className="text-sm font-bold uppercase tracking-wider text-slate-500">
+                  {track.title}
                 </p>
+                <ol className="mt-4 space-y-4">
+                  {track.steps.map((s, i) => (
+                    <li key={s} className="flex items-center gap-4">
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-900 text-sm font-semibold text-white">
+                        {i + 1}
+                      </span>
+                      <span className="text-slate-800">{s}</span>
+                    </li>
+                  ))}
+                </ol>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* FAQ */}
+      {/* TRUST */}
       <section className="bg-white py-20">
+        <div className="mx-auto max-w-6xl px-6">
+          <h2 className="text-center text-3xl font-semibold tracking-tight text-slate-900">
+            {t.trustTitle}
+          </h2>
+          <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {t.trust.map((x) => (
+              <div key={x.title} className="rounded-2xl border border-slate-200 p-6">
+                <h3 className="font-semibold text-slate-900">{x.title}</h3>
+                <p className="mt-2 text-sm text-slate-600">{x.text}</p>
+              </div>
+            ))}
+          </div>
+          <p className="mt-6 text-center text-sm">
+            <Link href={`${base}/privacy`} className="font-semibold text-blue-600 underline">
+              {t.trustLink}
+            </Link>
+          </p>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="bg-slate-50 py-20">
         <div className="mx-auto max-w-3xl px-6">
           <h2 className="text-center text-3xl font-semibold tracking-tight text-slate-900">
             {t.faqTitle}
           </h2>
           <div className="mt-10 divide-y divide-slate-200 rounded-2xl border border-slate-200 bg-white">
-            {faqList.map((f) => (
+            {t.faqs.map((f) => (
               <details key={f.q} className="group px-6 py-5">
                 <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-medium text-slate-900">
                   {f.q}
@@ -773,15 +595,13 @@ export default function HomeView({ lang }: { lang: Lang }) {
             ))}
           </div>
           <p className="mt-6 text-center text-sm text-slate-500">
-            {t.faqMore}{" "}
             <Link href={`${base}/privacy`} className="underline">
-              {t.privacyLabel}
+              {t.privacy}
             </Link>{" "}
-            {t.and}{" "}
-            <Link href={`${base}/refund`} className="underline">
-              {t.refundLabel}
+            ·{" "}
+            <Link href={`${base}/pricing`} className="underline">
+              {lang === "fr" ? "Tarifs" : "Pricing"}
             </Link>
-            .
           </p>
         </div>
       </section>
@@ -795,15 +615,15 @@ export default function HomeView({ lang }: { lang: Lang }) {
             <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
               {t.finalTitle}
             </h2>
-            <p className="mx-auto mt-3 max-w-md text-sm text-slate-300">
-              {t.finalText}
-            </p>
-            <Link
-              href={`${base}/templates`}
-              className="mt-8 inline-block rounded-lg bg-amber-300 px-8 py-3.5 text-sm font-semibold text-slate-900 shadow-lg shadow-amber-300/20 transition hover:-translate-y-0.5 hover:bg-amber-200"
-            >
-              {t.cta}
-            </Link>
+            <p className="mx-auto mt-3 max-w-md text-sm text-slate-300">{t.finalText}</p>
+            <div className="mt-8 flex flex-wrap justify-center gap-3">
+              <Link href={`${base}/templates`} className={primaryBtn}>
+                {t.ctaSeeker}
+              </Link>
+              <Link href={`${base}/signup`} className={ghostBtn}>
+                {t.crmCta}
+              </Link>
+            </div>
           </div>
         </div>
       </section>
